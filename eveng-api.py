@@ -5,6 +5,8 @@
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
 
+import json
+
 try:
     import PyEVENG
 except ImportError as importError:
@@ -19,6 +21,12 @@ except ImportError as importError:
     print(importError)
     exit(EXIT_FAILURE)
 
+
+def pjson(jsonPrint):
+    print(json.dumps(jsonPrint, indent=4, sort_keys=True))
+    print("---------------------------------------------------------------------------------")
+
+
 @click.command()
 @click.option('--user', default="admin", help='EVE-NG username.')
 @click.option('--mdp', default="eve", help='EVE-NG password.')
@@ -31,8 +39,8 @@ def main(user, mdp, ip, port, ssl):
     api = PyEVENG.PyEVENG(user, mdp, ip, port, ssl)
 
     api.login()
-    print(api.status())
-    print(api.getUserInfo())
+    pjson(api.getUsers())
+    pjson(api.getLab("cumulus-spine-leaf.unl"))
 
 # -----------------------------------------------------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------------------------------------------------

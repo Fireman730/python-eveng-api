@@ -5,6 +5,8 @@
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
 
+import urllib3
+
 try:
     import requests
 except ImportError as importError:
@@ -21,6 +23,17 @@ except ImportError as importError:
 
 
 class PyEVENG:
+
+    def getLab(self, labName):
+        response = requests.get(self._url+"/api/labs/user/"+labName, cookies=self._cookies)
+        self.requestsError(response.status_code)
+        return json.loads(response.content)
+
+
+    def getUsers(self):
+        response = requests.get(self._url+"/api/users/", cookies=self._cookies)
+        self.requestsError(response.status_code)
+        return json.loads(response.content)
 
     def status(self):
         response = requests.get(self._url+"/api/status", cookies=self._cookies)
