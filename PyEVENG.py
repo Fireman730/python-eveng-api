@@ -8,6 +8,13 @@ EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
 
 try:
+    import paramiko
+except ImportError as importError:
+    print("Error import paramiko")
+    print(importError)
+    exit(EXIT_FAILURE)
+
+try:
     import urllib3
 except ImportError as importError:
     print("Error import urllib3")
@@ -33,6 +40,69 @@ class PyEVENG:
 
     # ------------------------------------------------------------------------------------------
     # Getters (project, labs, node, config, ...)
+    # Using REST API only
+    
+
+    def getCumulusNodeConfigFilesByProjectIDAndNodeID(self, project_name, node_id):
+        """
+        This function will return a list that contains node configuration according to project_name and name_uid given in parameter
+        This function only works with Cumulus Network Nodes !!
+
+        Args:
+            param1 (str): EVE-NG Project Name.
+            param2 (str): EVE-NG Node ID.
+        
+        Returns:
+            list: list of configuration files
+        """
+
+        sshClient = paramiko.SSHClient()
+        sshClient.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        sshClient.connect(hostname=self._ipAddress,
+                        username="root", password=self._password)
+
+        stdin, stdout, stderr = sshClient.exec_command(
+            "ls /opt/unetlab/tmp/"+self._pod+"/"+self.getLabID(project_name)+"/"+node_id+"/ | grep qcow2")
+        qcow2 = stdout.readlines()
+        if qcow2.__len__() is not 0:
+            stdin, stdout, stderr = sshClient.exec_command(
+                "sudo modprobe nbd max_part=8")
+            stdout.readlines()
+            stdin, stdout, stderr = sshClient.exec_command(
+                "sudo qemu-nbd -c /dev/nbd0 /opt/unetlab/tmp/"+self._pod+"/"+self.getLabID(project_name)+"/"+node_id +"/virtioa.qcow2")
+            stdout.readlines()
+            stdin, stdout, stderr = sshClient.exec_command(
+                "partx -a /dev/nbd0")
+            stdout.readlines()
+            stdin, stdout, stderr = sshClient.exec_command(
+                "mkdir /mnt/disk")
+            stdout.readlines()
+            stdin, stdout, stderr = sshClient.exec_command(
+                "sudo mount /dev/nbd0p4 /mnt/cumulus01/")
+            stdout.readlines()
+            stdin, stdout, stderr = sshClient.exec_command(
+                "sudo ls /mnt/disk/etc/")
+            output = stdout.readlines()
+
+            cumulusNetworkConfigurationFilesInETC = list()
+            for configFile in output:
+                cumulusNetworkConfigurationFilesInETC.append(configFile[:-1])
+
+            stdin, stdout, stderr = sshClient.exec_command(
+                "sudo umount /mnt/disk")
+            stdout.readlines()
+            stdin, stdout, stderr = sshClient.exec_command(
+                "sudo qemu-nbd --disconnect /dev/nbd0")
+            o = "".join(stdout.readlines())
+            if "nbd0" not in o:
+                raise Exception("Error during nbd disconnect")
+
+            return cumulusNetworkConfigurationFilesInETC
+    
+
+    # ------------------------------------------------------------------------------------------
+    # Getters (project, labs, node, config, ...)
+    # Using REST API only
     
     def getLabTopology(self, labName):
         response = requests.get(
@@ -40,7 +110,14 @@ class PyEVENG:
         self.requestsError(response.status_code)
         return json.loads(response.content)
 
-    def getLabNodeInterface(self, labName, nodeID):
+    def getLabLinks(self, labName):
+        response = requests.get(
+            self._url+"/api/labs/Users/"+labName+"/links", cookies=self._cookies, verify=False)
+        self.requestsError(response.status_code)
+        return json.loads(response.content)
+
+
+    def getLabNodeInterfaces(self, labName, nodeID):
         response = requests.get(
             self._url+"/api/labs/Users/"+labName+"/nodes/"+nodeID+"/interfaces", cookies=self._cookies, verify=False)
         self.requestsError(response.status_code)
@@ -145,9 +222,7 @@ class PyEVENG:
             self._url+"/api/labs/Users/"+labName+"/nodes/stop", cookies=self._cookies, verify=False)
         print(response.content)
         print(response)
-        
-
-
+    
     # ------------------------------------------------------------------------------------------
     # Authentification, Users and System
 
@@ -211,7 +286,7 @@ class PyEVENG:
     #
     #
 
-    def __init__(self, username, password, ipAddress, port=99999, useHTTPS=False, userFolder="Users", ):
+    def __init__(self, username, password, ipAddress, port=99999, useHTTPS=False, userFolder="Users", pod="0"):
         """
         :param username:        EVE-NG username
         :param password:        EVE-NG password
@@ -227,6 +302,7 @@ class PyEVENG:
         self._ipAddress = ipAddress
         self._cookies = requests.cookies.RequestsCookieJar()
         self._userFolder = userFolder
+        self._pod = pod
 
 
         if useHTTPS:

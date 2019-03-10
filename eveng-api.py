@@ -39,10 +39,11 @@ def pjson(jsonPrint):
 @click.option('--port', default="443", help='EVE-NG http/s port.')
 @click.option('--ssl', default=True, help='EVE-NG connection with SSL.')
 @click.option('--user', default="Users", help='EVE-NG folder where found the lab.')
-def main(login, mdp, ip, port, ssl, user):
+@click.option('--pod', default="0", help='EVE-NG POD number.')
+def main(login, mdp, ip, port, ssl, user, pod):
 
     print("[eveng-api - main] -", login, mdp, ip, port, ssl, user)
-    api = PyEVENG.PyEVENG(login, mdp, ip, port, ssl, user)
+    api = PyEVENG.PyEVENG(login, mdp, ip, port, ssl, user, pod)
 
     api.login()
     #pjson(api.getNodeInstall())
@@ -50,7 +51,7 @@ def main(login, mdp, ip, port, ssl, user):
     #pjson(api.getLab("cumulus-spine-leaf.unl"))
     #pjson(api.getLabID("cumulus-spine-leaf.unl"))
     #pjson(api.getLabAuthor("cumulus-spine-leaf.unl"))
-    pjson(api.getLabNodes("cumulus-spine-leaf.unl"))
+    #pjson(api.getLabNodes("cumulus-spine-leaf.unl"))
     #pjson(api.getLabDescription("cumulus-spine-leaf.unl"))
     #pjson(api.getLabNodesID("cumulus-spine-leaf.unl"))
     #pjson(api.getLabNodesName("cumulus-spine-leaf.unl"))
@@ -60,7 +61,10 @@ def main(login, mdp, ip, port, ssl, user):
     #pjson(api.getLabNodeInterface("cumulus-spine-leaf.unl", "1"))
     #pjson(api.startLabAllNodes("cumulus-spine-leaf.unl"))
     #pjson(api.stopLabNode("cumulus-spine-leaf.unl", "1"))
-    pjson(api.getLabNodes("cumulus-spine-leaf.unl"))
+    #pjson(api.getLabNodes("cumulus-spine-leaf.unl"))
+    #pjson(api.getLab("cumulus-spine-leaf.unl"))
+    print(api.getCumulusNodeConfigFilesByProjectIDAndNodeID(
+        "cumulus-spine-leaf.unl", "1"))
 # -----------------------------------------------------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------------------------------------------------
 
