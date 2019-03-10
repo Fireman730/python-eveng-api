@@ -35,6 +35,12 @@ except ImportError as importError:
     print(importError)
     exit(EXIT_FAILURE)
 
+try:
+    import sphinx
+except ImportError as importError:
+    print("Error import sphinx")
+    print(importError)
+    exit(EXIT_FAILURE)
 
 class PyEVENG:
     """
@@ -48,6 +54,13 @@ class PyEVENG:
     # Getters (project, labs, node, config, ...)
     # Using REST API only
     
+    def getBackupConfig(self, project_name, node_id):
+        nodeImage = self.getNodeImage(project_name, node_id)
+        nodeImage = nodeImage.upper()
+    
+        if "CUMULUS" in nodeImage :
+            return self.getCumulusNodeConfigFilesByProjectIDAndNodeID(project_name, node_id)
+
 
     def getCumulusNodeConfigFilesByProjectIDAndNodeID(self, project_name, node_id):
         """
@@ -84,7 +97,7 @@ class PyEVENG:
                 "mkdir /mnt/disk")
             stdout.readlines()
             stdin, stdout, stderr = sshClient.exec_command(
-                "sudo mount /dev/nbd0p4 /mnt/cumulus01/")
+                "sudo mount /dev/nbd0p4 /mnt/disk/")
             stdout.readlines()
             stdin, stdout, stderr = sshClient.exec_command(
                 "sudo ls /mnt/disk/etc/")
@@ -140,6 +153,21 @@ class PyEVENG:
         self.requestsError(response.status_code)
         return json.loads(response.content)
 
+    def getNodeImage(self, labName, nodeID):
+        """
+        This function will return a string that contains nodes image according to node ID and the lab name given in parameter
+
+        Args:
+            param1 (str): EVE-NG lab name
+            param2 (str): EVE-NG node ID
+
+        Returns:
+            str: That contains node image
+        """
+        response = requests.get(
+            self._url+"/api/labs/Users/"+labName+"/nodes/"+nodeID, cookies=self._cookies, verify=False)
+        self.requestsError(response.status_code)
+        return json.loads(response.content)["data"]["image"]
 
     def getLabNodeInterfaces(self, labName, nodeID):
         """
@@ -238,6 +266,22 @@ class PyEVENG:
         """
         response = requests.get(
             self._url+"/api/labs/Users/"+labName+"/nodes", cookies=self._cookies, verify=False)
+        self.requestsError(response.status_code)
+        return json.loads(response.content)
+
+    def getLabNode(self, labName, nodeID):
+        """
+        This function will return a JSON that contains informations about all nodes according to the lab name given in parameter
+
+        Args:
+            param1 (str): EVE-NG lab name
+            param1 (str): EVE-NG node ID
+
+        Returns:
+            json: That contains nodes informations
+        """
+        response = requests.get(
+            self._url+"/api/labs/Users/"+labName+"/nodes/"+nodeID, cookies=self._cookies, verify=False)
         self.requestsError(response.status_code)
         return json.loads(response.content)
 
@@ -353,11 +397,8 @@ class PyEVENG:
             param1 (str): EVE-NG node ID
 
         """
-        print(self._url+"/api/labs/Users/"+labName+"/nodes/"+nodeID+"/stop")
         response = requests.get(
             self._url+"/api/labs/Users/"+labName+"/nodes/"+nodeID+"/stop", cookies=self._cookies, verify=False)
-        print(response.content)
-        print(response)
         # self.requestsError(response.status_code)
 
     def stopLabAllNodes(self, labName):
@@ -370,8 +411,6 @@ class PyEVENG:
         """
         response = requests.get(
             self._url+"/api/labs/Users/"+labName+"/nodes/stop", cookies=self._cookies, verify=False)
-        print(response.content)
-        print(response)
     
     # ------------------------------------------------------------------------------------------
     # Authentification, Users and System
@@ -442,7 +481,6 @@ class PyEVENG:
         """
         response = requests.post(
             self._url+"/api/auth/logout", cookies=self._cookies, verify=False)
-        print(response)
         
 
     # --------------------------------------------------------------------------------------------------
@@ -460,6 +498,10 @@ class PyEVENG:
         """
         if status_code == 400:
             raise "HTTP 400 : Bad Request"
+        elif status_code == 412:
+            raise "HTTP 412 : please login before to make requests \n" + \
+                "api= PyEVENG.PyEVENG(login, mdp, ip, port, ssl, user, pod) \n" + \
+                    "api.login() \n api.getLabNodes"
 
 
 
