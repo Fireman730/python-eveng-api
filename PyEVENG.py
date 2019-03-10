@@ -37,6 +37,12 @@ except ImportError as importError:
 
 
 class PyEVENG:
+    """
+    This class is a Python client for retrieve information about your EVE-NG VM.
+    The main aim is provided an Python script for automate an deploy your network un EVE-NG    
+    """
+
+
 
     # ------------------------------------------------------------------------------------------
     # Getters (project, labs, node, config, ...)
@@ -105,12 +111,30 @@ class PyEVENG:
     # Using REST API only
     
     def getLabTopology(self, labName):
+        """
+        This function will return a JSON that contains informations about labs topology
+
+        Args:
+            param1 (str): EVE-NG lab name
+
+        Returns:
+            json: That contains topology informations
+        """
         response = requests.get(
             self._url+"/api/labs/Users/"+labName+"/topology", cookies=self._cookies, verify=False)
         self.requestsError(response.status_code)
         return json.loads(response.content)
 
     def getLabLinks(self, labName):
+        """
+        This function will return a JSON that contains informations about labs links
+
+        Args:
+            param1 (str): EVE-NG lab name
+
+        Returns:
+            json: That contains links informations
+        """
         response = requests.get(
             self._url+"/api/labs/Users/"+labName+"/links", cookies=self._cookies, verify=False)
         self.requestsError(response.status_code)
@@ -118,14 +142,37 @@ class PyEVENG:
 
 
     def getLabNodeInterfaces(self, labName, nodeID):
+        """
+        This function will return a JSON that contains informations about labs interfaces
+
+        Args:
+            param1 (str): EVE-NG lab name
+            param2 (str): EVE-NG node ID
+
+        Returns:
+            json: That contains interfaces informations
+        """
         response = requests.get(
             self._url+"/api/labs/Users/"+labName+"/nodes/"+nodeID+"/interfaces", cookies=self._cookies, verify=False)
         self.requestsError(response.status_code)
         return json.loads(response.content)
 
     # def getLabNodesAddressAccessMethod(self, labName):
+    # This function is not available for the moment
 
     def getLabNodesAccessMethod(self, labName):
+        """
+        This function will return a dictionnary that contains informations access method
+        
+        Example :
+            - {"Spine01": "telnet", "Linux", "vnc"}
+            
+        Args:
+            param1 (str): EVE-NG lab name
+
+        Returns:
+            dict: That contains key = hostname, value = access method
+        """
         response = requests.get(
             self._url+"/api/labs/Users/"+labName+"/nodes", cookies=self._cookies, verify=False)
         self.requestsError(response.status_code)
@@ -138,6 +185,15 @@ class PyEVENG:
         return nodesAccessMethod
 
     def getLabNodesID(self, labName):
+        """
+        This function will return a list that contains all nodes ID according to the lab name given in parameter
+
+        Args:
+            param1 (str): EVE-NG lab name
+
+        Returns:
+            list: That contains all node ID
+        """
         response = requests.get(
             self._url+"/api/labs/Users/"+labName+"/nodes", cookies=self._cookies, verify=False)
         self.requestsError(response.status_code)
@@ -150,6 +206,15 @@ class PyEVENG:
         return nodesID
 
     def getLabNodesName(self, labName):
+        """
+        This function will return a list that contains all nodes name according to the lab name given in parameter
+
+        Args:
+            param1 (str): EVE-NG lab name
+
+        Returns:
+            list: That contains all node name
+        """
         response = requests.get(
             self._url+"/api/labs/Users/"+labName+"/nodes", cookies=self._cookies, verify=False)
         self.requestsError(response.status_code)
@@ -162,24 +227,69 @@ class PyEVENG:
         return nodesName
 
     def getLabNodes(self, labName):
+        """
+        This function will return a JSON that contains informations about all nodes according to the lab name given in parameter
+
+        Args:
+            param1 (str): EVE-NG lab name
+
+        Returns:
+            json: That contains nodes informations
+        """
         response = requests.get(
             self._url+"/api/labs/Users/"+labName+"/nodes", cookies=self._cookies, verify=False)
         self.requestsError(response.status_code)
         return json.loads(response.content)
 
     def getLabDescription(self, labName):
+        """
+        This function will return a string that contains lab descriptions
+
+        Args:
+            param1 (str): EVE-NG lab name
+
+        Returns:
+            str: That contains lab description
+        """
         response = self.getLab(labName)
         return response["data"]["description"]
 
     def getLabAuthor(self, labName):
+        """
+        This function will return a string that contains lab author
+
+        Args:
+            param1 (str): EVE-NG lab name
+
+        Returns:
+            str: That contains lab author
+        """
         response = self.getLab(labName)
         return response["data"]["author"]
 
     def getLabID(self, labName):
+        """
+        This function will return a string that contains lab ID
+
+        Args:
+            param1 (str): EVE-NG lab name
+
+        Returns:
+            str: That contains lab ID
+        """
         response = self.getLab(labName)
         return response["data"]["id"]
     
     def getLab(self, labName):
+        """
+        This function will return a JSON that contains lab informations
+
+        Args:
+            param1 (str): EVE-NG lab name
+
+        Returns:
+            json: That contains lab informations
+        """
         response = requests.get(
             self._url+"/api/labs/Users/"+labName, cookies=self._cookies, verify=False)
         self.requestsError(response.status_code)
@@ -187,29 +297,62 @@ class PyEVENG:
 
 
     def getUsers(self):
+        """
+        This function will return a JSON that contains user informations
+
+        Returns:
+            json: That contains user informations
+        """
         response = requests.get(self._url+"/api/users/",
                                 cookies=self._cookies, verify=False)
         self.requestsError(response.status_code)
         return json.loads(response.content)
 
     def status(self):
+        """
+        This function will return a JSON that contains vm infromations
+
+        Returns:
+            json: That contains vm informations
+        """
         response = requests.get(self._url+"/api/status",
                                 cookies=self._cookies, verify=False)
         self.requestsError(response.status_code)
         return json.loads(response.content)
 
     def startLabNode(self, labName, nodeID):
+        """
+        This function will start a node of a lab according to lab name and node id given in parameter
+
+        Args:
+            param1 (str): EVE-NG lab name
+            param1 (str): EVE-NG node ID
+        """
         response = requests.get(
             self._url+"/api/labs/Users/"+labName+"/nodes/"+nodeID+"/start", cookies=self._cookies, verify=False)
         self.requestsError(response.status_code)
 
     def startLabAllNodes(self, labName):
+        """
+        This function will start all node of a lab
+
+        Args:
+            param1 (str): EVE-NG lab name
+        """
         nodesID = self.getLabNodesID(labName)
 
         for nodeID in nodesID:
           self.startLabNode(labName, nodeID)
 
     def stopLabNode(self, labName, nodeID):
+        """
+        This function will stop a node of a lab according to lab name and node id given in parameter
+
+        Args:
+            param1 (str): EVE-NG lab name
+            param1 (str): EVE-NG node ID
+
+        """
         print(self._url+"/api/labs/Users/"+labName+"/nodes/"+nodeID+"/stop")
         response = requests.get(
             self._url+"/api/labs/Users/"+labName+"/nodes/"+nodeID+"/stop", cookies=self._cookies, verify=False)
@@ -218,6 +361,13 @@ class PyEVENG:
         # self.requestsError(response.status_code)
 
     def stopLabAllNodes(self, labName):
+        """
+        This function will stop all node of a lab
+
+        Args:
+            param1 (str): EVE-NG lab name
+
+        """
         response = requests.get(
             self._url+"/api/labs/Users/"+labName+"/nodes/stop", cookies=self._cookies, verify=False)
         print(response.content)
@@ -227,7 +377,12 @@ class PyEVENG:
     # Authentification, Users and System
 
     def getNodeInstall(self):
-        
+        """
+        This function will return a list that contains all installed nodes
+
+        Returns:
+            list: That contains all installed nodes
+        """
         response = requests.get(
             self._url+"/api/list/templates/", cookies=self._cookies, verify=False)
         self.requestsError(response.status_code)
@@ -244,18 +399,35 @@ class PyEVENG:
         return data
 
     def getNodeAvailable(self):
+        """
+        This function will return a list that contains all available nodes
+
+        Returns:
+            list: That contains all available nodes
+        """
         response = requests.get(
             self._url+"/api/list/templates/", cookies=self._cookies, verify=False)
         self.requestsError(response.status_code)
         return json.loads(response.content)
 
     def getUserInfo(self):
+        """
+        This function will return a JSON that contains user informations
+
+        Returns:
+            json: That contains user informations
+        """
         response = requests.get(self._url+"/api/auth",
                                 cookies=self._cookies, verify=False)
         self.requestsError(response.status_code)
         return json.loads(response.content)
 
     def login(self):
+        """
+        This function login to EVE-NG
+        Store Cookie
+
+        """
         # For avoid InsecureRequestWarning error
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         response = requests.post(
@@ -265,6 +437,9 @@ class PyEVENG:
         self._cookies = response.cookies
 
     def logout(self):
+        """
+        This function logout to EVE-NG        
+        """
         response = requests.post(
             self._url+"/api/auth/logout", cookies=self._cookies, verify=False)
         print(response)
@@ -275,7 +450,14 @@ class PyEVENG:
     #
     #
     def requestsError(self, status_code):
+        """
+        This function will check if there is an error in the status code
+        In progress
 
+        Args:
+            param1 (str): Request status code
+
+        """
         if status_code == 400:
             raise "HTTP 400 : Bad Request"
 
@@ -288,6 +470,8 @@ class PyEVENG:
 
     def __init__(self, username, password, ipAddress, port=99999, useHTTPS=False, userFolder="Users", pod="0"):
         """
+        Constructor of PyEVENG
+
         :param username:        EVE-NG username
         :param password:        EVE-NG password
         :param ipAddress:       EVE-NG ipAddress
