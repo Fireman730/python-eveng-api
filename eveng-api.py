@@ -42,7 +42,7 @@ def pjson(jsonPrint):
 @click.option('--pod', default="0", help='EVE-NG POD number.')
 def main(login, mdp, ip, port, ssl, user, pod):
 
-    print("[eveng-api - main] -", login, mdp, ip, port, ssl, user)
+    print("[eveng-api - main] -", login, mdp, ip, port, ssl, user, pod)
     api = PyEVENG.PyEVENG(login, mdp, ip, port, ssl, user, pod)
 
     api.login()
@@ -61,10 +61,12 @@ def main(login, mdp, ip, port, ssl, user, pod):
     #pjson(api.getLabNodeInterface("cumulus-spine-leaf.unl", "1"))
     #pjson(api.startLabAllNodes("cumulus-spine-leaf.unl"))
     #pjson(api.stopLabNode("cumulus-spine-leaf.unl", "1"))
+    #pjson(api.getLabNode("cumulus-spine-leaf.unl", "1"))
+    #pjson(api.getNodeImage("cumulus-spine-leaf.unl", "1"))
     #pjson(api.getLabNodes("cumulus-spine-leaf.unl"))
     #pjson(api.getLab("cumulus-spine-leaf.unl"))
-    print(api.getCumulusNodeConfigFilesByProjectIDAndNodeID(
-        "cumulus-spine-leaf.unl", "1"))
+    #print(api.getCumulusNodeConfigFilesByProjectIDAndNodeID("cumulus-spine-leaf.unl", "1"))
+    print(api.getBackupConfig("cumulus-spine-leaf.unl", "1"))
 # -----------------------------------------------------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------------------------------------------------
 
