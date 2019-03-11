@@ -45,7 +45,7 @@ def pjson(jsonPrint):
 def main(login, mdp, ip, port, ssl, user, pod, root, rmdp):
 
     print("[eveng-api - main] -", login, mdp, ip, port, ssl, user, pod)
-    api = PyEVENG.PyEVENG(login, mdp, ip, port, ssl, user, pod, )
+    api = PyEVENG.PyEVENG(login, mdp, ip, port, ssl, user, pod, root, rmdp)
 
     api.login()
     #pjson(api.getNodeInstall())
