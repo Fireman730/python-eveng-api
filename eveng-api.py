@@ -40,10 +40,12 @@ def pjson(jsonPrint):
 @click.option('--ssl', default=True, help='EVE-NG connection with SSL.')
 @click.option('--user', default="Users", help='EVE-NG folder where found the lab.')
 @click.option('--pod', default="0", help='EVE-NG POD number.')
-def main(login, mdp, ip, port, ssl, user, pod):
+@click.option('--root', default="root", help='EVE-NG root username.')
+@click.option('--rmdp', default="eve", help='EVE-NG root password.')
+def main(login, mdp, ip, port, ssl, user, pod, root, rmdp):
 
     print("[eveng-api - main] -", login, mdp, ip, port, ssl, user, pod)
-    api = PyEVENG.PyEVENG(login, mdp, ip, port, ssl, user, pod)
+    api = PyEVENG.PyEVENG(login, mdp, ip, port, ssl, user, pod, )
 
     api.login()
     #pjson(api.getNodeInstall())

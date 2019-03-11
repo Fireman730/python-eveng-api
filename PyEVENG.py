@@ -48,8 +48,6 @@ class PyEVENG:
     The main aim is provided an Python script for automate an deploy your network un EVE-NG    
     """
 
-
-
     # ------------------------------------------------------------------------------------------
     # Getters (project, labs, node, config, ...)
     # Using REST API only
@@ -78,7 +76,7 @@ class PyEVENG:
         sshClient = paramiko.SSHClient()
         sshClient.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         sshClient.connect(hostname=self._ipAddress,
-                        username="root", password=self._password)
+                        username=self._root, password=self.self._rootPassword)
 
         stdin, stdout, stderr = sshClient.exec_command(
             "ls /opt/unetlab/tmp/"+self._pod+"/"+self.getLabID(project_name)+"/"+node_id+"/ | grep qcow2")
@@ -91,10 +89,10 @@ class PyEVENG:
                 "sudo qemu-nbd -c /dev/nbd0 /opt/unetlab/tmp/"+self._pod+"/"+self.getLabID(project_name)+"/"+node_id +"/virtioa.qcow2")
             stdout.readlines()
             stdin, stdout, stderr = sshClient.exec_command(
-                "partx -a /dev/nbd0")
+                "sudo partx -a /dev/nbd0")
             stdout.readlines()
             stdin, stdout, stderr = sshClient.exec_command(
-                "mkdir /mnt/disk")
+                "sudo mkdir /mnt/disk")
             stdout.readlines()
             stdin, stdout, stderr = sshClient.exec_command(
                 "sudo mount /dev/nbd0p4 /mnt/disk/")
@@ -510,7 +508,7 @@ class PyEVENG:
     #
     #
 
-    def __init__(self, username, password, ipAddress, port=99999, useHTTPS=False, userFolder="Users", pod="0"):
+    def __init__(self, username, password, ipAddress, port=99999, useHTTPS=False, userFolder="Users", pod="0", root="root", rmdp="eve"):
         """
         Constructor of PyEVENG
 
@@ -520,6 +518,9 @@ class PyEVENG:
         :param port:            EVE-NG port
         :param useHTTPS:        EVE-NG useHTTPS true if HTTPS is used
         :param userFolder:      EVE-NG userFolder
+        :param pod:             EVE-NG project POD number
+        :param root:            EVE-NG user with root privilege
+        :param rmdp:            EVE-NG user with root privilege password
         """
 
         self._ipAddress = ipAddress
@@ -529,7 +530,8 @@ class PyEVENG:
         self._cookies = requests.cookies.RequestsCookieJar()
         self._userFolder = userFolder
         self._pod = pod
-
+        self._root = root
+        self._rootPassword = rmdp
 
         if useHTTPS:
             self._url = "https://" + ipAddress
