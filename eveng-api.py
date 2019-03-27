@@ -45,7 +45,6 @@ def pjson(jsonPrint):
 @click.option('--path', default="error", help='Path on your device to save config')
 def main(login, mdp, ip, port, ssl, user, pod, root, rmdp, path):
 
-    print("[eveng-api - main] -", login, mdp, ip, port, ssl, user, pod)
     api = PyEVENG.PyEVENG(login, mdp, ip, port, ssl, user, pod, root, rmdp)
     try:
         api.login()
@@ -65,9 +64,9 @@ def main(login, mdp, ip, port, ssl, user, pod, root, rmdp, path):
         #pjson(api.stopLabNode("cumulus-spine-leaf.unl", "1"))
         #pjson(api.getLabNode("cumulus-spine-leaf.unl", "1"))
         #pjson(api.getNodeImage("cumulus-spine-leaf.unl", "1"))
-        config = api.getCumulusNodeConfigFilesByProjectIDAndNodeID("cumulus-spine-leaf.unl", "1")
-        if "/" in path :
-            write_in_file(config, path)
+        api.getBackupConfig("/Volumes/Data/gitlab/python-eveng-api/backup", "cumulus-spine-leaf.unl", "1")
+        #if "/" in path :
+        #    write_in_file(config, path)
         #print(api.getBackupConfig("cumulus-spine-leaf.unl", "1"))
     except Exception as e:
         print(e)
