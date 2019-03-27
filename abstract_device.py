@@ -15,6 +15,7 @@ except ImportError as importError:
 
 class DeviceQEMUAbstract(ABC):
 
+    @abstractmethod
     def pushConfig(self):
         pass
 
