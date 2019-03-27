@@ -2,8 +2,19 @@
 # -*- coding: utf-8 -*-
 
 # Default value used for exit()
+
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
+
+
+try:
+    from os import listdir
+    from os.path import isfile, join
+except ImportError as importError:
+    print("Error import listdir")
+    print(importError)
+    exit(EXIT_FAILURE)
+
 
 try:
     import yaml
@@ -40,7 +51,10 @@ class CumulusDevice(abstract_device.DeviceQEMUAbstract):
         open("./commands/config_files_verbose.yml"))
     _configFilesSimple = yaml.load(
         open("./commands/config_files_simple.yml"))
-    
+    _pushConfigFiles = yaml.load(
+        open("./commands/push_config_files.yml"))
+    _noPushConfigFiles = yaml.load(
+        open("./commands/push_no_config_files.yml"))
     # ------------------------------------------------------------------------------------------------------------
     #
     #
@@ -82,6 +96,30 @@ class CumulusDevice(abstract_device.DeviceQEMUAbstract):
     #
     #
     #
+    def pushConfig(self):
+        configFiles = [f for f in listdir(self._path) if "DS" not in f and isfile(join(self._path, f))]
+        
+        ssh = self.sshConnect()
+        self.mountNBD(ssh)
+        ftp_client = ssh.open_sftp()
+        
+        for file in configFiles:
+            try:
+                print(file, "NOT IN", self._noPushConfigFiles)
+                print(file not in self._noPushConfigFiles)
+                if file not in self._noPushConfigFiles:
+                    print(str(self._path+"/"+file))
+                    print(str(self._pushConfigFiles[file])+file)
+                    ftp_client.put(localpath=(str(self._path+"/"+file)), remotepath=(str(self._pushConfigFiles[file])+file))
+            except Exception as e:
+                print(e)
+
+        self.umountNBD(ssh)
+        ssh.close()
+    # ------------------------------------------------------------------------------------------------------------
+    #
+    #
+    #
     def getConfigSimple(self):
         self.getConfig(self._configFilesSimple, False)
         
@@ -113,7 +151,7 @@ class CumulusDevice(abstract_device.DeviceQEMUAbstract):
                 ftp_client.get("/tmp/"+filename, self._path+"/"+filename)
 
         self.umountNBD(ssh)
-
+        ssh.close()
     # ------------------------------------------------------------------------------------------------------------
     #
     #

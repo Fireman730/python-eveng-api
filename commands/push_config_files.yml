@@ -1,0 +1,17 @@
+hosts: /mnt/disk/etc/
+hostname: /mnt/disk/etc/
+passwd: /mnt/disk/etc/
+motd: /mnt/disk/etc/
+resolv.conf: /mnt/disk/etc/
+ntp.conf: /mnt/disk/etc/
+frr.conf: /mnt/disk/etc/frr/
+daemons.conf: /mnt/disk/etc/frr/
+daemons: /mnt/disk/etc/frr/
+snmpd.conf: /mnt/disk/etc/snmp/
+os-release: /mnt/disk/etc/cumulus/etc.replace/
+lsb-release: /mnt/disk/etc/cumulus/etc.replace/
+traffic.conf: /mnt/disk/etc/cumulus/datapath/
+ports.conf: /mnt/disk/etc/cumulus/
+switchd.conf: /mnt/disk/etc/cumulus/
+00control_plane.rules: /mnt/disk/etc/cumulus/acl/policy.d/
+99control_plane_catch_all.rules: /mnt/disk/etc/cumulus/acl/policy.d/

@@ -49,7 +49,7 @@ def main(login, mdp, ip, port, ssl, user, pod, root, rmdp, path):
     cumulus = cumulus_device.CumulusDevice("172.16.194.239", "root", "eve", 
         "/Volumes/Data/gitlab/python-eveng-api/backup", "0", api.getLabID("cumulus-spine-leaf.unl"), "1")
     
-    cumulus.getConfigVerbose()
+    cumulus.pushConfig()
 
 
 if __name__ == "__main__":
