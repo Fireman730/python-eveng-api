@@ -1,0 +1,4 @@
+- sudo modprobe nbd max_part=8
+- sudo partx -a /dev/nbd0
+- sudo mkdir /mnt/disk
+- sudo mount /dev/nbd0p4 /mnt/disk/
