@@ -76,6 +76,16 @@ class PyEVENG:
 
 
     def getCumulusBackup(self, path, project_name, nodeID):
+        """
+        This function backup Cumulus Network configuration files in path given in parameter
+        Files will be retrieve with paramiko SFTP
+
+        Args:
+            param1 (str): Path where save configuration files.
+            param2 (str): EVE-NG Project Name.
+            param3 (str): EVE-NG Node ID.
+        
+        """
         cumulus = cumulus_device.CumulusDevice(
             self._ipAddress, self._root, self._password, path, 
             self._pod, self.getLabID(project_name), nodeID)
