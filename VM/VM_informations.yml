@@ -1,0 +1,10 @@
+ip: 172.16.194.239
+https_username: admin
+https_password: eve
+https_port: 443
+https_ssl: true
+ssh_root: root
+ssh_pass: eve
+lab_pod: 0
+path_yaml_create_lab: ./architecture/lab_architecture.yml
+path_where_sore_bck: ./backup

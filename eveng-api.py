@@ -40,16 +40,7 @@ def pjson(jsonPrint):
 
 
 @click.command()
-@click.option('--login', default="admin", help='EVE-NG username.')
-@click.option('--mdp', default="eve", help='EVE-NG password.')
-@click.option('--ip', default="localhost", help='EVE-NG IPv4 address.')
-@click.option('--port', default="443", help='EVE-NG http/s port.')
-@click.option('--ssl', default=True, help='EVE-NG connection with SSL.')
-@click.option('--user', default="Users", help='EVE-NG folder where found the lab.')
-@click.option('--pod', default="0", help='EVE-NG POD number.')
-@click.option('--root', default="root", help='EVE-NG root username.')
-@click.option('--rmdp', default="eve", help='EVE-NG root password.')
-@click.option('--path', default="error", help='Path on your device to save config')
+@click.option('--path', default="error", help='Path to yaml file that contains VM informations')
 def main(login, mdp, ip, port, ssl, user, pod, root, rmdp, path):
 
     
