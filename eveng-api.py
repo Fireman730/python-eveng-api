@@ -26,6 +26,13 @@ except ImportError as importError:
     print(importError)
     exit(EXIT_FAILURE)
 
+try:
+    import yaml
+except ImportError as importError:
+    print("Error import yaml")
+    print(importError)
+    exit(EXIT_FAILURE)
+
 
 def pjson(jsonPrint):
     print(json.dumps(jsonPrint, indent=4, sort_keys=True))
@@ -45,31 +52,50 @@ def pjson(jsonPrint):
 @click.option('--path', default="error", help='Path on your device to save config')
 def main(login, mdp, ip, port, ssl, user, pod, root, rmdp, path):
 
+    
+
+    with open(path, 'r') as stream:
+        try:
+            file = yaml.load(stream)
+        except yaml.YAMLError as exc:
+            print(exc)
+
+    nodesToCreate = list()
+    for node in file['devices']:
+        if node['hostname'] not in nodesToCreate:
+            nodesToCreate.append(node['hostname'])
+        else:
+            raise Exception("Error some nodes have the same hostname")
+
+    print(nodesToCreate)
+
+    print(file['project'])
+
+    
     api = PyEVENG.PyEVENG(login, mdp, ip, port, ssl, user, pod, root, rmdp)
-    try:
-        api.login()
-        #pjson(api.getNodeInstall())
-        #pjson(api.status())
-        #pjson(api.getLab("cumulus-spine-leaf.unl"))
-        #pjson(api.getLabID("cumulus-spine-leaf.unl"))
-        #pjson(api.getLabAuthor("cumulus-spine-leaf.unl"))
-        #pjson(api.getLabNodes("cumulus-spine-leaf.unl"))
-        #pjson(api.getLabDescription("cumulus-spine-leaf.unl"))
-        #pjson(api.getLabNodesID("cumulus-spine-leaf.unl"))
-        #pjson(api.getLabNodesName("cumulus-spine-leaf.unl"))
-        #pjson(api.getLabNodesAccessMethod("cumulus-spine-leaf.unl"))
-        #pjson(api.startlabAllNodes("cumulus-spine-leaf.unl"))
-        #pjson(api.getLabNodeInterfaces("cumulus-spine-leaf.unl", "1"))
-        #pjson(api.startLabAllNodes("cumulus-spine-leaf.unl"))
-        #pjson(api.stopLabNode("cumulus-spine-leaf.unl", "1"))
-        #pjson(api.getLabNode("cumulus-spine-leaf.unl", "1"))
-        #pjson(api.getNodeImage("cumulus-spine-leaf.unl", "1"))
-        api.getBackupConfig("/Volumes/Data/gitlab/python-eveng-api/backup", "cumulus-spine-leaf.unl", "1")
-        #if "/" in path :
-        #    write_in_file(config, path)
-        #print(api.getBackupConfig("cumulus-spine-leaf.unl", "1"))
-    except Exception as e:
-        print(e)
+    api.login()
+    pjson(api.getNodeInstall())
+    api.createLab(file['project'])
+    
+    #pjson(api.status())
+    #pjson(api.getLab("cumulus-spine-leaf.unl"))
+    #pjson(api.getLabID("cumulus-spine-leaf.unl"))
+    #pjson(api.getLabAuthor("cumulus-spine-leaf.unl"))
+    #pjson(api.getLabNodes("cumulus-spine-leaf.unl"))
+    #pjson(api.getLabDescription("cumulus-spine-leaf.unl"))
+    #pjson(api.getLabNodesID("cumulus-spine-leaf.unl"))
+    #pjson(api.getLabNodesName("cumulus-spine-leaf.unl"))
+    #pjson(api.getLabNodesAccessMethod("cumulus-spine-leaf.unl"))
+    #pjson(api.startlabAllNodes("cumulus-spine-leaf.unl"))
+    #pjson(api.getLabNodeInterfaces("cumulus-spine-leaf.unl", "1"))
+    #pjson(api.startLabAllNodes("cumulus-spine-leaf.unl"))
+    #pjson(api.stopLabNode("cumulus-spine-leaf.unl", "1"))
+    #pjson(api.getLabNode("cumulus-spine-leaf.unl", "1"))
+    #pjson(api.getNodeImage("cumulus-spine-leaf.unl", "1"))
+    #api.getBackupConfig("/Volumes/Data/gitlab/python-eveng-api/backup", "cumulus-spine-leaf.unl", "1")
+    #if "/" in path :
+    #    write_in_file(config, path)
+    #print(api.getBackupConfig("cumulus-spine-leaf.unl", "1"))
 # -----------------------------------------------------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------------------------------------------------
 

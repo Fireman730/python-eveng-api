@@ -487,8 +487,22 @@ class PyEVENG:
         """
         response = requests.post(
             self._url+"/api/auth/logout", cookies=self._cookies, verify=False)
-        
 
+    # --------------------------------------------------------------------------------------------------
+    #
+    # CREATE functions
+    #
+    def createLab(self, labInformations:dict()):
+        """
+        This function Will create a Lab
+
+        Args:
+            param1 (dict): All lab informations
+        """
+        response = requests.post(
+            self._url+"/api/labs", data=json.dumps(labInformations), cookies=self._cookies, verify=False)
+
+        self.requestsError(response.status_code)
     # --------------------------------------------------------------------------------------------------
     #
     #
