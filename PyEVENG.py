@@ -518,6 +518,8 @@ class PyEVENG:
         """
         if status_code == 400:
             raise "HTTP 400 : Bad Request"
+        elif status_code == 500:
+            raise "HTTP 500 : Internal Server Error"
         elif status_code == 412:
             raise "HTTP 412 : please login before to make requests \n" + \
                 "api= PyEVENG.PyEVENG(login, mdp, ip, port, ssl, user, pod) \n" + \
