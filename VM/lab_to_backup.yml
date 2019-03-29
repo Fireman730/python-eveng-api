@@ -1,0 +1,19 @@
+labs:
+  - labname: spine-leaf.unl
+    pod: 0
+    folder: Users
+    bck_path: #
+    devices:
+      - Spine01
+      - Spine02
+      - Leaf01
+      - Leaf02
+      - Leaf03
+      - Leaf04
+  - labname: BGP-as-path.unl
+    pod: 0
+    folder: Users
+    bck_path: /data/eveng/backup/
+    devices: 
+      - all
+    
