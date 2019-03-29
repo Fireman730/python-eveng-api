@@ -53,18 +53,11 @@ def main(create, deploy, config, start, modify, stop, remove):
         create_lab(create)
         exit(EXIT_SUCCESS)
 
+    if deploy != "#":
+        deploy_lab(deploy)
+        exit(EXIT_SUCCESS)
     
-     # Retrieve YAML files informations
-    with open(path, 'r') as stream:
-        try:
-            file = yaml.load(stream)
-        except yaml.YAMLError as exc:
-            print(exc)
 
-    nodesToCreate = list()
-    for node in file['devices']:
-        if node['hostname'] not in nodesToCreate:
-            nodesToCreate.append(node['hostname'])
 
 # -----------------------------------------------------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------------------------------------------------
@@ -78,14 +71,33 @@ def create_lab(path):
         except yaml.YAMLError as exc:
             print(exc)
 
-    print(labToCreate)
-    print(vmInfo)
-
-    api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'], vmInfo['https_port'],
+    try:
+        api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'], vmInfo['https_port'],
                           vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'])
+        api.createLab(labToCreate['project'])
+    except Exception as e:
+        print(e)
+# -----------------------------------------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------------------------------------------------------
+def deploy_lab(path):
+    with open(path, 'r') as s1:
+        try:
+            labToDeploy = yaml.load(s1)
+            with open(labToDeploy['path_vm_info'], 'r') as s2:
+                vmInfo = yaml.load(s2)
+        except yaml.YAMLError as exc:
+            print(exc)
+    
+    print(labToDeploy['devices'])
+    print(labToDeploy['labname'])
+    #try:
+    api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'], vmInfo['https_port'],
+                              vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'])
+    api.addNodesToLab(labToDeploy['devices'], labToDeploy['labname'])
+    #except Exception as e:
+    #    print(e)
+        
 
-    api.createLab(labToCreate['project'])
-   
 
 
 

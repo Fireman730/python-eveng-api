@@ -1,0 +1,87 @@
+labname: spine-leaf.unl
+path_vm_info: /Volumes/Data/gitlab/python-eveng-api/VM/VM_informations.yml
+devices:
+  - type: qemu
+    template: cumulus
+    config: Unconfigured
+    delay: 0
+    icon: router.png
+    image: cumulus-vx-3.7.3
+    name: Spine01
+    left: 45%
+    top: 20%
+    ram: 1024
+    console: telnet 
+    cpu: 1
+    ethernet: 8 
+    uuid: 641a4800-1b19-427c-ae87-5555590b7790
+  - type: qemu
+    template: cumulus
+    config: Unconfigured
+    delay: 0
+    icon: router.png
+    image: cumulus-vx-3.7.3
+    name: Spine01
+    left: 55%
+    top: 20%
+    ram: 1024
+    console: telnet 
+    cpu: 1
+    ethernet: 8 
+    uuid: 641a4800-1b19-427c-ae87-6666690b7790
+  - type: qemu
+    template: cumulus
+    config: Unconfigured
+    delay: 0
+    icon: router.png
+    image: cumulus-vx-3.7.3
+    name: Leaf01
+    left: 35%
+    top: 35%
+    ram: 1024
+    console: telnet 
+    cpu: 1
+    ethernet: 8 
+    uuid: 641a4800-1b19-427c-ae87-1111190b7790
+  - type: qemu
+    template: cumulus
+    config: Unconfigured
+    delay: 0
+    icon: router.png
+    image: cumulus-vx-3.7.3
+    name: Leaf02
+    left: 45%
+    top: 35%
+    ram: 1024
+    console: telnet 
+    cpu: 1
+    ethernet: 8 
+    uuid: 641a4800-1b19-427c-ae87-2222290b7790
+  - type: qemu
+    template: cumulus
+    config: Unconfigured
+    delay: 0
+    icon: router.png
+    image: cumulus-vx-3.7.3
+    name: Leaf03
+    left: 55%
+    top: 35%
+    ram: 1024
+    console: telnet 
+    cpu: 1
+    ethernet: 8 
+    uuid: 641a4800-1b19-427c-ae87-3333390b7790
+  - type: qemu
+    template: cumulus
+    config: Unconfigured
+    delay: 0
+    icon: router.png
+    image: cumulus-vx-3.7.3
+    name: Leaf03
+    left: 65%
+    top: 35%
+    ram: 1024
+    console: telnet 
+    cpu: 1
+    ethernet: 8 
+    uuid: 641a4800-1b19-427c-ae87-4444490b7790

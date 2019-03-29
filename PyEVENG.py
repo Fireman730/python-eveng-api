@@ -107,7 +107,7 @@ class PyEVENG:
             json: That contains topology informations
         """
         response = requests.get(
-            self._url+"/api/labs/Users/"+labName+"/topology", cookies=self._cookies, verify=False)
+            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/topology", cookies=self._cookies, verify=False)
         self.requestsError(response.status_code)
         return json.loads(response.content)
 
@@ -122,7 +122,7 @@ class PyEVENG:
             json: That contains links informations
         """
         response = requests.get(
-            self._url+"/api/labs/Users/"+labName+"/links", cookies=self._cookies, verify=False)
+            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/links", cookies=self._cookies, verify=False)
         self.requestsError(response.status_code)
         return json.loads(response.content)
 
@@ -138,7 +138,7 @@ class PyEVENG:
             str: That contains node image
         """
         response = requests.get(
-            self._url+"/api/labs/Users/"+labName+"/nodes/"+nodeID, cookies=self._cookies, verify=False)
+            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes/"+nodeID, cookies=self._cookies, verify=False)
         self.requestsError(response.status_code)
         return json.loads(response.content)["data"]["image"]
 
@@ -157,7 +157,7 @@ class PyEVENG:
         self.check_param_type_str(nodeID)
 
         response = requests.get(
-            self._url+"/api/labs/Users/"+labName+"/nodes/"+nodeID+"/interfaces", cookies=self._cookies, verify=False)
+            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes/"+nodeID+"/interfaces", cookies=self._cookies, verify=False)
         self.requestsError(response.status_code)
         return json.loads(response.content)
 
@@ -181,7 +181,7 @@ class PyEVENG:
         self.check_param_type_str(labName)
 
         response = requests.get(
-            self._url+"/api/labs/Users/"+labName+"/nodes", cookies=self._cookies, verify=False)
+            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes", cookies=self._cookies, verify=False)
         self.requestsError(response.status_code)
         content = json.loads(response.content)["data"]
 
@@ -205,7 +205,7 @@ class PyEVENG:
         self.check_param_type_str(labName)
 
         response = requests.get(
-            self._url+"/api/labs/Users/"+labName+"/nodes", cookies=self._cookies, verify=False)
+            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes", cookies=self._cookies, verify=False)
         self.requestsError(response.status_code)
         content = json.loads(response.content)["data"]
 
@@ -229,7 +229,7 @@ class PyEVENG:
         self.check_param_type_str(labName)
 
         response = requests.get(
-            self._url+"/api/labs/Users/"+labName+"/nodes", cookies=self._cookies, verify=False)
+            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes", cookies=self._cookies, verify=False)
         self.requestsError(response.status_code)
         content = json.loads(response.content)["data"]
 
@@ -253,7 +253,7 @@ class PyEVENG:
         self.check_param_type_str(labName)
 
         response = requests.get(
-            self._url+"/api/labs/Users/"+labName+"/nodes", cookies=self._cookies, verify=False)
+            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes", cookies=self._cookies, verify=False)
         self.requestsError(response.status_code)
         return json.loads(response.content)
 
@@ -273,7 +273,7 @@ class PyEVENG:
         self.check_param_type_str(nodeID)
 
         response = requests.get(
-            self._url+"/api/labs/Users/"+labName+"/nodes/"+nodeID, cookies=self._cookies, verify=False)
+            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes/"+nodeID, cookies=self._cookies, verify=False)
         self.requestsError(response.status_code)
         return json.loads(response.content)
 
@@ -338,7 +338,7 @@ class PyEVENG:
         self.check_param_type_str(labName)
 
         response = requests.get(
-            self._url+"/api/labs/Users/"+labName, cookies=self._cookies, verify=False)
+            self._url+"/api/labs/"+self._userFolder+"/"+labName, cookies=self._cookies, verify=False)
         self.requestsError(response.status_code)
         return json.loads(response.content)
 
@@ -376,7 +376,7 @@ class PyEVENG:
             param1 (str): EVE-NG node ID
         """
         response = requests.get(
-            self._url+"/api/labs/Users/"+labName+"/nodes/"+nodeID+"/start", cookies=self._cookies, verify=False)
+            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes/"+nodeID+"/start", cookies=self._cookies, verify=False)
         self.requestsError(response.status_code)
 
     def startLabAllNodes(self, labName:str()):
@@ -404,7 +404,7 @@ class PyEVENG:
 
         """
         response = requests.get(
-            self._url+"/api/labs/Users/"+labName+"/nodes/"+nodeID+"/stop", cookies=self._cookies, verify=False)
+            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes/"+nodeID+"/stop", cookies=self._cookies, verify=False)
         # self.requestsError(response.status_code)
 
     def stopLabAllNodes(self, labName):
@@ -416,11 +416,10 @@ class PyEVENG:
 
         """
         response = requests.get(
-            self._url+"/api/labs/Users/"+labName+"/nodes/stop", cookies=self._cookies, verify=False)
+            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes/stop", cookies=self._cookies, verify=False)
     
     # ------------------------------------------------------------------------------------------
     # Authentification, Users and System
-
     def getNodeInstall(self) -> dict():
         """
         This function will return a list that contains all installed nodes
@@ -505,6 +504,37 @@ class PyEVENG:
         self.requestsError(response.status_code)
     # --------------------------------------------------------------------------------------------------
     #
+    # EDIT (POST) functions
+    #
+
+    def addNodeToLab(self, nodesToAdd: dict(), labName: str()):
+        """
+        This function add a node to Lab
+
+        Args:
+            param1 (dict): Node Informamations
+            param2 (str): Labname to add nodes
+        """
+        self.lock_lab()
+
+        response = requests.post(
+            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes", data=json.dumps(nodesToAdd), cookies=self._cookies, verify=False)
+
+        self.requestsError(response.status_code)
+    
+    def addNodesToLab(self, nodesToAdd: dict(), labName:str()):
+        """
+        This function add a nodes to Lab
+        It uses addNodeToLab
+
+        Args:
+            param1 (dict): Nodes Informamations
+        """
+        for node in nodesToAdd:
+            self.addNodeToLab(node, labName)
+
+    # --------------------------------------------------------------------------------------------------
+    #
     #
     #
     def requestsError(self, status_code):
@@ -544,6 +574,21 @@ class PyEVENG:
     #
     #
     #
+    def lock_lab(self):
+        ssh = self.sshConnect()
+        stdin, stdout, stderr = ssh.exec_command(
+            "find / opt/unetlab/labs / -name '*.lock' - exec rm {}")
+        print("Lock lab")
+        ssh.close
+        
+
+    def sshConnect(self) -> paramiko.SSHClient():
+        sshClient = paramiko.SSHClient()
+        sshClient.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        sshClient.connect(hostname=self._ipAddress,
+                          username=self._root, password=self._rootPassword)
+
+        return sshClient
 
     def __init__(self, username, password, ipAddress, port=99999, useHTTPS=False, userFolder="Users", pod="0", root="root", rmdp="eve"):
         """
@@ -583,3 +628,5 @@ class PyEVENG:
                 self._port = 80
             else:
                 self._port = port
+
+        self.login()

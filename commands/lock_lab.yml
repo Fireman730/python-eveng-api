@@ -1,0 +1,1 @@
+- find /opt/unetlab/labs/ -name '*.lock' -exec rm {} \;
