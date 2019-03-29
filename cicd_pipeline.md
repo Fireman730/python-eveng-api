@@ -38,3 +38,55 @@ The steps are the following :
 8. EVE-NG nodes Stop
 
 9. Remove you lab
+
+
+When the script will be finish.
+You will able to run as follow :
+
+```shell
+
+# 1. Create your Lab
+./eveng-api.py --create=/path/to/yml/lab
+
+# 2. Deploy your topology on your lab
+./eveng-api.py --deploy=/path/to/yml/topology
+
+# ---------------------------------------------------------------------------
+# Case 1 copy config file into your devices before your lab start
+### 3. Copy your config into dev
+./eveng-api.py --config=/path/to/backup
+
+### 4. Start nodes
+./eveng-api.py --start
+
+# Case 2 start nodes and deploy config via Ansible
+### 3. Start nodes
+./eveng-api.py --start
+
+### 4. 
+./eveng-api.py --ansible=/path/to/playbooks
+# ---------------------------------------------------------------------------
+
+#
+# Execute your Ansible playbooks modify test ...
+#
+
+# 5. If your network works fine backup nodes !
+./eveng-api.py --backup=/path/where/backup 
+
+# 6. Stop nodes
+./eveng-api.py --stop
+
+# 7. Remove lab
+./eveng-api.py --remove
+
+```
+
+
+
+
+
+
+
+
+
