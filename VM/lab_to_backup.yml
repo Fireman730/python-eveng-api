@@ -1,9 +1,18 @@
+---
+# List of lab that you want backup
+# This file contains backup informations
 labs:
   - labname: spine-leaf.unl
     pod: 0
     folder: Users
-    bck_path: #
-    devices:
+    # All devices will be sava in "bck_path/labename/hostname/{files}"
+    bck_path: /data/eveng/backup/
+    # Backup type. It can be "Verbose" or "Simple"
+    # "Simple" will only backup "/etc/network/interface" "/etc/frr/frr.conf". More info in this repo on folder "commands/config_files_simple.yml
+    # "Verbose" will backup all config file. More info in this repo on folder "commands/config_files_verbose.yml and "commands/config_files_verbose_shell.yml"
+    type: verbose
+    # List of hostname that you want backup - You can use keyword "all"
+    hostname:
       - Spine01
       - Spine02
       - Leaf01
@@ -14,6 +23,6 @@ labs:
     pod: 0
     folder: Users
     bck_path: /data/eveng/backup/
-    devices: 
+    hostname: 
       - all
     
