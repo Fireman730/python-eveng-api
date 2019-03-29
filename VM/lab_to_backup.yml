@@ -10,7 +10,7 @@ labs:
     # Backup type. It can be "Verbose" or "Simple"
     # "Simple" will only backup "/etc/network/interface" "/etc/frr/frr.conf". More info in this repo on folder "commands/config_files_simple.yml
     # "Verbose" will backup all config file. More info in this repo on folder "commands/config_files_verbose.yml and "commands/config_files_verbose_shell.yml"
-    type: verbose
+    bck_type: verbose
     # List of hostname that you want backup - You can use keyword "all"
     hostname:
       - Spine01
@@ -19,10 +19,13 @@ labs:
       - Leaf02
       - Leaf03
       - Leaf04
+  
+  # Second lab to backup
   - labname: BGP-as-path.unl
     pod: 0
     folder: Users
     bck_path: /data/eveng/backup/
+    bck_type: simple
     hostname: 
       - all
     
