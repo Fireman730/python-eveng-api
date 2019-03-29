@@ -40,7 +40,9 @@ def pjson(jsonPrint):
 
 
 @click.command()
-@click.option('--path', default="error", help='Path to yaml file that contains VM informations')
+@click.option('--vm', default="#", help='Path to yaml file that contains VM informations.')
+@click.option('--clab', default="#", help='Path to yaml file that contains labs to create.')
+@click.option('--blab', default="#", help='Path to yaml file that contains labs to backup.')
 def main(login, mdp, ip, port, ssl, user, pod, root, rmdp, path):
 
     
