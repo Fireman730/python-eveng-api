@@ -40,13 +40,21 @@ def pjson(jsonPrint):
 
 
 @click.command()
-@click.option('--vm', default="#", help='Path to yaml file that contains VM informations.')
-@click.option('--clab', default="#", help='Path to yaml file that contains labs to create.')
-@click.option('--blab', default="#", help='Path to yaml file that contains labs to backup.')
-def main(login, mdp, ip, port, ssl, user, pod, root, rmdp, path):
+@click.option('--create', default="#", help='Path to yaml file that contains lab to create.')
+@click.option('--deploy', default="#", help='Path to yaml file that contains topology to deploy.')
+@click.option('--config', default="#", help='Path to directory that contains nodes configuration files.')
+@click.option('--start', default="#", help='Labname you want to start')
+@click.option('--modify', default="#", help='Path to Ansible playbooks to execute.')
+@click.option('--stop', default="#", help='Labname you want to stop')
+@click.option('--remove', default="#", help='Labname you want to remove')
+def main(create, deploy, config, start, modify, stop, remove):
+
+    if create != "#":
+        create_lab(create)
+        exit(EXIT_SUCCESS)
 
     
-
+     # Retrieve YAML files informations
     with open(path, 'r') as stream:
         try:
             file = yaml.load(stream)
@@ -57,43 +65,34 @@ def main(login, mdp, ip, port, ssl, user, pod, root, rmdp, path):
     for node in file['devices']:
         if node['hostname'] not in nodesToCreate:
             nodesToCreate.append(node['hostname'])
-        else:
-            raise Exception("Error some nodes have the same hostname")
 
-    print(nodesToCreate)
-
-    print(file['project'])
-
-    
-    api = PyEVENG.PyEVENG(login, mdp, ip, port, ssl, user, pod, root, rmdp)
-    api.login()
-    pjson(api.getNodeInstall())
-    api.createLab(file['project'])
-    
-    #pjson(api.status())
-    #pjson(api.getLab("cumulus-spine-leaf.unl"))
-    #pjson(api.getLabID("cumulus-spine-leaf.unl"))
-    #pjson(api.getLabAuthor("cumulus-spine-leaf.unl"))
-    #pjson(api.getLabNodes("cumulus-spine-leaf.unl"))
-    #pjson(api.getLabDescription("cumulus-spine-leaf.unl"))
-    #pjson(api.getLabNodesID("cumulus-spine-leaf.unl"))
-    #pjson(api.getLabNodesName("cumulus-spine-leaf.unl"))
-    #pjson(api.getLabNodesAccessMethod("cumulus-spine-leaf.unl"))
-    #pjson(api.startlabAllNodes("cumulus-spine-leaf.unl"))
-    #pjson(api.getLabNodeInterfaces("cumulus-spine-leaf.unl", "1"))
-    #pjson(api.startLabAllNodes("cumulus-spine-leaf.unl"))
-    #pjson(api.stopLabNode("cumulus-spine-leaf.unl", "1"))
-    #pjson(api.getLabNode("cumulus-spine-leaf.unl", "1"))
-    #pjson(api.getNodeImage("cumulus-spine-leaf.unl", "1"))
-    #api.getBackupConfig("/Volumes/Data/gitlab/python-eveng-api/backup", "cumulus-spine-leaf.unl", "1")
-    #if "/" in path :
-    #    write_in_file(config, path)
-    #print(api.getBackupConfig("cumulus-spine-leaf.unl", "1"))
 # -----------------------------------------------------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------------------------------------------------
+def create_lab(path):
 
-def write_in_file(config:str(), path:str()):
-    file=open(path, "w")
+    with open(path, 'r') as s1:
+        try:
+            labToCreate = yaml.load(s1)
+            with open(labToCreate['path_vm_info'], 'r') as s2:
+                vmInfo = yaml.load(s2)
+        except yaml.YAMLError as exc:
+            print(exc)
+
+    print(labToCreate)
+    print(vmInfo)
+
+    api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'], vmInfo['https_port'],
+                          vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'])
+
+    api.createLab(labToCreate['project'])
+   
+
+
+
+
+
+def write_in_file(config: str(), path: str()):
+    file = open(path, "w")
     file.write(config)
     file.close()
 
