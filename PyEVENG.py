@@ -60,12 +60,7 @@ class PyEVENG:
         print(yamlFiles)
 
         for lab in yamlFiles['labs']:
-            print(lab)
-            print(lab['hostname'])
             for hostname in lab['hostname']:
-                print(lab['bck_path'])
-                print(lab['labname'])
-                print(hostname)
                 self.getBackupConfig(lab['bck_path'], lab['labname'], hostname)
 
 
@@ -89,7 +84,6 @@ class PyEVENG:
                 nodeID = node['id']
             
         nodeImage = nodeImage.upper()
-        print(nodeImage)
 
         if "CUMULUS" in nodeImage :
             self.getCumulusBackup(path, project_name, nodeName, nodeID)
@@ -105,7 +99,6 @@ class PyEVENG:
             param3 (str): EVE-NG Node ID.
         
         """
-        print("22222")
         cumulus = cumulus_device.CumulusDevice(
             self._ipAddress, self._root, self._password, path, 
             self._pod, projectName, self.getLabID(projectName), nodeName, nodeID)

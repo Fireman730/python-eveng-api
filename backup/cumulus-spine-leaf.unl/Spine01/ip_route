@@ -2,25 +2,25 @@ Active Internet connections (w/o servers)
 Proto Recv-Q Send-Q Local Address           Foreign Address         State      
 tcp        1      0 localhost:38580         localhost:http-alt      CLOSE_WAIT 
 tcp        0      0 localhost:mysql         localhost:43342         ESTABLISHED
-tcp        0      0 localhost:58388         localhost:4243          TIME_WAIT  
 tcp        1      0 localhost:38738         localhost:http-alt      CLOSE_WAIT 
-tcp        0      0 localhost:38804         localhost:http-alt      ESTABLISHED
-tcp        1      0 localhost:38790         localhost:http-alt      CLOSE_WAIT 
+tcp        1      0 localhost:38804         localhost:http-alt      CLOSE_WAIT 
+tcp        0      0 localhost:58400         localhost:4243          TIME_WAIT  
 tcp        1      0 localhost:38556         localhost:http-alt      CLOSE_WAIT 
 tcp        1      0 localhost:38766         localhost:http-alt      CLOSE_WAIT 
 tcp        0      0 localhost:mysql         localhost:43344         ESTABLISHED
+tcp        0      0 localhost:58402         localhost:4243          TIME_WAIT  
+tcp        0      0 localhost:58392         localhost:4243          TIME_WAIT  
 tcp        1      0 localhost:38754         localhost:http-alt      CLOSE_WAIT 
 tcp        1      0 localhost:38780         localhost:http-alt      CLOSE_WAIT 
-tcp        0      0 localhost:58378         localhost:4243          TIME_WAIT  
-tcp        0      0 localhost:58380         localhost:4243          TIME_WAIT  
-tcp        0      0 localhost:58386         localhost:4243          TIME_WAIT  
+tcp        0      0 172.16.194.239:ssh      172.16.194.1:52384      ESTABLISHED
 tcp        1      0 localhost:38548         localhost:http-alt      CLOSE_WAIT 
-tcp        0      0 172.16.194.239:ssh      172.16.194.1:52269      ESTABLISHED
+tcp        0      0 localhost:38818         localhost:http-alt      ESTABLISHED
 tcp        0      0 172.16.194.239:ssh      172.16.194.1:56718      ESTABLISHED
 tcp        1      0 localhost:38424         localhost:http-alt      CLOSE_WAIT 
-tcp6       0      0 localhost:http-alt      localhost:38804         ESTABLISHED
+tcp        0      0 localhost:58394         localhost:4243          TIME_WAIT  
 tcp6       0      0 localhost:43342         localhost:mysql         ESTABLISHED
-tcp6       0      0 localhost:https         localhost:39390         TIME_WAIT  
+tcp6       0      0 localhost:http-alt      localhost:38818         ESTABLISHED
+tcp6       0      0 localhost:https         localhost:39404         TIME_WAIT  
 tcp6       0      0 localhost:43344         localhost:mysql         ESTABLISHED
 Active UNIX domain sockets (w/o servers)
 Proto RefCnt Flags       Type       State         I-Node   Path
@@ -31,7 +31,6 @@ unix  3      [ ]         DGRAM                    16883    /run/systemd/notify
 unix  2      [ ]         DGRAM                    16891    /run/systemd/journal/syslog
 unix  3      [ ]         STREAM     CONNECTED     23062    /run/systemd/journal/stdout
 unix  3      [ ]         STREAM     CONNECTED     23032    /run/systemd/journal/stdout
-unix  3      [ ]         STREAM     CONNECTED     486055   /var/lock/qemu-nbd-nbd0
 unix  3      [ ]         STREAM     CONNECTED     35923    
 unix  3      [ ]         STREAM     CONNECTED     25317    
 unix  3      [ ]         STREAM     CONNECTED     30433    
@@ -41,18 +40,17 @@ unix  3      [ ]         STREAM     CONNECTED     23895
 unix  3      [ ]         STREAM     CONNECTED     30434    /run/systemd/journal/stdout
 unix  2      [ ]         STREAM     CONNECTED     448929   
 unix  2      [ ]         DGRAM                    29596    
+unix  2      [ ]         DGRAM                    491955   
 unix  3      [ ]         STREAM     CONNECTED     24010    
 unix  2      [ ]         STREAM     CONNECTED     465196   
 unix  3      [ ]         STREAM     CONNECTED     23058    /run/systemd/journal/stdout
 unix  3      [ ]         STREAM     CONNECTED     25319    /var/run/openvswitch/db.sock
 unix  2      [ ]         STREAM     CONNECTED     446623   
 unix  2      [ ]         STREAM     CONNECTED     463496   
-unix  2      [ ]         DGRAM                    486627   
 unix  3      [ ]         STREAM     CONNECTED     22107    /run/systemd/journal/stdout
 unix  3      [ ]         STREAM     CONNECTED     25852    /var/run/dbus/system_bus_socket
 unix  2      [ ]         STREAM     CONNECTED     474946   
 unix  3      [ ]         STREAM     CONNECTED     35021    /var/run/docker/libcontainerd/docker-containerd.sock
-unix  3      [ ]         STREAM     CONNECTED     486688   
 unix  3      [ ]         STREAM     CONNECTED     25853    /var/run/dbus/system_bus_socket
 unix  3      [ ]         STREAM     CONNECTED     23953    
 unix  3      [ ]         STREAM     CONNECTED     24959    
@@ -80,6 +78,7 @@ unix  2      [ ]         STREAM     CONNECTED     469208
 unix  3      [ ]         STREAM     CONNECTED     23083    /run/systemd/journal/stdout
 unix  3      [ ]         STREAM     CONNECTED     34960    
 unix  3      [ ]         STREAM     CONNECTED     23838    /run/systemd/journal/stdout
+unix  3      [ ]         STREAM     CONNECTED     492050   /var/lock/qemu-nbd-nbd0
 unix  3      [ ]         STREAM     CONNECTED     25931    /var/run/dbus/system_bus_socket
 unix  3      [ ]         STREAM     CONNECTED     22524    
 unix  3      [ ]         DGRAM                    18142    
@@ -102,6 +101,7 @@ unix  2      [ ]         STREAM     CONNECTED     439145
 unix  3      [ ]         DGRAM                    18141    
 unix  2      [ ]         DGRAM                    32686    
 unix  2      [ ]         STREAM     CONNECTED     460707   
+unix  3      [ ]         STREAM     CONNECTED     494063   
 unix  3      [ ]         STREAM     CONNECTED     14753    /run/systemd/journal/stdout
 unix  3      [ ]         STREAM     CONNECTED     32396    /run/systemd/journal/stdout
 unix  2      [ ]         DGRAM                    29191    

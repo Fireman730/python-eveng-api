@@ -2,3 +2,4 @@
 - sudo partx -a /dev/nbd0
 - sudo mkdir -p /mnt/disk
 - sudo mount /dev/nbd0p4 /mnt/disk/
+- sudo cat /mnt/disk/etc/hostname

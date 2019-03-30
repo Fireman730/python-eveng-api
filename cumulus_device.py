@@ -65,13 +65,20 @@ class CumulusDevice(abstract_device.DeviceQEMUAbstract):
         for command in self._shellCommandsMountNBD:
             print("[EVE-NG shell mount]", command)
             stdin, stdout, stderr = sshClient.exec_command(command)
+            output = "".join(stdout.readlines())
             if first:
                 print("[EVE-NG shell mount]", "sudo qemu-nbd -c /dev/nbd0 /opt/unetlab/tmp/" + str(
                     self._pod) + "/" + str(self._labID) + "/" + str(self._nodeID) + "/virtioa.qcow2")
                 stdin, stdout, stderr = sshClient.exec_command(
                     "sudo qemu-nbd -c /dev/nbd0 /opt/unetlab/tmp/" + str(self._pod) + "/" + str(self._labID) + "/" + str(self._nodeID) + "/virtioa.qcow2")
+                output = stdout.readlines()
                 first = False
-
+            
+            
+            if "cat" in command:
+                output = output[:-1]
+                if output is self._nodeName:
+                    raise Exception("Wrong qcow2 is mount in /mnt/disk")
     # ------------------------------------------------------------------------------------------------------------
     #
     #
@@ -80,7 +87,6 @@ class CumulusDevice(abstract_device.DeviceQEMUAbstract):
         for command in self._shellCommandsUmountNBD:
             stdin, stdout, stderr = sshClient.exec_command(command)
             o = "".join(stdout.readlines())
-        
       
         if "nbd0" not in o:
             raise Exception("Error during nbd disconnect")
@@ -138,7 +144,7 @@ class CumulusDevice(abstract_device.DeviceQEMUAbstract):
     def getConfig(self, commands:list(), v):
         ssh = self.sshConnect()
 
-        print("[Cumulus Backup]",self._labName)
+        print("[Cumulus Backup]",self._labName, self._nodeName)
         self.umountNBD(ssh)
         self.mountNBD(ssh)        
         ftp_client = ssh.open_sftp()
