@@ -68,13 +68,7 @@ def main(create, deploy, config, start, modify, backup, stop, remove):
 # -----------------------------------------------------------------------------------------------------------------------------
 def create_lab(path):
 
-    with open(path, 'r') as s1:
-        try:
-            labToCreate = yaml.load(s1)
-            with open(labToCreate['path_vm_info'], 'r') as s2:
-                vmInfo = yaml.load(s2)
-        except yaml.YAMLError as exc:
-            print(exc)
+    labToCreate, vmInfo = open_files(path)
 
     try:
         api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'], vmInfo['https_port'],
@@ -85,13 +79,7 @@ def create_lab(path):
 # -----------------------------------------------------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------------------------------------------------
 def deploy_lab(path):
-    with open(path, 'r') as s1:
-        try:
-            labToDeploy = yaml.load(s1)
-            with open(labToDeploy['path_vm_info'], 'r') as s2:
-                vmInfo = yaml.load(s2)
-        except yaml.YAMLError as exc:
-            print(exc)
+    labToDeploy, vmInfo = open_files(path)
     
     try:
         api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'], vmInfo['https_port'],
