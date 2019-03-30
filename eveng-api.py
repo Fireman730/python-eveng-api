@@ -45,9 +45,10 @@ def pjson(jsonPrint):
 @click.option('--config', default="#", help='Path to directory that contains nodes configuration files.')
 @click.option('--start', default="#", help='Labname you want to start')
 @click.option('--modify', default="#", help='Path to Ansible playbooks to execute.')
+@click.option('--backup', default="#", help='Path to yaml file that contains informations about backups.')
 @click.option('--stop', default="#", help='Labname you want to stop')
 @click.option('--remove', default="#", help='Labname you want to remove')
-def main(create, deploy, config, start, modify, stop, remove):
+def main(create, deploy, config, start, modify, backup, stop, remove):
 
     if create != "#":
         create_lab(create)
@@ -55,6 +56,10 @@ def main(create, deploy, config, start, modify, stop, remove):
 
     if deploy != "#":
         deploy_lab(deploy)
+        exit(EXIT_SUCCESS)
+
+    if backup != "#":
+        backup_lab(backup)
         exit(EXIT_SUCCESS)
     
 
@@ -88,21 +93,40 @@ def deploy_lab(path):
         except yaml.YAMLError as exc:
             print(exc)
     
-    print(labToDeploy['devices'])
-    print(labToDeploy['labname'])
-    #try:
-    api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'], vmInfo['https_port'],
+    try:
+        api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'], vmInfo['https_port'],
                               vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'])
-    api.addNodesToLab(labToDeploy['devices'], labToDeploy['labname'])
-    #except Exception as e:
-    #    print(e)
+        api.addNodesToLab(labToDeploy['devices'], labToDeploy['labname'])
+    except Exception as e:
+        print(e)
         
+# -----------------------------------------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------------------------------------------------------
+def backup_lab(path):
+    labtoBackup, vmInfo = open_files(path)
 
+    try:
+        api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'],
+                              vmInfo['https_port'], vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'])
+        
+        api.getBackupNodesConfig(labtoBackup)
+    except Exception as e:
+        print(e)
+# -----------------------------------------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------------------------------------------------------
+def open_files(path):
+    with open(path, 'r') as s1:
+        try:
+            lab = yaml.load(s1)
+            with open(lab['path_vm_info'], 'r') as s2:
+                vmInfo = yaml.load(s2)
+        except yaml.YAMLError as exc:
+            print(exc)
+    
+    return lab, vmInfo
 
-
-
-
-
+# -----------------------------------------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------------------------------------------------------
 def write_in_file(config: str(), path: str()):
     file = open(path, "w")
     file.write(config)

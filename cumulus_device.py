@@ -10,6 +10,7 @@ EXIT_FAILURE = 1
 try:
     from os import listdir
     from os.path import isfile, join
+    from os import mkdir
 except ImportError as importError:
     print("Error import listdir")
     print(importError)
@@ -62,10 +63,13 @@ class CumulusDevice(abstract_device.DeviceQEMUAbstract):
     def mountNBD(self, sshClient:paramiko.SSHClient):
         first = True
         for command in self._shellCommandsMountNBD:
+            print("[EVE-NG shell mount]", command)
             stdin, stdout, stderr = sshClient.exec_command(command)
             if first:
+                print("[EVE-NG shell mount]", "sudo qemu-nbd -c /dev/nbd0 /opt/unetlab/tmp/" + str(
+                    self._pod) + "/" + str(self._labID) + "/" + str(self._nodeID) + "/virtioa.qcow2")
                 stdin, stdout, stderr = sshClient.exec_command(
-                    "sudo qemu-nbd -c /dev/nbd0 /opt/unetlab/tmp/" + self._pod + "/" + self._labID + "/" + self._nodeID + "/virtioa.qcow2")
+                    "sudo qemu-nbd -c /dev/nbd0 /opt/unetlab/tmp/" + str(self._pod) + "/" + str(self._labID) + "/" + str(self._nodeID) + "/virtioa.qcow2")
                 first = False
 
     # ------------------------------------------------------------------------------------------------------------
@@ -76,7 +80,8 @@ class CumulusDevice(abstract_device.DeviceQEMUAbstract):
         for command in self._shellCommandsUmountNBD:
             stdin, stdout, stderr = sshClient.exec_command(command)
             o = "".join(stdout.readlines())
-            
+        
+      
         if "nbd0" not in o:
             raise Exception("Error during nbd disconnect")
 
@@ -102,14 +107,10 @@ class CumulusDevice(abstract_device.DeviceQEMUAbstract):
         ssh = self.sshConnect()
         self.mountNBD(ssh)
         ftp_client = ssh.open_sftp()
-        
+
         for file in configFiles:
             try:
-                print(file, "NOT IN", self._noPushConfigFiles)
-                print(file not in self._noPushConfigFiles)
                 if file not in self._noPushConfigFiles:
-                    print(str(self._path+"/"+file))
-                    print(str(self._pushConfigFiles[file])+file)
                     ftp_client.put(localpath=(str(self._path+"/"+file)), remotepath=(str(self._pushConfigFiles[file])+file))
             except Exception as e:
                 print(e)
@@ -137,25 +138,48 @@ class CumulusDevice(abstract_device.DeviceQEMUAbstract):
     def getConfig(self, commands:list(), v):
         ssh = self.sshConnect()
 
-        self.mountNBD(ssh)
-
+        print("[Cumulus Backup]",self._labName)
+        self.umountNBD(ssh)
+        self.mountNBD(ssh)        
         ftp_client = ssh.open_sftp()
 
-        for file in commands:
-            ftp_client.get(
-                file, str(self._path+"/"+str(file[file.rfind("/")+1:])))
+        try:
+            mkdir(self._path+"/"+self._labName)
+        except OSError as e:
+            print(e)
+        
+        try:
+            mkdir(self._path+"/"+self._labName+"/"+self._nodeName)
+        except OSError as e:
+            print(e)
 
-        if v:
-            for filename, command in self._shellCommandsCatFiles.items():
-                stdin, stdout, stderr = ssh.exec_command(command)
-                ftp_client.get("/tmp/"+filename, self._path+"/"+filename)
+        self._path = self._path+"/"+self._labName+"/"+self._nodeName
 
+        try:
+            for file in commands:
+                ftp_client.get(
+                    file, str(self._path+"/"+str(file[file.rfind("/")+1:])))
+
+            if v:
+                for filename, command in self._shellCommandsCatFiles.items():
+                    stdin, stdout, stderr = ssh.exec_command(command)
+                    ftp_client.get("/tmp/"+filename, self._path+"/"+filename)
+        except Exception as e:
+            print(e.with_traceback)
+            self.umountNBD(ssh)
+        finally:
+            self.umountNBD(ssh)
+
+        print("END")
         self.umountNBD(ssh)
         ssh.close()
+        
     # ------------------------------------------------------------------------------------------------------------
     #
     #
     #
-    def __init__(self, ip, root, pwd, path, pod, labID, nodeID):
+    def __init__(self, ip, root, pwd, path, pod, labName, labID, nodeName, nodeID):
         super().__init__(ip, root, pwd, path, pod, labID, nodeID)
+        self._labName = labName
+        self._nodeName = nodeName
         

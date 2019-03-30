@@ -1,0 +1,34 @@
+# This file describes the network interfaces available on your system
+# and how to activate them. For more information, see interfaces(5).
+
+source /etc/network/interfaces.d/*.intf
+
+# The loopback network interface
+auto lo
+iface lo inet loopback
+    # The primary network interface
+    address 10.10.0.101/32
+
+# The primary network interface
+auto eth0
+iface eth0
+    address 10.0.4.101/24
+    alias Out-Of-Band
+    gateway 10.0.4.1
+
+auto swp1
+iface swp1
+    mtu 9216
+
+auto swp2
+iface swp2
+    mtu 9216
+
+auto swp3
+iface swp3
+    mtu 9216
+
+auto swp4
+iface swp4
+    mtu 9216
+

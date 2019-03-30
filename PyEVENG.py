@@ -56,8 +56,21 @@ class PyEVENG:
     # ------------------------------------------------------------------------------------------
     # Getters (project, labs, node, config, ...)
     # Using REST API only
+    def getBackupNodesConfig(self, yamlFiles: dict()):
+        print(yamlFiles)
+
+        for lab in yamlFiles['labs']:
+            print(lab)
+            print(lab['hostname'])
+            for hostname in lab['hostname']:
+                print(lab['bck_path'])
+                print(lab['labname'])
+                print(hostname)
+                self.getBackupConfig(lab['bck_path'], lab['labname'], hostname)
+
+
     
-    def getBackupConfig(self, path:str(), project_name: str(), nodeID: str()):
+    def getBackupConfig(self, path:str(), project_name: str(), nodeName: str()):
         """
         This function will return a string that defines device image
 
@@ -68,14 +81,20 @@ class PyEVENG:
         Returns:
             str: Device image
         """
-        nodeImage = self.getNodeImage(project_name, nodeID)
+        allNodesID = self.getLabNodesID(project_name)
+        allNodes = self.getLabNodes(project_name)
+        for node in allNodes['data'].values():
+            if node['name'] == nodeName:
+                nodeImage = node['image']
+                nodeID = node['id']
+            
         nodeImage = nodeImage.upper()
-    
+        print(nodeImage)
+
         if "CUMULUS" in nodeImage :
-            self.getCumulusBackup(path, project_name, nodeID)
+            self.getCumulusBackup(path, project_name, nodeName, nodeID)
 
-
-    def getCumulusBackup(self, path, project_name, nodeID):
+    def getCumulusBackup(self, path, projectName, nodeName, nodeID):
         """
         This function backup Cumulus Network configuration files in path given in parameter
         Files will be retrieve with paramiko SFTP
@@ -86,9 +105,10 @@ class PyEVENG:
             param3 (str): EVE-NG Node ID.
         
         """
+        print("22222")
         cumulus = cumulus_device.CumulusDevice(
             self._ipAddress, self._root, self._password, path, 
-            self._pod, self.getLabID(project_name), nodeID)
+            self._pod, projectName, self.getLabID(projectName), nodeName, nodeID)
 
         cumulus.getConfigVerbose()
 
