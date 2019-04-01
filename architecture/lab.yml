@@ -5,4 +5,5 @@ project:
   author: DylanHamel
   description: Spine and Leaf architecture for test befor prod
   body: Actual label
+  
 path_vm_info: /Volumes/Data/gitlab/python-eveng-api/VM/VM_informations.yml

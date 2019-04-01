@@ -1,58 +1,67 @@
-
+labname: dqdqwdqw.unl
+path_vm_info: /Volumes/Data/gitlab/python-eveng-api/VM/VM_informations.yml
 links:
   - id: 1
+    type: ethernet
+    # if it's a connexion between 2 devices, use bridge
+    network: bridge
     src: Spine01
     sport: swp1
-    stype: node
     dst: Leaf01
     dport: swp1
-    dtype: node
   - id: 2
+    type: ethernet
+    # if it's a connexion between 2 devices, use bridge
+    network: bridge
     src: Spine01
     sport: swp2
-    stype: node
     dst: Leaf02
     dport: swp1
-    dtype: node
   - id: 3
+    type: ethernet
+    # if it's a connexion between 2 devices, use bridge
+    network: bridge
     src: Spine01
     sport: swp3
-    stype: node
     dst: Leaf03
     dport: swp1
-    dtype: node
   - id: 4
+    type: ethernet
+    # if it's a connexion between 2 devices, use bridge
+    network: bridge
     src: Spine01
     sport: swp4
-    stype: node
     dst: Leaf04
     dport: swp1
-    dtype: node
   - id: 5
+    type: ethernet
+    # if it's a connexion between 2 devices, use bridge
+    network: bridge
+    src: Spine02
+    sport: swp4
+    dst: Leaf04
+    dport: swp2
+  - id: 6
+    type: ethernet
+    # if it's a connexion between 2 devices, use bridge
+    network: bridge
+    src: Spine02
+    sport: swp3
+    dst: Leaf03
+    dport: swp2
+  - id: 7
+    type: ethernet
+    # if it's a connexion between 2 devices, use bridge
+    network: bridge
+    src: Spine02
+    sport: swp2
+    dst: Leaf02
+    dport: swp2
+  - id: 8
+    type: ethernet
+    # if it's a connexion between 2 devices, use bridge
+    network: bridge
     src: Spine02
     sport: swp1
-    stype: node
     dst: Leaf01
     dport: swp2
-    dtype: node
-  - id: 6
-    src: Spine02
-    sport: swp2
-    stype: node
-    dst: Leaf02
-    dport: swp2
-    dtype: node
-  - id: 7
-    src: Spine02
-    sport: swp3
-    stype: node
-    dst: Leaf03
-    dport: swp2
-    dtype: node
-  - id: 8
-    src: Spine02
-    sport: swp4
-    stype: node
-    dst: Leaf04
-    dport: swp2
-    dtype: node

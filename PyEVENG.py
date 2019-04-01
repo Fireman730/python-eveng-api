@@ -52,6 +52,37 @@ class PyEVENG:
     This class is a Python client for retrieve information about your EVE-NG VM.
     The main aim is provided an Python script for automate an deploy your network un EVE-NG    
     """
+    # ------------------------------------------------------------------------------------------
+    # Other commands
+    # Using SSH
+    
+    def retrieveUNL(self, labName, pathToXML):
+        labPath = "/opt/unetlab/labs/"+self._userFolder+"/"
+        print("[PyEVENG - retrieveUNL] -", labPath+labName+".unl")
+
+        try:
+            ssh = self.sshConnect()
+            ftp_client = ssh.open_sftp()
+            ftp_client.get(str(labPath+labName+".unl"), pathToXML)
+            ftp_client.close()
+            ssh.close()
+        except Exception as e:
+            print(e)
+
+
+    def replaceUNL(self, labName, pathToUNL):
+        labPath = "/opt/unetlab/labs/"+self._userFolder+"/"
+        print("[PyEVENG - replaceUNL] -", labPath+labName)
+        try:
+            ssh = self.sshConnect()
+            ftp_client = ssh.open_sftp()
+            ftp_client.put(pathToUNL,
+                           str(labPath+labName+".unl"))
+            ftp_client.close()
+            ssh.close()
+        except Exception as e:
+            print(e)
+
 
     # ------------------------------------------------------------------------------------------
     # Getters (project, labs, node, config, ...)
@@ -522,7 +553,7 @@ class PyEVENG:
 
     def addNodeToLab(self, nodesToAdd: dict(), labName: str()):
         """
-        This function add a node to Lab
+        This function add a node to a Lab
 
         Args:
             param1 (dict): Node Informamations
@@ -530,21 +561,55 @@ class PyEVENG:
         """
         self.lock_lab()
 
+        print("[PyEVENG addNodeToLab] -", nodesToAdd['name'])
+        print("[PyEVENG addNodeToLab] -", nodesToAdd)
+        print("[PyEVENG addNodeToLab] -", labName)
         response = requests.post(
             self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes", data=json.dumps(nodesToAdd), cookies=self._cookies, verify=False)
 
+        print("[PyEVENG addNodeToLab] -", response.status_code)
         self.requestsError(response.status_code)
     
     def addNodesToLab(self, nodesToAdd: dict(), labName:str()):
         """
-        This function add a nodes to Lab
+        This function add some nodes to a Lab
         It uses addNodeToLab
 
         Args:
             param1 (dict): Nodes Informamations
+            param2 (str): Labname
         """
         for node in nodesToAdd:
             self.addNodeToLab(node, labName)
+
+
+    def addNetworksToLab (self, networksToAdd: dict(), labName:str()):
+        """
+        This function add some links to a Lab
+
+        Args:
+            param1 (dict): Nodes Informamations
+            param2 (str): Labname
+        """
+        for link in networksToAdd:
+            self.addNodeToLab(link, labName)
+
+    def addNetworkToLab(self, networkToAdd: dict(), labName: str()):
+        """
+        This function add a link to a Lab
+
+        Args:
+            param1 (dict): Nodes Informamations
+            param2 (str): Labname
+        """
+        self.lock_lab()
+
+        response = requests.post(
+            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/netowrks", data=json.dumps(networkToAdd), cookies=self._cookies, verify=False)
+
+        self.requestsError(response.status_code)
+
+
 
     # --------------------------------------------------------------------------------------------------
     #
@@ -561,6 +626,8 @@ class PyEVENG:
         """
         if status_code == 400:
             raise "HTTP 400 : Bad Request"
+        if status_code == 400:
+            raise "HTTP 404 : Not Found"
         elif status_code == 500:
             raise "HTTP 500 : Internal Server Error"
         elif status_code == 412:
@@ -591,7 +658,6 @@ class PyEVENG:
         ssh = self.sshConnect()
         stdin, stdout, stderr = ssh.exec_command(
             "find / opt/unetlab/labs / -name '*.lock' - exec rm {}")
-        print("Lock lab")
         ssh.close
         
 
