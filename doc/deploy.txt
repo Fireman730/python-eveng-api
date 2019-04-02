@@ -1,0 +1,15 @@
+I didn't find on API Documentation how it is possible to connect two devices between us.
+There are endpoints for "Add Network" and "Add Nodes".
+But there is no information about "How connect network to a device"
+
+I wrote to EVE-NG team but for the moment -> no answer
+
+I wrote a function that will retrieve the Lab XML and modify this file.
+The function works for Cumulus and ./architecture/all.yml lab.
+I didn't test this function for other lab.
+
+Please keep in mind that is not a really good method.
+Don't implement this function in production !!
+
+You can run :
+./eveng-api.py --deploy=./architecture/all.yml  
