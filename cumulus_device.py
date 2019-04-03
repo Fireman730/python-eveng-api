@@ -50,19 +50,19 @@ MY_PATH = "/Volumes/Data/gitlab/python-eveng-api/"
 class CumulusDevice(abstract_device.DeviceQEMUAbstract):
 
     _shellCommandsMountNBD = yaml.load(
-        open("./commands/command_mount_nbd.yml"))
+        open("./commands/cumulus/command_mount_nbd.yml"))
     _shellCommandsUmountNBD = yaml.load(
-        open("./commands/command_umount_nbd.yml"))
+        open("./commands/cumulus/command_umount_nbd.yml"))
     _shellCommandsCatFiles = yaml.load(
-        open("./commands/config_files_verbose_shell.yml"))
+        open("./commands/cumulus/config_files_verbose_shell.yml"))
     _configFilesVerbose = yaml.load(
-        open("./commands/config_files_verbose.yml"))
+        open("./commands/cumulus/config_files_verbose.yml"))
     _configFilesSimple = yaml.load(
-        open("./commands/config_files_simple.yml"))
+        open("./commands/cumulus/config_files_simple.yml"))
     _pushConfigFiles = yaml.load(
-        open("./commands/push_config_files.yml"))
+        open("./commands/cumulus/push_config_files.yml"))
     _noPushConfigFiles = yaml.load(
-        open("./commands/push_no_config_files.yml"))
+        open("./commands/cumulus/push_no_config_files.yml"))
     # ------------------------------------------------------------------------------------------------------------
     #
     #

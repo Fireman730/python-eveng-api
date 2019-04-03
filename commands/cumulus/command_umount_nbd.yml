@@ -1,0 +1,2 @@
+- sudo umount /mnt/disk
+- sudo qemu-nbd --disconnect /dev/nbd0
