@@ -1,6 +1,0 @@
-- sudo modprobe nbd max_part=8
-# sudo qemu-nbd -c /dev/nbd0 /opt/unetlab/tmp/pod/labID/nodeID/virtioa.qcow2
-- sudo partx -a /dev/nbd0
-- sudo mkdir -p /mnt/disk
-- sudo mount /dev/nbd0p4 /mnt/disk/
-- sudo cat /mnt/disk/etc/hostname
