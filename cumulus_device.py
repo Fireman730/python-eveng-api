@@ -1,12 +1,19 @@
 #!/usr/bin/env python3.7
 # -*- coding: utf-8 -*-
 
-# Default value used for exit()
+__author__ = "Dylan Hamel"
+__version__ = "0.1"
+__email__ = "dylan.hamel@protonmail.com"
+__status__ = "Prototype"
 
+# Default value used for exit()
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
 
-
+######################################################
+#
+# Import Library
+#
 try:
     from os import listdir
     from os.path import isfile, join

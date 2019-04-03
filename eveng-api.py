@@ -1,10 +1,19 @@
 #!/usr/bin/env python3.7
 # -*- coding: utf-8 -*-
 
+__author__ = "Dylan Hamel"
+__version__ = "0.1"
+__email__ = "dylan.hamel@protonmail.com"
+__status__ = "Prototype"
+
 # Default value used for exit()
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
 
+######################################################
+#
+# Import Library
+#
 try:
     import json
     import ast
@@ -93,15 +102,6 @@ def main(create, deploy, config, start, modify, backup, stop, remove):
         backup_lab(backup)
         exit(EXIT_SUCCESS)
     
-    
-
-    
-    
-    
-
-
-
-
 # -----------------------------------------------------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------------------------------------------------
 def create_lab(labToCreate, vmInfo):

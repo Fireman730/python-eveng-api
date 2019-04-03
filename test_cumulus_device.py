@@ -1,11 +1,19 @@
 #!/usr/bin/env python3.7
 # -*- coding: utf-8 -*-
 
+__author__ = "Dylan Hamel"
+__version__ = "0.1"
+__email__ = "dylan.hamel@protonmail.com"
+__status__ = "Prototype"
+
 # Default value used for exit()
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
 
-
+######################################################
+#
+# Import Library
+#
 try:
     import cumulus_device
 except ImportError as importError:
@@ -40,19 +48,19 @@ except ImportError as importError:
 @click.option('--rmdp', default="eve", help='EVE-NG root password.')
 @click.option('--path', default="error", help='Path on your device to save config')
 def main(login, mdp, ip, port, ssl, user, pod, root, rmdp, path):
-
+    """
     print("[eveng-api - main] -", login, mdp, ip, port, ssl, user, pod)
    
-    api = PyEVENG.PyEVENG(login, mdp, ip, port, ssl, user, pod, root, rmdp)
+    
     api.login()
 
     cumulus = cumulus_device.CumulusDevice("172.16.194.239", "root", "eve", 
                                            "/Volumes/Data/gitlab/python-eveng-api/backup", "0", api.getLabID("Test-PyEVE.unl"), "1")
     
     cumulus.getConfigVerbose()
-
-
-    #pjson(api.status())
+    """
+    api = PyEVENG.PyEVENG(login, mdp, ip, port, ssl, user, pod, root, rmdp)
+    print(api.getNodeInstall())
     #pjson(api.getLab("cumulus-spine-leaf.unl"))
     #pjson(api.getLabID("cumulus-spine-leaf.unl"))
     #pjson(api.getLabAuthor("cumulus-spine-leaf.unl"))
