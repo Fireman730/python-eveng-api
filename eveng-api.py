@@ -51,32 +51,24 @@ except ImportError as importError:
     print(importError)
     exit(EXIT_FAILURE)
 
+try:
+    from EveYAMLValidate import validateYamlFileForPyEVENG
+except ImportError as importError:
+    print("Error import eveng-yaml-validation")
+    print(importError)
+    exit(EXIT_FAILURE)
 
+######################################################
+#
+# Functions
+#
+
+#### Print JSON files with indexation####
 def pjson(jsonPrint):
     print(json.dumps(jsonPrint, indent=4, sort_keys=True))
     print("---------------------------------------------------------------------------------")
 
-
-NETWORK_TEMPLATE = dict({
-    "@color": "",
-    "@id": 99999,
-    "@label": "",
-    "@left": 519,
-    "@linkstyle": "Straight",
-    "@name": "Net-Spine01iface_1",
-    "@style": "Solid",
-    "@top": 193,
-    "@type": "bridge",
-    "@visibility": 0
-})
-
-INTERFACE_TEMPLATE = dict({
-    '@id': 99999,
-    '@name': 'eth0',
-    '@type': 'ethernet',
-    '@network_id': 99999
-})
-
+#### Main function ####
 @click.command()
 @click.option('--create', default="#", help='Path to yaml file that contains lab to create.')
 @click.option('--deploy', default="#", help='Path to yaml file that contains topology to deploy.')
@@ -93,8 +85,10 @@ def main(create, deploy, config, start, modify, backup, stop, remove):
         exit(EXIT_SUCCESS)
 
     if deploy != "#":
-        #deploy_device(deploy)
+        #yamlF, vm = open_files(deploy)
+        #deploy_device(yamlF, vm)
         #deploy_links(deploy)
+        #assert validateYamlFileForPyEVENG(open_all(deploy))
         deploy_all(deploy)
         exit(EXIT_SUCCESS)
 
@@ -103,7 +97,7 @@ def main(create, deploy, config, start, modify, backup, stop, remove):
         exit(EXIT_SUCCESS)
     
 # -----------------------------------------------------------------------------------------------------------------------------
-# -----------------------------------------------------------------------------------------------------------------------------
+#### Create a Lab based on a YAML File ####
 def create_lab(labToCreate, vmInfo):
     #labToCreate, vmInfo = open_files(path)
     print("[create_lab]")
@@ -115,7 +109,7 @@ def create_lab(labToCreate, vmInfo):
         print(e)
 
 # -----------------------------------------------------------------------------------------------------------------------------
-# -----------------------------------------------------------------------------------------------------------------------------
+#### Create a Topology (devices, links) based on a YAML File ####
 def deploy_all (path):
     yml, vmInfo = open_files(path)
 
@@ -127,7 +121,8 @@ def deploy_all (path):
 def deploy_device(deviceToDeploy, vmInfo):
     # deviceToDeploy, vmInfo = open_files(path)
     print("[deploy_device]")
-
+    print(deviceToDeploy['project'])
+    
     api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'], vmInfo['https_port'],
                               vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'])
     api.addNodesToLab(deviceToDeploy['devices'],
@@ -135,6 +130,64 @@ def deploy_device(deviceToDeploy, vmInfo):
 
 
 def deploy_links(linksToDeploy, vmInfo):
+    print("[deploy_links]")
+
+    api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'], vmInfo['https_port'],
+                          vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'])
+
+    api.addNetworksLinksToLab(linksToDeploy['links'],
+                              linksToDeploy['project']['name']+".unl")
+
+
+# -----------------------------------------------------------------------------------------------------------------------------
+#### Backup a Lab based on a YAML File ####
+def backup_lab(path):
+    labtoBackup, vmInfo = open_files(path)
+
+    try:
+        api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'],
+                              vmInfo['https_port'], vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'])
+        
+        api.getBackupNodesConfig(labtoBackup)
+    except Exception as e:
+        print(e)
+# -----------------------------------------------------------------------------------------------------------------------------
+#### Open a YAML File and open VM_path contains into YAML file ####
+def open_files(path):
+    with open(path, 'r') as s1:
+        try:
+            lab = yaml.load(s1)
+            with open(lab['path_vm_info'], 'r') as s2:
+                vmInfo = yaml.load(s2)
+        except yaml.YAMLError as exc:
+            print(exc)
+    
+    return lab, vmInfo
+
+# -----------------------------------------------------------------------------------------------------------------------------
+#### Create a Lab based on a YAML File ####
+def open_all(path):
+    with open(path, 'r') as s1:
+        try:
+            lab = yaml.load(s1)
+        except yaml.YAMLError as exc:
+            print(exc)
+    return lab
+
+
+# -----------------------------------------------------------------------------------------------------------------------------
+#### Write config into a file ####
+def write_in_file(config: str(), path: str()):
+    file = open(path, "w")
+    file.write(config)
+    file.close()
+
+
+if __name__ == "__main__":
+    main()
+
+
+def old_deploy_links(linksToDeploy, vmInfo):
     #linksToDeploy, vmInfo = open_files(path)
     print("[deploy_links]")
 
@@ -156,7 +209,8 @@ def deploy_links(linksToDeploy, vmInfo):
     for link in linksToDeploy['links']:
         newNetwork = dict(NETWORK_TEMPLATE)
         newNetwork['@id'] = link['id']
-        newNetwork['@name'] = str(link['src']+"("+link['sport']+")--"+link['dst']+"("+link['dport'] +")")
+        newNetwork['@name'] = str(
+            link['src']+"("+link['sport']+")--"+link['dst']+"("+link['dport'] + ")")
 
         try:
             type(data['lab']['topology']['networks'])
@@ -182,11 +236,10 @@ def deploy_links(linksToDeploy, vmInfo):
                     node['interface'] = list()
 
                 node['interface'].append(newInterface)
-                
-    
+
             if (node['@name'] == link['dst']):
                 newInterface = dict(INTERFACE_TEMPLATE)
-                newInterface['@network_id'] = link['id']                
+                newInterface['@network_id'] = link['id']
                 newInterface['@id'] = link['dport'][-1:]
                 newInterface['@name'] = link['dport']
 
@@ -200,9 +253,8 @@ def deploy_links(linksToDeploy, vmInfo):
                     node['interface'].append(newInterface)
                 else:
                     node['interface'].append(newInterface)
-        
+
         #xml = dicttoxml(data, root="lab")
-    
 
     data['lab']['body'] = data['lab']['body']['$']
     data['lab']['description'] = data['lab']['description']['$']
@@ -219,53 +271,3 @@ def deploy_links(linksToDeploy, vmInfo):
 
     api.replaceUNL(
         linksToDeploy['project']['name'], str(linksToDeploy['path_to_save']+linksToDeploy['project']['name']+".unl"))
-
-
-        
-        
-
-# -----------------------------------------------------------------------------------------------------------------------------
-# -----------------------------------------------------------------------------------------------------------------------------
-def backup_lab(path):
-    labtoBackup, vmInfo = open_files(path)
-
-    try:
-        api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'],
-                              vmInfo['https_port'], vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'])
-        
-        api.getBackupNodesConfig(labtoBackup)
-    except Exception as e:
-        print(e)
-# -----------------------------------------------------------------------------------------------------------------------------
-# -----------------------------------------------------------------------------------------------------------------------------
-def open_files(path):
-    with open(path, 'r') as s1:
-        try:
-            lab = yaml.load(s1)
-            with open(lab['path_vm_info'], 'r') as s2:
-                vmInfo = yaml.load(s2)
-        except yaml.YAMLError as exc:
-            print(exc)
-    
-    return lab, vmInfo
-
-
-def open_all(path):
-    with open(path, 'r') as s1:
-        try:
-            lab = yaml.load(s1)
-        except yaml.YAMLError as exc:
-            print(exc)
-    return lab
-
-
-# -----------------------------------------------------------------------------------------------------------------------------
-# -----------------------------------------------------------------------------------------------------------------------------
-def write_in_file(config: str(), path: str()):
-    file = open(path, "w")
-    file.write(config)
-    file.close()
-
-
-if __name__ == "__main__":
-    main()

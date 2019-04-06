@@ -55,7 +55,34 @@ except ImportError as importError:
     print("Error import sphinx")
     print(importError)
     exit(EXIT_FAILURE)
+######################################################
+#
+# Constantes
+#
+NETWORK_TEMPLATE = dict({
+    "@color": "",
+    "@id": 99999,
+    "@label": "",
+    "@left": 519,
+    "@linkstyle": "Straight",
+    "@name": "Net-Spine01iface_1",
+    "@style": "Solid",
+    "@top": 193,
+    "@type": "bridge",
+    "@visibility": 0
+})
 
+INTERFACE_TEMPLATE = dict({
+    '@id': 99999,
+    '@name': 'eth0',
+    '@type': 'ethernet',
+    '@network_id': 99999
+})
+
+######################################################
+#
+# Class
+#
 class PyEVENG:
     """
     This class is a Python client for retrieve information about your EVE-NG VM.
@@ -309,6 +336,26 @@ class PyEVENG:
             self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes", cookies=self._cookies, verify=False)
         self.requestsError(response.status_code)
         return json.loads(response.content)
+    
+    def getNodeIDbyNodeName(self, labName:str(), nodeName:str()) -> str():
+        """
+        This function will nodeID regarding to the nodeName given in parameter
+
+        Args:
+            param1 (str): EVE-NG lab name
+            param2 (str): Node name
+
+        Returns:
+            str: nodeID
+        """
+        nodeID = str()
+        allNodesID = self.getLabNodesID(labName)
+        allNodes = self.getLabNodes(labName)
+        for node in allNodes['data'].values():
+                if node['name'] == nodeName:
+                    nodeID = node['id']
+        return nodeID
+        
 
     def getLabNode(self, labName:str(), nodeID:str()) -> dict():
         """
@@ -551,10 +598,13 @@ class PyEVENG:
         Args:
             param1 (dict): All lab informations
         """
+        print("[PyEVENG addNodeToLab] -", labInformations['name'], "is creating...")
         response = requests.post(
             self._url+"/api/labs", data=json.dumps(labInformations), cookies=self._cookies, verify=False)
 
         self.requestsError(response.status_code)
+        print("[PyEVENG addNodeToLab] -",
+              labInformations['name'], "has been created...")
     # --------------------------------------------------------------------------------------------------
     #
     # EDIT (POST) functions
@@ -568,16 +618,14 @@ class PyEVENG:
             param1 (dict): Node Informamations
             param2 (str): Labname to add nodes
         """
-        self.lock_lab()
+        print("[PyEVENG addNodeToLab] -", nodesToAdd['name'], "is deploying...")
 
-        print("[PyEVENG addNodeToLab] -", nodesToAdd['name'])
-        print("[PyEVENG addNodeToLab] -", nodesToAdd)
-        print("[PyEVENG addNodeToLab] -", labName)
+        self.lock_lab()
         response = requests.post(
             self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes", data=json.dumps(nodesToAdd), cookies=self._cookies, verify=False)
 
-        print("[PyEVENG addNodeToLab] -", response.status_code)
         self.requestsError(response.status_code)
+        print("[PyEVENG addNodeToLab] -", nodesToAdd['name'], "has been deployed!")
     
     def addNodesToLab(self, nodesToAdd: dict(), labName:str()):
         """
@@ -592,7 +640,21 @@ class PyEVENG:
             self.addNodeToLab(node, labName)
 
 
-    def addNetworksToLab (self, networksToAdd: dict(), labName:str()):
+    def addNetworksToLab(self, networksToAdd: dict(), labName:str()):
+        """
+        This function add some network to a Lab
+
+        Args:
+            param1 (dict): Nodes Informamations
+            param2 (str): Labname
+        """
+        data = dict()
+        for link in networksToAdd:
+            data['name'] = str(link['src']+"("+link['sport']+")--"+link['dst']+"("+link['dport'] + ")")
+            data['type'] = str(link['network'])
+            self.addNetworkToLab(data, labName)
+
+    def addNetworkToLab(self, networkToAdd: dict(), labName: str()):
         """
         This function add some links to a Lab
 
@@ -600,24 +662,80 @@ class PyEVENG:
             param1 (dict): Nodes Informamations
             param2 (str): Labname
         """
-        for link in networksToAdd:
-            self.addNodeToLab(link, labName)
+        print("[PyEVENG addNetworkToLab] -",
+              networkToAdd['name'], "is deploying...")
 
-    def addNetworkToLab(self, networkToAdd: dict(), labName: str()):
+        self.lock_lab()
+        response = requests.post(
+            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/networks", data=json.dumps(networkToAdd), cookies=self._cookies, verify=False)
+        self.requestsError(response.status_code)
+
+        print("[PyEVENG addNetworkToLab] -",
+              networkToAdd['name'], "(",str(response.status_code),") has been deployed!")
+
+    def addNetworksLinksToLab(self, interfacesToAdd: dict(), labName: str()):
         """
-        This function add a link to a Lab
+        This function will connect a node to a Network.
+        Firstly they will create Network.
+        2 nodes have to be connected on the same netwrok for communicate
+
+        -X PUT - d '{"0":1}'127.0.0.1/api/labs/Users/Lab.unl/nodes/1/interfaces'
+
+        Args:
+            param1 (str): Lab Names
+            param1 (str): Nodes Names
+            param2 (str): Node interface ID
+            param3 (str): Network ID
+        """
+        self.addNetworksToLab(interfacesToAdd, labName)
+        self.addLinksToLab(interfacesToAdd, labName)
+
+    def addLinksToLab(self, interfaceToAdd: dict(), labName: str()):
+        """
+        This function add some links to a Lab
 
         Args:
             param1 (dict): Nodes Informamations
             param2 (str): Labname
         """
+        data = dict()
+        nodeSrcID = str()
+        nodeDstID = str()
+        for link in interfaceToAdd:
+            print("******", link)
+            nodeSrcID = self.getNodeIDbyNodeName(labName, link['src'])
+            nodeDstID = self.getNodeIDbyNodeName(labName, link['dst'])
+            
+            self.addLinkToLab(link['id'], nodeSrcID,
+                              link['sport'][-1:], labName)
+            self.addLinkToLab(link['id'], nodeDstID,
+                              link['dport'][-1:], labName)
+
+        
+    def addLinkToLab(self, networkID: str(), nodeID:str(), interfaceID:str(), labName: str()):
+        """
+        This function will connect a node to a Network.
+        2 nodes have to be connected on the same netwrok for communicate
+
+        -X PUT - d '{"0":1}'127.0.0.1/api/labs/Users/Lab.unl/nodes/1/interfaces'
+
+        Args:
+            param1 (str): Lab Names
+            param1 (str): Nodes Names
+            param2 (str): Node interface ID
+            param3 (str): Network ID
+        """
+        print("[PyEVENG addNetworkToLab] -",
+              nodeID, interfaceID, "is deploying...")
+
+        print(self._url+"/api/labs/"+self._userFolder+"/" +
+              str(labName)+"/nodes/"+str(nodeID)+"/interfaces")
+        print("{\""+str(interfaceID)+"\":\""+str(networkID)+"\"}")
         self.lock_lab()
-
-        response = requests.post(
-            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/netowrks", data=json.dumps(networkToAdd), cookies=self._cookies, verify=False)
-
+        response = requests.put(
+            self._url+"/api/labs/"+self._userFolder+"/"+str(labName)+"/nodes/"+str(nodeID)+"/interfaces", data="{\""+str(interfaceID)+"\":\""+str(networkID)+"\"}", cookies=self._cookies, verify=False)
+        
         self.requestsError(response.status_code)
-
 
 
     # --------------------------------------------------------------------------------------------------
@@ -666,7 +784,11 @@ class PyEVENG:
     def lock_lab(self):
         ssh = self.sshConnect()
         stdin, stdout, stderr = ssh.exec_command(
-            "find / opt/unetlab/labs / -name '*.lock' - exec rm {}")
+            "find /opt/unetlab/labs/ -name '*.lock' -exec rm {} \; && echo 'LOCK LAB!'")
+        o = "".join(stdout.readlines())
+
+        if "LOCK" not in o:
+            raise Exception("Error during lock_lab")
         ssh.close
         
 
