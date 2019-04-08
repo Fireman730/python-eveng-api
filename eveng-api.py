@@ -120,20 +120,29 @@ def main(create, deploy, oob, config, start, modify, backup, stop, remove):
         pushOOBConf(oob)
         exit(EXIT_SUCCESS)
 
-
     if backup != "#":
         backup_lab(backup)
         exit(EXIT_SUCCESS)
 
     if start != "#":
         i = start.find(',')
-        print(start[:i])
 
         vmInfo = open_all(str(start[i+1:]))
         try:
             api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'], vmInfo['https_port'],
                               vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'])
             api.startLabAllNodes(start[:i])
+        except Exception as e:
+            print(e)
+
+    if stop != "#":
+        i = stop.find(',')
+    
+        vmInfo = open_all(str(stop[i+1:]))
+        try:
+            api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'], vmInfo['https_port'],
+                                  vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'])
+            api.stopLabAllNodes(stop[:i])
         except Exception as e:
             print(e)
     
@@ -176,8 +185,6 @@ def deploy_all (path):
     old_deploy_links(ymlF, vmInfo)
     
     
-    
-
 def deploy_device(deviceToDeploy, vmInfo):
     # deviceToDeploy, vmInfo = open_files(path)
     print("[deploy_device]")

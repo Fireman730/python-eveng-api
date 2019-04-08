@@ -226,7 +226,21 @@ class PyEVENG:
     # ------------------------------------------------------------------------------------------
     # Getters (project, labs, node, config, ...)
     # Using REST API only
-    
+    def getNodeNameByID(self, labName: str(), nodeID: str()) -> str():
+        """
+        This function will return a string that contains node name regarding node ID and labname given in parameter
+
+        Args:
+            param1 (str): EVE-NG lab name
+            param1 (str): Node ID
+
+        Returns:
+            str: Node name
+        """
+        return self.getLabNode(labName, nodeID)['data']['name']
+
+
+
     def getNodeImageAndNodeID(self,labName:str(), nodeName:str()) -> str():
         """
         This function will return a string that contains image type of nodes given in parameter
@@ -546,6 +560,10 @@ class PyEVENG:
             param1 (str): EVE-NG lab name
             param1 (str): EVE-NG node ID
         """
+        
+        print("[PyEVENG startLabNode] -",
+              labName, self.getNodeNameByID(labName, nodeID), "is starting...")
+
         response = requests.get(
             self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes/"+nodeID+"/start", cookies=self._cookies, verify=False)
         self.requestsError(response.status_code)
@@ -574,11 +592,15 @@ class PyEVENG:
             param1 (str): EVE-NG node ID
 
         """
+
+        print("[PyEVENG stopLabNode] -",
+              labName, self.getNodeNameByID(labName, nodeID), "is stopping...")
+
         response = requests.get(
             self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes/"+nodeID+"/stop", cookies=self._cookies, verify=False)
         # self.requestsError(response.status_code)
 
-    def stopLabAllNodes(self, labName):
+    def stopLabAllNodes1(self, labName):
         """
         This function will stop all node of a lab
 
@@ -588,6 +610,23 @@ class PyEVENG:
         """
         response = requests.get(
             self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes/stop", cookies=self._cookies, verify=False)
+
+
+    def stopLabAllNodes(self, labName):
+        """
+        This function will stop all node of a lab
+
+        Args:
+            param1 (str): EVE-NG lab name
+
+        """
+
+        self.check_param_type_str(labName)
+
+        nodesID = self.getLabNodesID(labName)
+
+        for nodeID in nodesID:
+          self.stopLabNode(labName, nodeID)
     
     # ------------------------------------------------------------------------------------------
     # Authentification, Users and System
