@@ -14,6 +14,13 @@ EXIT_FAILURE = 1
 #
 # Import Library
 #
+try:
+    from os import listdir
+    from os.path import isfile, join
+except ImportError as importError:
+    print("Error import listdir")
+    print(importError)
+    exit(EXIT_FAILURE)
 
 try:
     import yaml
@@ -35,15 +42,21 @@ except ImportError as importError:
     print("Error import abc - abstractmethod")
     print(importError)
     exit(EXIT_FAILURE)
+######################################################
+#
+# Constantes
+#
 
-MY_PATH = "/Volumes/Data/gitlab/python-eveng-api/"
-
+######################################################
+#
+# Class
+#
 class CumulusDevice(abstract_device.DeviceQEMUAbstract):
-
-    _shellCommandsMountNBD = yaml.load(
-        open("./commands/cumulus/command_mount_nbd.yml"))
-    _shellCommandsUmountNBD = yaml.load(
-        open("./commands/cumulus/command_umount_nbd.yml"))
+    
+    # ------------------------------------------------------------------------------------------------------------
+    #
+    # Class variables
+    #
     _shellCommandsCatFiles = yaml.load(
         open("./commands/cumulus/config_files_verbose_shell.yml"))
     _configFilesVerbose = yaml.load(
@@ -54,11 +67,14 @@ class CumulusDevice(abstract_device.DeviceQEMUAbstract):
         open("./commands/cumulus/push_config_files.yml"))
     _noPushConfigFiles = yaml.load(
         open("./commands/cumulus/push_no_config_files.yml"))
+    _shellCommandsMountNBD = yaml.load(
+        open("./commands/cumulus/command_mount_nbd.yml"))
+
     # ------------------------------------------------------------------------------------------------------------
     #
     #
     #
-    def mountNBD(self, sshClient:paramiko.SSHClient):
+    def mountNBD(self, sshClient: paramiko.SSHClient):
         first = True
         for command in self._shellCommandsMountNBD:
             print("[EVE-NG shell mount]", command)
@@ -71,41 +87,13 @@ class CumulusDevice(abstract_device.DeviceQEMUAbstract):
                     "sudo qemu-nbd -c /dev/nbd0 /opt/unetlab/tmp/" + str(self._pod) + "/" + str(self._labID) + "/" + str(self._nodeID) + "/virtioa.qcow2")
                 output = stdout.readlines()
                 first = False
-            
-            
+
             if "cat" in command:
                 output = output[:-1]
                 if output is self._nodeName:
                     raise Exception("Wrong qcow2 is mount in /mnt/disk")
-    # ------------------------------------------------------------------------------------------------------------
-    #
-    #
-    #
-    def umountNBDWithOutCheck(self, sshClient: paramiko.SSHClient):
-        for command in self._shellCommandsUmountNBD:
-            stdin, stdout, stderr = sshClient.exec_command(command)
-            o = "".join(stdout.readlines())
 
-    def umountNBD(self, sshClient: paramiko.SSHClient):
-        for command in self._shellCommandsUmountNBD:
-            stdin, stdout, stderr = sshClient.exec_command(command)
-            o = "".join(stdout.readlines())
-      
-        if "nbd0" not in o:
-            raise Exception("Error during nbd disconnect")
-
-    # ------------------------------------------------------------------------------------------------------------
-    #
-    #
-    #
-    def sshConnect(self) -> paramiko.SSHClient():
-        sshClient = paramiko.SSHClient()
-        sshClient.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        sshClient.connect(hostname=self._ip,
-                          username=self._root, password=self._pwd)
-
-        return sshClient
-
+    
     # ------------------------------------------------------------------------------------------------------------
     #
     #
@@ -147,7 +135,7 @@ class CumulusDevice(abstract_device.DeviceQEMUAbstract):
     def getConfig(self, commands:list(), v):
         ssh = self.sshConnect()
 
-        print("[Cumulus Backup]",self._labName, self._nodeName)
+        print("[ExtremeCumulus - getConfig]", self._labName, self._nodeName)
         self.umountNBDWithOutCheck(ssh)
         self.mountNBD(ssh)        
         ftp_client = ssh.open_sftp()
@@ -167,7 +155,7 @@ class CumulusDevice(abstract_device.DeviceQEMUAbstract):
         finally:
             self.umountNBD(ssh)
 
-        print("END")
+        print("[CumulusDevice - getConfig]", self._nodeName, "has been backuped")
         self.umountNBD(ssh)
         ssh.close()
         
@@ -176,7 +164,5 @@ class CumulusDevice(abstract_device.DeviceQEMUAbstract):
     #
     #
     def __init__(self, ip, root, pwd, path, pod, labName, labID, nodeName, nodeID):
-        super().__init__(ip, root, pwd, path, pod, labID, nodeID)
-        self._labName = labName
-        self._nodeName = nodeName
+        super().__init__(ip, root, pwd, path, pod, labName, labID, nodeName, nodeID)
         
