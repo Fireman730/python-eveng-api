@@ -24,7 +24,7 @@ except ImportError as importError:
     exit(EXIT_FAILURE)
 
 try:
-    import cumulus_device
+    import cumulus_device, extreme_device
 except ImportError as importError:
     print("Error import cumulus_device")
     print(importError)
@@ -110,12 +110,13 @@ class PyEVENG:
     # Getters (project, labs, node, config, ...)
     # Using REST API only
     def getBackupNodesConfig(self, yamlFiles: dict()):
-        print(yamlFiles)
-
         for lab in yamlFiles['labs']:
-            for hostname in lab['hostname']:
-                self.getBackupConfig(lab['bck_path'], lab['labname'], hostname)
-
+            if "all" in lab['hostname']:
+                for hostname in self.getLabNodesName(lab['labname']):
+                    self.getBackupConfig(lab['bck_path'], lab['labname'], hostname)
+            else:
+                for hostname in lab['hostname']:
+                    self.getBackupConfig(lab['bck_path'], lab['labname'], hostname)
 
     
     def getBackupConfig(self, path:str(), project_name: str(), nodeName: str()):
@@ -152,6 +153,25 @@ class PyEVENG:
     
         if "CUMULUS" in nodeImage :
             self.getCumulusBackup(path, project_name, nodeName, nodeID)
+        elif "EXTREME" in nodeImage:
+            self.getExtremeBackup(path, project_name, nodeName, nodeID)
+
+    def getExtremeBackup(self, path, projectName, nodeName, nodeID):
+        """
+        This function backup Extreme Network configuration files in path given in parameter
+        Files will be retrieve with paramiko SFTP
+
+        Args:
+            param1 (str): Path where save configuration files.
+            param2 (str): EVE-NG Project Name.
+            param3 (str): EVE-NG Node ID.
+        
+        """
+        extreme = extreme_device.ExtremeDevice(
+            self._ipAddress, self._root, self._password, path,
+            self._pod, projectName, self.getLabID(projectName), nodeName, nodeID)
+
+        extreme.getConfigVerbose()
 
     def getCumulusBackup(self, path, projectName, nodeName, nodeID):
         """
