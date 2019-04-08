@@ -1,0 +1,14 @@
+# No default IP address
+ip: 172.16.194.239
+# Default admin
+https_username: admin
+# Default eve
+https_password: eve
+# Mandatory with no community version
+https_port: 443
+# Mandatory with no community version
+https_ssl: true
+# Default root
+ssh_root: root
+# Default eve
+ssh_pass: eve
