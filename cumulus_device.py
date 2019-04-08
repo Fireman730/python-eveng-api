@@ -98,6 +98,28 @@ class CumulusDevice(abstract_device.DeviceQEMUAbstract):
     #
     #
     #
+    def pushOOB(self):
+        
+        ssh = self.sshConnect()
+        self.umountNBDWithOutCheck(ssh)
+        self.mountNBD(ssh)
+        ftp_client = ssh.open_sftp()
+
+        print(self._path)
+        try:
+            ftp_client.put(localpath=(str(self._path)),remotepath=(str("/mnt/disk/etc/network/interfaces")))
+        except Exception as e:
+            print("[CumulusDevice - pushOOB] error during sftp put transfert.")
+            print(e)
+
+        self.umountNBD(ssh)
+        ftp_client.close()
+        ssh.close()
+
+    # ------------------------------------------------------------------------------------------------------------
+    #
+    #
+    #
     def pushConfig(self):
         configFiles = [f for f in listdir(self._path) if "DS" not in f and isfile(join(self._path, f))]
         

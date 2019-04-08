@@ -191,9 +191,60 @@ class PyEVENG:
         cumulus.getConfigVerbose()
 
     # ------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def pushOOBConfiFile(self, filesToPushOnNodes:dict()):
+        """
+        This function will call xxx_device.py for push OOB configuration
+
+        Args:
+            param1 (str): EVE-NG lab name
+            param1 (str): Node name
+            param3 (str): Path to file to push
+        """
+        print("[PyEVENG - pushOOBConfiFile]")
+        for device in filesToPushOnNodes['devices']:
+            print(device)
+            nodeImage, nodeID = self.getNodeImageAndNodeID(
+                device['labname'], device['hostname'])
+
+            if "CUMULUS" in nodeImage:
+                self.pushCumulusOOB(
+                    device['config'], device['labname'], device['hostname'], nodeID)
+            
+
+    def pushCumulusOOB(self, pathToConfigFileOOB, labName, nodeName, nodeID):
+
+        print("[PyEVENG - pushCumulusOOB]")
+        cumulus = cumulus_device.CumulusDevice(
+            self._ipAddress, self._root, self._password, pathToConfigFileOOB,
+            self._pod, labName, self.getLabID(labName), nodeName, nodeID)
+
+        cumulus.pushOOB()
+
+    # ------------------------------------------------------------------------------------------
     # Getters (project, labs, node, config, ...)
     # Using REST API only
     
+    def getNodeImageAndNodeID(self,labName:str(), nodeName:str()) -> str():
+        """
+        This function will return a string that contains image type of nodes given in parameter
+
+        Args:
+            param1 (str): EVE-NG lab name
+            param1 (str): Node name
+
+        Returns:
+            str: Node image type
+        """
+        allNodesID = self.getLabNodesID(labName)
+        allNodes = self.getLabNodes(labName)
+        for node in allNodes['data'].values():
+            if node['name'] == nodeName:
+                return node['image'].upper(), node['id']
+
+
     def getLabTopology(self, labName):
         """
         This function will return a JSON that contains informations about labs topology

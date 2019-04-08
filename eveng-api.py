@@ -95,13 +95,14 @@ def pjson(jsonPrint):
 @click.command()
 @click.option('--create', default="#", help='Path to yaml file that contains lab to create.')
 @click.option('--deploy', default="#", help='Path to yaml file that contains topology to deploy.')
+@click.option('--oob', default="#", help='Path to yaml file that contains path to VM info, path to file config and devices.')
 @click.option('--config', default="#", help='Path to directory that contains nodes configuration files.')
 @click.option('--start', default="#", help='Labname you want to start')
 @click.option('--modify', default="#", help='Path to Ansible playbooks to execute.')
 @click.option('--backup', default="#", help='Path to yaml file that contains informations about backups.')
 @click.option('--stop', default="#", help='Labname you want to stop')
 @click.option('--remove', default="#", help='Labname you want to remove')
-def main(create, deploy, config, start, modify, backup, stop, remove):
+def main(create, deploy, oob, config, start, modify, backup, stop, remove):
 
     if create != "#":
         #create_lab(create)
@@ -115,10 +116,44 @@ def main(create, deploy, config, start, modify, backup, stop, remove):
         deploy_all(deploy)
         exit(EXIT_SUCCESS)
 
+    if oob != "#":
+        pushOOBConf(oob)
+        exit(EXIT_SUCCESS)
+
+
     if backup != "#":
         backup_lab(backup)
         exit(EXIT_SUCCESS)
+
+    if start != "#":
+        i = start.find(',')
+        print(start[:i])
+
+        vmInfo = open_all(str(start[i+1:]))
+        try:
+            api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'], vmInfo['https_port'],
+                              vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'])
+            api.startLabAllNodes(start[:i])
+        except Exception as e:
+            print(e)
     
+    
+    exit(EXIT_SUCCESS)
+# -----------------------------------------------------------------------------------------------------------------------------
+#### Push Out-of-Band configuration ####
+def pushOOBConf(path):
+    ymlF, vmInfo = open_files(path)
+
+    try:
+        api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'], vmInfo['https_port'],
+                              vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'])
+        
+        api.pushOOBConfiFile(ymlF)
+    except Exception as e:
+        print(e)
+
+
+
 # -----------------------------------------------------------------------------------------------------------------------------
 #### Create a Lab based on a YAML File ####
 def create_lab(labToCreate, vmInfo):
