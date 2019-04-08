@@ -57,6 +57,29 @@ except ImportError as importError:
     print("Error import eveng-yaml-validation")
     print(importError)
     exit(EXIT_FAILURE)
+######################################################
+#
+# Constantes
+#
+NETWORK_TEMPLATE = dict({
+    "@color": "",
+    "@id": 99999,
+    "@label": "",
+    "@left": 519,
+    "@linkstyle": "Straight",
+    "@name": "Net-Spine01iface_1",
+    "@style": "Solid",
+    "@top": 193,
+    "@type": "bridge",
+    "@visibility": 0
+})
+
+INTERFACE_TEMPLATE = dict({
+    '@id': 99999,
+    '@name': 'eth0',
+    '@type': 'ethernet',
+    '@network_id': 99999
+})
 
 ######################################################
 #
@@ -111,18 +134,20 @@ def create_lab(labToCreate, vmInfo):
 # -----------------------------------------------------------------------------------------------------------------------------
 #### Create a Topology (devices, links) based on a YAML File ####
 def deploy_all (path):
-    yml, vmInfo = open_files(path)
+    ymlF, vmInfo = open_files(path)
 
-    create_lab(yml, vmInfo)
-    deploy_device(yml, vmInfo)
-    deploy_links(yml, vmInfo)
+    create_lab(ymlF, vmInfo)
+    deploy_device(ymlF, vmInfo)
+    old_deploy_links(ymlF, vmInfo)
+    
+    
     
 
 def deploy_device(deviceToDeploy, vmInfo):
     # deviceToDeploy, vmInfo = open_files(path)
     print("[deploy_device]")
     print(deviceToDeploy['project'])
-    
+
     api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'], vmInfo['https_port'],
                               vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'])
     api.addNodesToLab(deviceToDeploy['devices'],
@@ -137,54 +162,6 @@ def deploy_links(linksToDeploy, vmInfo):
 
     api.addNetworksLinksToLab(linksToDeploy['links'],
                               linksToDeploy['project']['name']+".unl")
-
-
-# -----------------------------------------------------------------------------------------------------------------------------
-#### Backup a Lab based on a YAML File ####
-def backup_lab(path):
-    labtoBackup, vmInfo = open_files(path)
-
-    try:
-        api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'],
-                              vmInfo['https_port'], vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'])
-        
-        api.getBackupNodesConfig(labtoBackup)
-    except Exception as e:
-        print(e)
-# -----------------------------------------------------------------------------------------------------------------------------
-#### Open a YAML File and open VM_path contains into YAML file ####
-def open_files(path):
-    with open(path, 'r') as s1:
-        try:
-            lab = yaml.load(s1)
-            with open(lab['path_vm_info'], 'r') as s2:
-                vmInfo = yaml.load(s2)
-        except yaml.YAMLError as exc:
-            print(exc)
-    
-    return lab, vmInfo
-
-# -----------------------------------------------------------------------------------------------------------------------------
-#### Create a Lab based on a YAML File ####
-def open_all(path):
-    with open(path, 'r') as s1:
-        try:
-            lab = yaml.load(s1)
-        except yaml.YAMLError as exc:
-            print(exc)
-    return lab
-
-
-# -----------------------------------------------------------------------------------------------------------------------------
-#### Write config into a file ####
-def write_in_file(config: str(), path: str()):
-    file = open(path, "w")
-    file.write(config)
-    file.close()
-
-
-if __name__ == "__main__":
-    main()
 
 
 def old_deploy_links(linksToDeploy, vmInfo):
@@ -271,3 +248,52 @@ def old_deploy_links(linksToDeploy, vmInfo):
 
     api.replaceUNL(
         linksToDeploy['project']['name'], str(linksToDeploy['path_to_save']+linksToDeploy['project']['name']+".unl"))
+
+# -----------------------------------------------------------------------------------------------------------------------------
+#### Backup a Lab based on a YAML File ####
+def backup_lab(path):
+    labtoBackup, vmInfo = open_files(path)
+
+    try:
+        api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'],
+                              vmInfo['https_port'], vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'])
+        
+        api.getBackupNodesConfig(labtoBackup)
+    except Exception as e:
+        print(e)
+# -----------------------------------------------------------------------------------------------------------------------------
+#### Open a YAML File and open VM_path contains into YAML file ####
+def open_files(path):
+    with open(path, 'r') as s1:
+        try:
+            lab = yaml.load(s1)
+            with open(lab['path_vm_info'], 'r') as s2:
+                vmInfo = yaml.load(s2)
+        except yaml.YAMLError as exc:
+            print(exc)
+    
+    return lab, vmInfo
+
+# -----------------------------------------------------------------------------------------------------------------------------
+#### Create a Lab based on a YAML File ####
+def open_all(path):
+    with open(path, 'r') as s1:
+        try:
+            lab = yaml.load(s1)
+        except yaml.YAMLError as exc:
+            print(exc)
+    return lab
+
+
+# -----------------------------------------------------------------------------------------------------------------------------
+#### Write config into a file ####
+def write_in_file(config: str(), path: str()):
+    file = open(path, "w")
+    file.write(config)
+    file.close()
+
+
+if __name__ == "__main__":
+    main()
+
+

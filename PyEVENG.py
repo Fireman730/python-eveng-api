@@ -15,6 +15,15 @@ EXIT_FAILURE = 1
 # Import Library
 #
 try:
+    from os import listdir
+    from os.path import isfile, join
+    from os import mkdir
+except ImportError as importError:
+    print("Error import listdir")
+    print(importError)
+    exit(EXIT_FAILURE)
+
+try:
     import cumulus_device
 except ImportError as importError:
     print("Error import cumulus_device")
@@ -55,29 +64,6 @@ except ImportError as importError:
     print("Error import sphinx")
     print(importError)
     exit(EXIT_FAILURE)
-######################################################
-#
-# Constantes
-#
-NETWORK_TEMPLATE = dict({
-    "@color": "",
-    "@id": 99999,
-    "@label": "",
-    "@left": 519,
-    "@linkstyle": "Straight",
-    "@name": "Net-Spine01iface_1",
-    "@style": "Solid",
-    "@top": 193,
-    "@type": "bridge",
-    "@visibility": 0
-})
-
-INTERFACE_TEMPLATE = dict({
-    '@id': 99999,
-    '@name': 'eth0',
-    '@type': 'ethernet',
-    '@network_id': 99999
-})
 
 ######################################################
 #
@@ -152,6 +138,18 @@ class PyEVENG:
             
         nodeImage = nodeImage.upper()
 
+        try:
+            mkdir(path+"/"+project_name)
+        except OSError as e:
+            print("[PyEVENG - getBackupConfig] create project folder", e)
+
+        try:
+            mkdir(path+"/"+project_name+"/"+nodeName)
+        except OSError as e:
+            print("[PyEVENG - getBackupConfig] create node folder", e)
+
+        path = path+"/"+project_name+"/"+nodeName
+    
         if "CUMULUS" in nodeImage :
             self.getCumulusBackup(path, project_name, nodeName, nodeID)
 
@@ -314,6 +312,8 @@ class PyEVENG:
         content = json.loads(response.content)["data"]
 
         nodesName = list()
+        if content.__len__() == 0:
+            return nodesName
         for key, val in content.items():
             nodesName.append(val["name"])
             
@@ -620,12 +620,19 @@ class PyEVENG:
         """
         print("[PyEVENG addNodeToLab] -", nodesToAdd['name'], "is deploying...")
 
-        self.lock_lab()
-        response = requests.post(
-            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes", data=json.dumps(nodesToAdd), cookies=self._cookies, verify=False)
+        nodeNameAlreadyInLab = self.getLabNodesName(labName)
+    
+        if nodesToAdd['name'] in nodeNameAlreadyInLab:
+            print("[PyEVENG addNodeToLab] - a node with the name \"",
+                  nodesToAdd['name'], "\" is already deployed!")
 
-        self.requestsError(response.status_code)
-        print("[PyEVENG addNodeToLab] -", nodesToAdd['name'], "has been deployed!")
+        else:
+            #self.lock_lab()
+            response = requests.post(
+                self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes", data=json.dumps(nodesToAdd), cookies=self._cookies, verify=False)
+
+            self.requestsError(response.status_code)
+            print("[PyEVENG addNodeToLab] -", nodesToAdd['name'], "has been deployed!")
     
     def addNodesToLab(self, nodesToAdd: dict(), labName:str()):
         """
@@ -639,6 +646,12 @@ class PyEVENG:
         for node in nodesToAdd:
             self.addNodeToLab(node, labName)
 
+        if nodesToAdd.__len__() == self.getLabNodesName(labName).__len__():
+            print("[PyEVENG addNodesToLab] - all nodes have been deployed!")
+        else:
+            print("[PyEVENG addNodesToLab] - some nodes haven't been deployed!")
+            raise Exception("[PyEVENG addNodesToLab] - Nodes deployment error !")
+        
 
     def addNetworksToLab(self, networksToAdd: dict(), labName:str()):
         """
@@ -649,10 +662,15 @@ class PyEVENG:
             param2 (str): Labname
         """
         data = dict()
+
+        print(self.getLabTopology(labName))
+
         for link in networksToAdd:
             data['name'] = str(link['src']+"("+link['sport']+")--"+link['dst']+"("+link['dport'] + ")")
             data['type'] = str(link['network'])
             self.addNetworkToLab(data, labName)
+        
+        print(self.getLabTopology(labName))
 
     def addNetworkToLab(self, networkToAdd: dict(), labName: str()):
         """

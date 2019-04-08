@@ -14,15 +14,6 @@ EXIT_FAILURE = 1
 #
 # Import Library
 #
-try:
-    from os import listdir
-    from os.path import isfile, join
-    from os import mkdir
-except ImportError as importError:
-    print("Error import listdir")
-    print(importError)
-    exit(EXIT_FAILURE)
-
 
 try:
     import yaml
@@ -90,6 +81,11 @@ class CumulusDevice(abstract_device.DeviceQEMUAbstract):
     #
     #
     #
+    def umountNBDWithOutCheck(self, sshClient: paramiko.SSHClient):
+        for command in self._shellCommandsUmountNBD:
+            stdin, stdout, stderr = sshClient.exec_command(command)
+            o = "".join(stdout.readlines())
+
     def umountNBD(self, sshClient: paramiko.SSHClient):
         for command in self._shellCommandsUmountNBD:
             stdin, stdout, stderr = sshClient.exec_command(command)
@@ -152,21 +148,9 @@ class CumulusDevice(abstract_device.DeviceQEMUAbstract):
         ssh = self.sshConnect()
 
         print("[Cumulus Backup]",self._labName, self._nodeName)
-        self.umountNBD(ssh)
+        self.umountNBDWithOutCheck(ssh)
         self.mountNBD(ssh)        
         ftp_client = ssh.open_sftp()
-
-        try:
-            mkdir(self._path+"/"+self._labName)
-        except OSError as e:
-            print(e)
-        
-        try:
-            mkdir(self._path+"/"+self._labName+"/"+self._nodeName)
-        except OSError as e:
-            print(e)
-
-        self._path = self._path+"/"+self._labName+"/"+self._nodeName
 
         try:
             for file in commands:
