@@ -22,11 +22,11 @@ labs:
       - Leaf04
   
   # Second lab to backup
-  #- labname: BGP-as-path.unl
-  #  pod: 0
-  #  folder: Users
-  #  bck_path: /data/eveng/backup/
-  #  bck_type: simple
-  #  hostname: 
-  #    - all
+  - labname: extreme-spb-smlt.unl
+    pod: 0
+    folder: Users
+    bck_path: /Volumes/Data/gitlab/python-eveng-api/backup
+    bck_type: verbose
+    hostname: 
+      - all
     
