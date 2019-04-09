@@ -305,6 +305,24 @@ class PyEVENG:
         self.requestsError(response.status_code)
         return json.loads(response.content)["data"]["image"]
 
+    def getNodeInterfaceID(self, labName:str(), nodeID:str(), interfaceName:str()) -> str():
+        """
+        This function will return a str that contains node interface ID
+
+        Args:
+            param1 (str): EVE-NG lab name
+            param2 (str): EVE-NG node ID
+            param3 (str): Node interface name
+
+        Returns:
+            string: Node Interface ID
+        """
+        data = self.getLabNodeInterfaces(labName, nodeID)
+
+        for index, value in enumerate(data['data']['ethernet']):
+            if value['name'] == interfaceName:
+                return index
+
     def getLabNodeInterfaces(self, labName:str(), nodeID:str()) -> dict():
         """
         This function will return a JSON that contains informations about labs interfaces
@@ -316,16 +334,48 @@ class PyEVENG:
         Returns:
             json: That contains interfaces informations
         """
-        self.check_param_type_str(labName)
-        self.check_param_type_str(nodeID)
+        ##self.check_param_type_str(labName)
+        ##self.check_param_type_str(nodeID)
 
         response = requests.get(
-            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes/"+nodeID+"/interfaces", cookies=self._cookies, verify=False)
+            self._url+"/api/labs/"+self._userFolder+"/"+str(labName)+"/nodes/"+str(nodeID)+"/interfaces", cookies=self._cookies, verify=False)
         self.requestsError(response.status_code)
         return json.loads(response.content)
 
-    # def getLabNodesAddressAccessMethod(self, labName):
-    # This function is not available for the moment
+    def getLabNetworks(self, labName:str()) -> dict():
+        """
+        This function will return a JSON that contains informations about labs networks
+
+        Args:
+            param1 (str): EVE-NG lab name
+
+        Returns:
+            json: That contains networks informations
+        """
+        response = requests.get(
+            self._url+"/api/labs/"+self._userFolder+"/"+str(labName)+"/networks", cookies=self._cookies, verify=False)
+        self.requestsError(response.status_code)
+        return json.loads(response.content)
+
+
+    def getLabNetworksName(self, labName:str()) -> list():
+        """
+        This function will return a LIST that contains all network name in lab given in parameter
+
+        Args:
+            param1 (str): EVE-NG lab name
+
+        Returns:
+            list: That contains networks name
+        """
+        data = self.getLabNetworks(labName)
+
+        networkName = list()
+
+        for network in data['data']:
+            networkName.append(data['data'][network]['name'])
+
+        return networkName
 
     def getLabNodesAccessMethod(self, labName:str()) -> dict():
         """
@@ -341,7 +391,7 @@ class PyEVENG:
             dict: That contains key = hostname, value = access method
         """
 
-        self.check_param_type_str(labName)
+        #self.check_param_type_str(labName)
 
         response = requests.get(
             self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes", cookies=self._cookies, verify=False)
@@ -365,7 +415,7 @@ class PyEVENG:
             list: That contains all node ID
         """
 
-        self.check_param_type_str(labName)
+        #self.check_param_type_str(labName)
 
         response = requests.get(
             self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes", cookies=self._cookies, verify=False)
@@ -389,7 +439,7 @@ class PyEVENG:
             list: That contains all node name
         """
 
-        self.check_param_type_str(labName)
+        #self.check_param_type_str(labName)
 
         response = requests.get(
             self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes", cookies=self._cookies, verify=False)
@@ -415,7 +465,7 @@ class PyEVENG:
             json: That contains nodes informations
         """
 
-        self.check_param_type_str(labName)
+        #self.check_param_type_str(labName)
 
         response = requests.get(
             self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes", cookies=self._cookies, verify=False)
@@ -454,8 +504,8 @@ class PyEVENG:
             json: That contains nodes informations
         """
 
-        self.check_param_type_str(labName)
-        self.check_param_type_str(nodeID)
+        #self.check_param_type_str(labName)
+        #self.check_param_type_str(nodeID)
 
         response = requests.get(
             self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes/"+nodeID, cookies=self._cookies, verify=False)
@@ -473,7 +523,7 @@ class PyEVENG:
             str: That contains lab description
         """
 
-        self.check_param_type_str(labName)
+        #self.check_param_type_str(labName)
 
         response = self.getLab(labName)
         return response["data"]["description"]
@@ -489,7 +539,7 @@ class PyEVENG:
             str: That contains lab author
         """
 
-        self.check_param_type_str(labName)
+        #self.check_param_type_str(labName)
 
         response = self.getLab(labName)
         return response["data"]["author"]
@@ -505,7 +555,7 @@ class PyEVENG:
             str: That contains lab ID
         """
 
-        self.check_param_type_str(labName)
+        #self.check_param_type_str(labName)
 
         response = self.getLab(labName)
         return response["data"]["id"]
@@ -520,7 +570,7 @@ class PyEVENG:
         Returns:
             json: That contains lab informations
         """            
-        self.check_param_type_str(labName)
+        #self.check_param_type_str(labName)
 
         response = requests.get(
             self._url+"/api/labs/"+self._userFolder+"/"+labName, cookies=self._cookies, verify=False)
@@ -576,7 +626,7 @@ class PyEVENG:
             param1 (str): EVE-NG lab name
         """
 
-        self.check_param_type_str(labName)
+        #self.check_param_type_str(labName)
 
         nodesID = self.getLabNodesID(labName)
 
@@ -621,7 +671,7 @@ class PyEVENG:
 
         """
 
-        self.check_param_type_str(labName)
+        #self.check_param_type_str(labName)
 
         nodesID = self.getLabNodesID(labName)
 
@@ -762,34 +812,7 @@ class PyEVENG:
             print("[PyEVENG addNodesToLab] - some nodes haven't been deployed!")
             raise Exception("[PyEVENG addNodesToLab] - Nodes deployment error !")
         
-
-    def addNetworksToLab(self, networksToAdd: dict(), labName:str()):
-        """
-        This function add some network to a Lab
-
-        Args:
-            param1 (dict): Nodes Informamations
-            param2 (str): Labname
-        """
-        data = dict()
-
-        print(self.getLabTopology(labName))
-
-        for link in networksToAdd:
-            if link['dst'] == "OOB-NETWORK":
-                data['name'] = str("OOB-NETWORK")
-            else:
-                data['name'] = str(link['src']+"("+link['sport']+")--"+link['dst']+"("+link['dport'] + ")")
-
-            data['type'] = str(link['network'])
-            data['visibility'] = 1
-            networkID = self.addNetworkToLab(data, labName)
-            # self.setNetworkVisibilityTo0(labName, networkID)
-
-            self.addLinkToLab
-        
-        print(self.getLabTopology(labName))
-
+    
     def setNetworkVisibilityTo0(self, network: dict(), labName: str()):
         """
         This function will set network visibility to 0
@@ -803,6 +826,32 @@ class PyEVENG:
             response = requests.put(
                 self._url+"/api/labs/"+self._userFolder+"/"+str(labName)+"/networks/"+str(networkID['id']), data="{\"visibility\":0}", cookies=self._cookies, verify=False)
             self.requestsError(response.status_code)
+
+    
+    def addNetworksToLab(self, networksToAdd: dict(), labName:str()):
+        """
+        This function add some network to a Lab
+
+        Args:
+            param1 (dict): Nodes Informamations
+            param2 (str): Labname
+        """
+        data = dict()
+        networkName = self.getLabNetworksName(labName)
+
+        for link in networksToAdd:
+            if link['dst'] == "OOB-NETWORK":
+                data['name'] = str("OOB-NETWORK")
+            else:
+                data['name'] = str(link['src']+"("+link['sport']+")--"+link['dst']+"("+link['dport'] + ")")
+
+            if data['name'] not in networkName:
+                data['type'] = str(link['network'])
+                data['visibility'] = 1
+                self.addNetworkToLab(data, labName)
+            else:
+                print("[PyEVENG addNetworkToLab] -",
+                      data['name'], " is already deployed!")
 
 
     def addNetworkToLab(self, networkToAdd: dict(), labName: str()) -> str():
@@ -852,9 +901,6 @@ class PyEVENG:
             param1 (dict): Nodes Informamations
             param2 (str): Labname
         """
-        data = dict()
-        nodeSrcID = str()
-        nodeDstID = str()
         for link in interfaceToAdd:
             if link['dst'] == "OOB-NETWORK":
                 for oobInterface in link['src']:
@@ -862,9 +908,9 @@ class PyEVENG:
 
             else:
                 self.addLinkToLab(link['id'], self.getNodeIDbyNodeName(labName, link['src']),
-                                  link['sport'][-1:], labName)
+                                  self.getNodeInterfaceID(labName, self.getNodeIDbyNodeName(labName, link['src']), link['sport']), labName)
                 self.addLinkToLab(link['id'], self.getNodeIDbyNodeName(labName, link['dst']),
-                                  link['dport'][-1:], labName)
+                                  self.getNodeInterfaceID(labName, self.getNodeIDbyNodeName(labName, link['dst']), link['dport']), labName)
 
         
     def addLinkToLab(self, networkID: str(), nodeID:str(), interfaceID:str(), labName: str()):
@@ -880,12 +926,11 @@ class PyEVENG:
             param2 (str): Node interface ID
             param3 (str): Network ID
         """
-        print("[PyEVENG addNetworkToLab] -",
+        print("[PyEVENG addLinkToLab] -",
               nodeID, interfaceID, "is deploying...")
 
         print(self._url+"/api/labs/"+self._userFolder+"/" +
-              str(labName)+"/nodes/"+str(nodeID)+"/interfaces")
-        print("{\""+str(interfaceID)+"\":\""+str(networkID)+"\"}")
+              str(labName)+"/nodes/"+str(nodeID)+"/interfaces - data={\""+str(interfaceID)+"\":\""+str(networkID)+"\"}")
         self.lock_lab()
         response = requests.put(
             self._url+"/api/labs/"+self._userFolder+"/"+str(labName)+"/nodes/"+str(nodeID)+"/interfaces", data="{\""+str(interfaceID)+"\":\""+str(networkID)+"\"}", cookies=self._cookies, verify=False)
