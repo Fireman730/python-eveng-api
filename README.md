@@ -123,6 +123,7 @@ You will able to run as follow :
 # --> --config is interessting if you want recreate your production network
 # in a virtual environnement. Based on your backup you can rebuild your network.
 # When your network is up, you can run Ansible/Chef/Python/Salt scripts.
+# In this case --config has to deploy network for joining nodes
 
 # Case 2 start nodes and deploy config via Ansible
 ### 2b. 
