@@ -118,6 +118,11 @@ You will able to run as follow :
 # Case 1 copy config file into your devices before your lab start
 ### 2a. Copy your config into dev
 ./eveng-api.py --config=/path/to/backup
+./eveng-api.py --ansible=/path/to/playbooks
+
+# --> --config is interessting if you want recreate your production network
+# in a virtual environnement. Based on your backup you can rebuild your network.
+# When your network is up, you can run Ansible/Chef/Python/Salt scripts.
 
 # Case 2 start nodes and deploy config via Ansible
 ### 2b. 
@@ -125,11 +130,12 @@ You will able to run as follow :
 ## your laptop/server virtual interface. You can run Ansible script on OOB net.
 ./eveng-api.py --oob=/path/to/oob.yml
 ./eveng-api.py --ansible=/path/to/playbooks
-# ---------------------------------------------------------------------------
 
-#
-# Execute your Ansible playbooks modify test ...
-#
+# --> --oob is interessting if you want test your scripts for deploy your network
+# from scratch. --oob will configure your out-of-band for access to your devices
+# and run your Ansible/Chef/Python/Salt scripts
+
+# ---------------------------------------------------------------------------
 
 # 3. If your network works fine backup nodes !
 ./eveng-api.py --backup=/path/where/backup 
