@@ -103,25 +103,27 @@ You will able to run as follow :
 
 ```shell
 
-# 1. Create your Lab
-./eveng-api.py --create=/path/to/yml/lab
+# ---------------------------------------------------------------------------
+### 0. Create your Lab - USELESS La creation can be insert into deploy yaml file.
+##./eveng-api.py --create=/path/to/yml/lab
 
-# 2. Deploy your topology on your lab
+# 1. Deploy your topology on your lab
 ./eveng-api.py --deploy=/path/to/yml/topology
+
+# This step is automatic
+# /!\ The directory VM will not be created if the VM have never been started
+./eveng-api.py --start=labName.unl,/path/to/vm/info/yaml/file.yml
 
 # ---------------------------------------------------------------------------
 # Case 1 copy config file into your devices before your lab start
-### 3. Copy your config into dev
+### 2a. Copy your config into dev
 ./eveng-api.py --config=/path/to/backup
 
-### 4. Start nodes
-./eveng-api.py --start
-
 # Case 2 start nodes and deploy config via Ansible
-### 3. Start nodes
-./eveng-api.py --start
-
-### 4. 
+### 2b. 
+## Create your OOB network - you need to create a network that is mapped on
+## your laptop/server virtual interface. You can run Ansible script on OOB net.
+./eveng-api.py --oob=/path/to/oob.yml
 ./eveng-api.py --ansible=/path/to/playbooks
 # ---------------------------------------------------------------------------
 
@@ -129,13 +131,13 @@ You will able to run as follow :
 # Execute your Ansible playbooks modify test ...
 #
 
-# 5. If your network works fine backup nodes !
+# 3. If your network works fine backup nodes !
 ./eveng-api.py --backup=/path/where/backup 
 
-# 6. Stop nodes
-./eveng-api.py --stop
+# 4. Stop nodes
+./eveng-api.py --stop=labName.unl,/path/to/vm/info/yaml/file.yml
 
-# 7. Remove lab
-./eveng-api.py --remove
+# 5. Remove lab
+./eveng-api.py --remove=labName.unl,/path/to/vm/info/yaml/file.yml
 
 ```
