@@ -249,7 +249,7 @@ def old_deploy_links(linksToDeploy, vmInfo):
         print("***************************************")
         for node in data['lab']['topology']['nodes']['node']:
             if link['dst'] == "OOB-NETWORK":
-                for nodeConnectedToOOB in éink['src']:
+                for nodeConnectedToOOB in link['src']:
                     newInterface = dict(INTERFACE_TEMPLATE)
                     newInterface['@network_id'] = link['id']
                     newInterface['@id'] = nodeConnectedToOOB['port'][-1:]
