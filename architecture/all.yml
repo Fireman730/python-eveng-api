@@ -1,5 +1,5 @@
 ---
-path_vm_info: /Volumes/Data/gitlab/python-eveng-api/VM/VM_informations.yml
+path_vm_info: /Volumes/Data/gitlab/python-eveng-api/vm/vm_info.yml
 path_to_save: /Volumes/Data/gitlab/python-eveng-api/architecture/
 project:
   path: /Users/
@@ -20,9 +20,9 @@ devices:
     left: 45%
     top: 20%
     ram: 1024
-    console: telnet 
+    console: telnet
     cpu: 1
-    ethernet: 8 
+    ethernet: 8
     uuid: 641a4800-1b19-427c-ae87-5555590b7790
   - type: qemu
     template: cumulus
@@ -34,10 +34,24 @@ devices:
     left: 55%
     top: 20%
     ram: 1024
-    console: telnet 
+    console: telnet
     cpu: 1
-    ethernet: 8 
+    ethernet: 8
     uuid: 641a4800-1b19-427c-ae87-6666690b7790
+  - type: qemu
+    template: cumulus
+    config: Unconfigured
+    delay: 0
+    icon: router.png
+    image: cumulus-vx-3.7.3
+    name: Spine03
+    left: 65%
+    top: 20%
+    ram: 1024
+    console: telnet
+    cpu: 1
+    ethernet: 8
+    uuid: 641a4800-1b19-427c-ae87-6666690b7799
   - type: qemu
     template: cumulus
     config: Unconfigured
@@ -48,9 +62,9 @@ devices:
     left: 35%
     top: 35%
     ram: 1024
-    console: telnet 
+    console: telnet
     cpu: 1
-    ethernet: 8 
+    ethernet: 8
     uuid: 641a4800-1b19-427c-ae87-1111190b7790
   - type: qemu
     template: cumulus
@@ -62,9 +76,9 @@ devices:
     left: 45%
     top: 35%
     ram: 1024
-    console: telnet 
+    console: telnet
     cpu: 1
-    ethernet: 8 
+    ethernet: 8
     uuid: 641a4800-1b19-427c-ae87-2222290b7790
   - type: qemu
     template: cumulus
@@ -76,9 +90,9 @@ devices:
     left: 55%
     top: 35%
     ram: 1024
-    console: telnet 
+    console: telnet
     cpu: 1
-    ethernet: 8 
+    ethernet: 8
     uuid: 641a4800-1b19-427c-ae87-3333390b7790
   - type: qemu
     template: cumulus
@@ -90,10 +104,24 @@ devices:
     left: 65%
     top: 35%
     ram: 1024
-    console: telnet 
+    console: telnet
     cpu: 1
-    ethernet: 8 
+    ethernet: 8
     uuid: 641a4800-1b19-427c-ae87-4444490b7790
+  - type: qemu
+    template: cumulus
+    config: Unconfigured
+    delay: 0
+    icon: router.png
+    image: cumulus-vx-3.7.3
+    name: Leaf05
+    left: 75%
+    top: 35%
+    ram: 1024
+    console: telnet
+    cpu: 1
+    ethernet: 8
+    uuid: 641a4800-1b19-427c-ae87-4444490b7733
 
 links:
   - id: 1
@@ -132,11 +160,19 @@ links:
     type: ethernet
     # if it's a connexion between 2 devices, use bridge
     network: bridge
+    src: Spine01
+    sport: swp5
+    dst: Leaf05
+    dport: swp1
+  - id: 6
+    type: ethernet
+    # if it's a connexion between 2 devices, use bridge
+    network: bridge
     src: Spine02
     sport: swp4
     dst: Leaf04
     dport: swp2
-  - id: 6
+  - id: 7
     type: ethernet
     # if it's a connexion between 2 devices, use bridge
     network: bridge
@@ -144,7 +180,7 @@ links:
     sport: swp3
     dst: Leaf03
     dport: swp2
-  - id: 7
+  - id: 8
     type: ethernet
     # if it's a connexion between 2 devices, use bridge
     network: bridge
@@ -152,7 +188,7 @@ links:
     sport: swp2
     dst: Leaf02
     dport: swp2
-  - id: 8
+  - id: 9
     type: ethernet
     # if it's a connexion between 2 devices, use bridge
     network: bridge
@@ -160,3 +196,51 @@ links:
     sport: swp1
     dst: Leaf01
     dport: swp2
+  - id: 10
+    type: ethernet
+    # if it's a connexion between 2 devices, use bridge
+    network: bridge
+    src: Spine02
+    sport: swp5
+    dst: Leaf05
+    dport: swp2
+  - id: 11
+    type: ethernet
+    # if it's a connexion between 2 devices, use bridge
+    network: bridge
+    src: Spine03
+    sport: swp5
+    dst: Leaf05
+    dport: swp3
+  - id: 12
+    type: ethernet
+    # if it's a connexion between 2 devices, use bridge
+    network: bridge
+    src: Spine03
+    sport: swp4
+    dst: Leaf04
+    dport: swp3
+  - id: 13
+    type: ethernet
+    # if it's a connexion between 2 devices, use bridge
+    network: bridge
+    src: Spine03
+    sport: swp3
+    dst: Leaf03
+    dport: swp3
+  - id: 14
+    type: ethernet
+    # if it's a connexion between 2 devices, use bridge
+    network: bridge
+    src: Spine03
+    sport: swp2
+    dst: Leaf02
+    dport: swp3
+  - id: 15
+    type: ethernet
+    # if it's a connexion between 2 devices, use bridge
+    network: bridge
+    src: Spine03
+    sport: swp1
+    dst: Leaf01
+    dport: swp3
