@@ -160,3 +160,15 @@ links:
     sport: swp1
     dst: Leaf01
     dport: swp2
+    #
+    # Out-Of-Band connection
+    #
+  - id: 9
+    type: ethernet
+    network: pnet4
+    src: Spine01
+    sport: eth0
+    dst: oobNet
+    dport: oobPort
+    
+    
