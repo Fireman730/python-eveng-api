@@ -2,6 +2,8 @@
 
 ###### Development in progress ! 
 
+
+## Project presentation
 Every days you hear about "CI/CD", pipeline or DevOps.
 Often pipeline is defined as follow 
 
@@ -51,55 +53,43 @@ Example based on Cumulus.
 This repo contains functions for Cumulus Network. If you need more device types you need implement functions for them.
 
 **Your help is welcome**
-### Become a contributor !! 
+##### Become a contributor !! 
 
-The steps are the following :
+## Project Structure
 
-1. You create a YAML file that contains all informations about your EVE-NG VM
-* IP
-* http username and password
-* root username and password
-* ...
+- ```eve-ng.py``` is the script with which you will interact and run commands. 
 
-2. You create a YAML file that contains informations on the project that you want create
-* labname
-* author
-* path 
-...
+- ```PyEVENG.py``` is a Class for interact with your VM via REST API or SSH.
 
-3. You create a YAML file that describes your lab infrastructure
-* 2 spines with 4 leaves
-* Spine01 swp1 is connected to Leaf01 port swp1
-* Spine02 swp4 is connected to Leaf04 port swp2
-* ... 
-* 
+- ```abstract_device.py``` some actions are differents for each devices.
+Exampple :
+If you want backup a device you need to backup "show run" for Cisco but,
+for a Cumulus Network device you nned to backup a lot of files in ```/etc`/```.
+This abstract class implement functions common to all devices and declare as
+```@abstractmethod``` functions that have to be implement for each devices
 
-4. You write a YAML file that contains informations about how and where save your device configurations
+- ```xxx_devcice.py``` (```cumulus_devcice.py```, ```extreme_devcice.py```, ...)
+are some method implementations and specifications for execute method
+Example ```getConf()```. In Cumulus specification this function will backup 
+necessary files in ```/etc/``` and for Extreme it will backup ```config.cfg```
+It is important to developp a class per device type.
+(There are some modifications to do in PyEVENG.py file - this part need to be 
+rethought)
 
-5. 
-    You have a configuration files (Example files in /etc/... for Cumulus or a "show run" file for Cisco"
-    -> In this case you can copy this configuration directly on your device BEFORE they start
-    
-    You have Ansible plabooks that will deploy will deploy your network 
-    -> In this case you will deploy your plabooks AFTER your nodes started
+- ```eveng-yaml-validation.py``` is used for validate your yaml topology files.
+For example this script avoids that you have 6 nodes called Leaf01...
 
-6. EVE-NG nodes Start
+- ```./vm/vm_info.yml```  describes your EVE-NG VM (ssh user/pass, http user/pass, IP address, ...)
 
-7. Execute your task on them
-    --> Playbooks that add a VLAN
-    --> Playbooks that modify your BGP configuration
-    --> Plabooks that configure BFD through your network
-    
-    SURE your plabook need to be test locally before run your CI/CD pipeline
+- ```./architecture/all.yml``` contains informations about your lab that you want create
+It contains devices and links between them that they have to be creat
 
-8. EVE-NG nodes Stop
+- ```lab_to_backup.yml``` contains informations about lab backup.
+If you want backup your devices after modifications.
 
-9. Remove you lab
+- ```./commands/*``` contains specific commands for device types (Cumulus, Extreme, ...)
 
-For pilote these steps you can use tools as Jenkins and Bamboo.
-Idea is create tasks that will run each step and verify that the previous step worked before execute the next one
-
-You will able to run as follow :
+## Run the script
 
 ```shell
 
