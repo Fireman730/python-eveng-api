@@ -228,8 +228,13 @@ def old_deploy_links(linksToDeploy, vmInfo):
     for link in linksToDeploy['links']:
         newNetwork = dict(NETWORK_TEMPLATE)
         newNetwork['@id'] = link['id']
-        newNetwork['@name'] = str(
-            link['src']+"("+link['sport']+")--"+link['dst']+"("+link['dport'] + ")")
+        newNetwork['@type'] = link['network']
+        
+        if link['dst'] == "OOB-NETWORK":
+            newNetwork['@name'] = str("OOB-NETWORK")
+        else:
+            newNetwork['@name'] = str(
+                link['src']+"("+link['sport']+")--"+link['dst']+"("+link['dport'] + ")")
 
         try:
             type(data['lab']['topology']['networks'])
@@ -243,7 +248,21 @@ def old_deploy_links(linksToDeploy, vmInfo):
 
         print("***************************************")
         for node in data['lab']['topology']['nodes']['node']:
-            if (node['@name'] == link['src']):
+            if link['dst'] == "OOB-NETWORK":
+                for nodeConnectedToOOB in link['src']:
+                    newInterface = dict(INTERFACE_TEMPLATE)
+                    newInterface['@network_id'] = link['id']
+                    newInterface['@id'] = nodeConnectedToOOB['port'][-1:]
+                    newInterface['@name']=str(nodeConnectedToOOB['port'])+"-OOB"
+
+                    try:
+                        type(node['interface'])
+                    except KeyError:
+                        node['interface'] = list()
+
+                    node['interface'].append(newInterface)
+
+            if node['@name'] == link['src'] :
                 newInterface = dict(INTERFACE_TEMPLATE)
                 newInterface['@network_id'] = link['id']
                 newInterface['@id'] = link['sport'][-1:]

@@ -244,3 +244,25 @@ links:
     sport: swp1
     dst: Leaf01
     dport: swp3
+  - id: 16
+    network: pnet4
+    src:
+      - host: Spine01
+        port: eth0
+      - host: Spine02
+        port: eth0
+      - host: Spine03
+        port: eth0
+      - host: Leaf01
+        port: eth0
+      - host: Leaf02
+        port: eth0
+      - host: Leaf03
+        port: eth0
+      - host: Leaf04
+        port: eth0
+      - host: Leaf05
+        port: eth0
+    dst: OOB-NETWORK
+    dport: oob
+   
