@@ -182,7 +182,7 @@ def deploy_all (path):
 
     create_lab(ymlF, vmInfo)
     deploy_device(ymlF, vmInfo)
-    old_deploy_links(ymlF, vmInfo)
+    deploy_links(ymlF, vmInfo)
     
     
 def deploy_device(deviceToDeploy, vmInfo):

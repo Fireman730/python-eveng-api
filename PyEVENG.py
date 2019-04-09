@@ -776,13 +776,36 @@ class PyEVENG:
         print(self.getLabTopology(labName))
 
         for link in networksToAdd:
-            data['name'] = str(link['src']+"("+link['sport']+")--"+link['dst']+"("+link['dport'] + ")")
+            if link['dst'] == "OOB-NETWORK":
+                data['name'] = str("OOB-NETWORK")
+            else:
+                data['name'] = str(link['src']+"("+link['sport']+")--"+link['dst']+"("+link['dport'] + ")")
+
             data['type'] = str(link['network'])
-            self.addNetworkToLab(data, labName)
+            data['visibility'] = 1
+            networkID = self.addNetworkToLab(data, labName)
+            # self.setNetworkVisibilityTo0(labName, networkID)
+
+            self.addLinkToLab
         
         print(self.getLabTopology(labName))
 
-    def addNetworkToLab(self, networkToAdd: dict(), labName: str()):
+    def setNetworkVisibilityTo0(self, network: dict(), labName: str()):
+        """
+        This function will set network visibility to 0
+        The network will not be show in GUI
+
+        Args:
+            param1 (str): Labname
+            param2 (str): NetworkID
+        """
+        for networkID in network:
+            response = requests.put(
+                self._url+"/api/labs/"+self._userFolder+"/"+str(labName)+"/networks/"+str(networkID['id']), data="{\"visibility\":0}", cookies=self._cookies, verify=False)
+            self.requestsError(response.status_code)
+
+
+    def addNetworkToLab(self, networkToAdd: dict(), labName: str()) -> str():
         """
         This function add some links to a Lab
 
@@ -800,6 +823,8 @@ class PyEVENG:
 
         print("[PyEVENG addNetworkToLab] -",
               networkToAdd['name'], "(",str(response.status_code),") has been deployed!")
+        
+        return (json.loads(response.content)['data']['id'])
 
     def addNetworksLinksToLab(self, interfacesToAdd: dict(), labName: str()):
         """
@@ -817,6 +842,7 @@ class PyEVENG:
         """
         self.addNetworksToLab(interfacesToAdd, labName)
         self.addLinksToLab(interfacesToAdd, labName)
+        self.setNetworkVisibilityTo0(interfacesToAdd, labName)
 
     def addLinksToLab(self, interfaceToAdd: dict(), labName: str()):
         """
@@ -830,14 +856,15 @@ class PyEVENG:
         nodeSrcID = str()
         nodeDstID = str()
         for link in interfaceToAdd:
-            print("******", link)
-            nodeSrcID = self.getNodeIDbyNodeName(labName, link['src'])
-            nodeDstID = self.getNodeIDbyNodeName(labName, link['dst'])
-            
-            self.addLinkToLab(link['id'], nodeSrcID,
-                              link['sport'][-1:], labName)
-            self.addLinkToLab(link['id'], nodeDstID,
-                              link['dport'][-1:], labName)
+            if link['dst'] == "OOB-NETWORK":
+                for oobInterface in link['src']:
+                    self.addLinkToLab(link['id'], self.getNodeIDbyNodeName(labName, oobInterface['host']), oobInterface['port'][-1:], labName)
+
+            else:
+                self.addLinkToLab(link['id'], self.getNodeIDbyNodeName(labName, link['src']),
+                                  link['sport'][-1:], labName)
+                self.addLinkToLab(link['id'], self.getNodeIDbyNodeName(labName, link['dst']),
+                                  link['dport'][-1:], labName)
 
         
     def addLinkToLab(self, networkID: str(), nodeID:str(), interfaceID:str(), labName: str()):
