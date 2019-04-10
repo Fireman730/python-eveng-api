@@ -637,6 +637,8 @@ class PyEVENG:
         """
         This function will stop a node of a lab according to lab name and node id given in parameter
 
+        https://127.0.0.1/api/labs/Users/spine-leaf.unl/nodes/2/stop/stopmode=3
+
         Args:
             param1 (str): EVE-NG lab name
             param1 (str): EVE-NG node ID
@@ -647,7 +649,7 @@ class PyEVENG:
               labName, self.getNodeNameByID(labName, nodeID), "is stopping...")
 
         response = requests.get(
-            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes/"+nodeID+"/stop", cookies=self._cookies, verify=False)
+            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes/"+nodeID+"/stop/stopmode=3", cookies=self._cookies, verify=False)
         # self.requestsError(response.status_code)
 
     def stopLabAllNodes1(self, labName):
@@ -659,7 +661,7 @@ class PyEVENG:
 
         """
         response = requests.get(
-            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes/stop", cookies=self._cookies, verify=False)
+            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes/stop/stopmode=3", cookies=self._cookies, verify=False)
 
 
     def stopLabAllNodes(self, labName):
