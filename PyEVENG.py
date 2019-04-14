@@ -832,6 +832,9 @@ class PyEVENG:
         This function will set network visibility to 0
         The network will not be show in GUI
 
+        curl -s -c /tmp/cookie -b /tmp/cookie -X PUT -d '{"visibility":0}' 
+        -H 'Content-type: application/json' http://127.0.0.1/api/labs/User1/Folder 2/Different Lab.unl/networks/1
+
         Args:
             param1 (str): Labname
             param2 (str): NetworkID
@@ -845,6 +848,9 @@ class PyEVENG:
     def addNetworksToLab(self, networksToAdd: dict(), labName:str()):
         """
         This function add some network to a Lab
+
+        curl -s -c /tmp/cookie -b /tmp/cookie -X POST -d '{"count":1,"name":"Net-R1iface_0","type":"bridge","left":441,"top":658,"visibility":1,"postfix":0}' 
+        -H 'Content-type: application/json' http://127.0.0.1/api/labs/User1/Folder 2/Different Lab.unl/networks
 
         Args:
             param1 (dict): Nodes Informamations
