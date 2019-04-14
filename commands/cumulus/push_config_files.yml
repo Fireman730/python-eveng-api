@@ -1,3 +1,4 @@
+interfaces: /mnt/disk/etc/network/
 hosts: /mnt/disk/etc/
 hostname: /mnt/disk/etc/
 passwd: /mnt/disk/etc/

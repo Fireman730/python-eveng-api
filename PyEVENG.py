@@ -194,6 +194,18 @@ class PyEVENG:
     #
     #
     #
+    def addConfigToNodesLab(self, configToDeploy:dict(), labName:str()):
+        for config in configToDeploy:
+            if config['type'] == "full":
+                cumulus = cumulus_device.CumulusDevice(
+                    self._ipAddress, self._root, self._password, config['config'],
+                    self._pod, labName, self.getLabID(labName), config['node'], self.getNodeIDbyNodeName(labName, config['node']))
+                
+                cumulus.pushConfig()
+
+
+
+
     def pushOOBConfiFile(self, filesToPushOnNodes:dict()):
         """
         This function will call xxx_device.py for push OOB configuration

@@ -175,6 +175,23 @@ def create_lab(labToCreate, vmInfo):
     except Exception as e:
         print(e)
 
+def startLab(ymlF,vmInfo):
+    try:
+        api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'], vmInfo['https_port'],
+                              vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'])
+        api.startLabAllNodes(ymlF['project']['name']+".unl")
+    except Exception as e:
+        print(e)
+
+def stopLab(ymlF, vmInfo):
+    try:
+        api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'], vmInfo['https_port'],
+                              vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'])
+        api.stopLabAllNodes(ymlF['project']['name'] + ".unl")
+    except Exception as e:
+        print(e)
+
+
 # -----------------------------------------------------------------------------------------------------------------------------
 #### Create a Topology (devices, links) based on a YAML File ####
 def deploy_all (path):
@@ -183,19 +200,40 @@ def deploy_all (path):
     create_lab(ymlF, vmInfo)
     deploy_device(ymlF, vmInfo)
     deploy_links(ymlF, vmInfo)
-    
-    
+    # start hosts for create folders
+    startLab(ymlF, vmInfo)
+    stopLab(ymlF, vmInfo)
+    deploy_config(ymlF, vmInfo)
+    startLab(ymlF, vmInfo)
+
+# -----------------------------------------------------------------------------------------------------------------------------
+#
+#
+def deploy_config(configToDeploy, vmInfo):
+    print("[deploy_config]")
+
+    api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'], vmInfo['https_port'],
+                          vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'])
+    api.addConfigToNodesLab(configToDeploy['configs'],
+                            configToDeploy['project']['name']+".unl")
+
+
+# -----------------------------------------------------------------------------------------------------------------------------
+#
+#
 def deploy_device(deviceToDeploy, vmInfo):
     # deviceToDeploy, vmInfo = open_files(path)
     print("[deploy_device]")
-    print(deviceToDeploy['project'])
+    #print(deviceToDeploy['project'])
 
     api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'], vmInfo['https_port'],
                               vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'])
     api.addNodesToLab(deviceToDeploy['devices'],
                       deviceToDeploy['project']['name']+".unl")
 
-
+# -----------------------------------------------------------------------------------------------------------------------------
+#
+#
 def deploy_links(linksToDeploy, vmInfo):
     print("[deploy_links]")
 
@@ -205,7 +243,9 @@ def deploy_links(linksToDeploy, vmInfo):
     api.addNetworksLinksToLab(linksToDeploy['links'],
                               linksToDeploy['project']['name']+".unl")
 
-
+# -----------------------------------------------------------------------------------------------------------------------------
+#
+#
 def old_deploy_links(linksToDeploy, vmInfo):
     #linksToDeploy, vmInfo = open_files(path)
     print("[deploy_links]")
@@ -353,7 +393,9 @@ def write_in_file(config: str(), path: str()):
     file.write(config)
     file.close()
 
-
+# -----------------------------------------------------------------------------------------------------------------------------
+#
+#
 if __name__ == "__main__":
     main()
 

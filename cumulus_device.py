@@ -130,6 +130,8 @@ class CumulusDevice(abstract_device.DeviceQEMUAbstract):
         for file in configFiles:
             try:
                 if file not in self._noPushConfigFiles:
+                    print("[CumulusDevice - getConfig] copy",
+                          str(self._path+"/"+file), "to", str(self._pushConfigFiles[file])+file)
                     ftp_client.put(localpath=(str(self._path+"/"+file)), remotepath=(str(self._pushConfigFiles[file])+file))
             except Exception as e:
                 print(e)
@@ -157,7 +159,7 @@ class CumulusDevice(abstract_device.DeviceQEMUAbstract):
     def getConfig(self, commands:list(), v):
         ssh = self.sshConnect()
 
-        print("[ExtremeCumulus - getConfig]", self._labName, self._nodeName)
+        print("[CumulusDevice - getConfig]", self._labName, self._nodeName)
         self.umountNBDWithOutCheck(ssh)
         self.mountNBD(ssh)        
         ftp_client = ssh.open_sftp()

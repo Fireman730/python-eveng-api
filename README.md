@@ -138,3 +138,224 @@ If you want backup your devices after modifications.
 ./eveng-api.py --remove=labName.unl,/path/to/vm/info/yaml/file.yml
 
 ```
+
+
+
+## Example
+
+A YAML file contains an architecture that describe a simple Data Center architecture
+
+* 2 Spines
+* 3 Leaves
+* Leaves are connected on Spine
+  * Leaf01 swp1 -> Spine01 swp1
+  * Leaf02 swp1 -> Spine01 swp2
+  * etc.
+
+You can find this YAML file in ```./architecture/2spines_3leafs.yml```
+
+In this YAML file I create a connexion on the Out-Of-Band network.
+
+```yaml
+- id: 9
+    network: pnet4
+    src:
+      - host: Spine01
+        port: eth0
+      - host: Spine02
+        port: eth0
+      - host: Leaf01
+        port: eth0
+      - host: Leaf02
+        port: eth0
+      - host: Leaf03
+        port: eth0
+      - host: Leaf04
+        port: eth0
+    dst: OOB-NETWORK
+    dport: oob
+```
+
+I give the directory that contains nodes configuration 
+
+```yaml
+configs:
+  - node: Spine01
+    type: full
+    config: /Volumes/Data/gitlab/python-eveng-api/backup/cumulus-spine-leaf.unl/Spine01
+  - node: Spine02
+    type: full
+    config: /Volumes/Data/gitlab/python-eveng-api/backup/cumulus-spine-leaf.unl/Spine02
+  - node: Leaf01
+    type: full
+    config: /Volumes/Data/gitlab/python-eveng-api/backup/cumulus-spine-leaf.unl/Leaf01
+  - node: Leaf02
+    type: full
+    config: /Volumes/Data/gitlab/python-eveng-api/backup/cumulus-spine-leaf.unl/Leaf02
+  - node: Leaf03
+    type: full
+    config: /Volumes/Data/gitlab/python-eveng-api/backup/cumulus-spine-leaf.unl/Leaf03
+  - node: Leaf04
+    type: full
+    config: /Volumes/Data/gitlab/python-eveng-api/backup/cumulus-spine-leaf.unl/Leaf04 
+```
+
+I run the script
+
+```bash
+./eveng-api.py --deploy=./architecture/2spines_3leafs.yml
+```
+
+Output
+
+```bash
+[create_lab]
+[PyEVENG addNodeToLab] - spine-leaf is creating...
+[PyEVENG addNodeToLab] - spine-leaf has been created...
+[deploy_device]
+[PyEVENG addNodeToLab] - Spine01 is deploying...
+[PyEVENG addNodeToLab] - Spine01 has been deployed!
+[PyEVENG addNodeToLab] - Spine02 is deploying...
+[PyEVENG addNodeToLab] - Spine02 has been deployed!
+[PyEVENG addNodeToLab] - Leaf01 is deploying...
+[PyEVENG addNodeToLab] - Leaf01 has been deployed!
+[PyEVENG addNodeToLab] - Leaf02 is deploying...
+[PyEVENG addNodeToLab] - Leaf02 has been deployed!
+[PyEVENG addNodeToLab] - Leaf03 is deploying...
+[PyEVENG addNodeToLab] - Leaf03 has been deployed!
+[PyEVENG addNodeToLab] - Leaf04 is deploying...
+[PyEVENG addNodeToLab] - Leaf04 has been deployed!
+[PyEVENG addNodesToLab] - all nodes have been deployed!
+[deploy_links]
+[PyEVENG addNetworkToLab] - Spine01(swp1)--Leaf01(swp1) is deploying...
+[PyEVENG addNetworkToLab] - Spine01(swp1)--Leaf01(swp1) ( 201 ) has been deployed!
+[PyEVENG addNetworkToLab] - Spine01(swp2)--Leaf02(swp1) is deploying...
+[PyEVENG addNetworkToLab] - Spine01(swp2)--Leaf02(swp1) ( 201 ) has been deployed!
+[PyEVENG addNetworkToLab] - Spine01(swp3)--Leaf03(swp1) is deploying...
+[PyEVENG addNetworkToLab] - Spine01(swp3)--Leaf03(swp1) ( 201 ) has been deployed!
+[PyEVENG addNetworkToLab] - Spine01(swp4)--Leaf04(swp1) is deploying...
+[PyEVENG addNetworkToLab] - Spine01(swp4)--Leaf04(swp1) ( 201 ) has been deployed!
+[PyEVENG addNetworkToLab] - Spine02(swp4)--Leaf04(swp2) is deploying...
+[PyEVENG addNetworkToLab] - Spine02(swp4)--Leaf04(swp2) ( 201 ) has been deployed!
+[PyEVENG addNetworkToLab] - Spine02(swp3)--Leaf03(swp2) is deploying...
+[PyEVENG addNetworkToLab] - Spine02(swp3)--Leaf03(swp2) ( 201 ) has been deployed!
+[PyEVENG addNetworkToLab] - Spine02(swp2)--Leaf02(swp2) is deploying...
+[PyEVENG addNetworkToLab] - Spine02(swp2)--Leaf02(swp2) ( 201 ) has been deployed!
+[PyEVENG addNetworkToLab] - Spine02(swp1)--Leaf01(swp2) is deploying...
+[PyEVENG addNetworkToLab] - Spine02(swp1)--Leaf01(swp2) ( 201 ) has been deployed!
+[PyEVENG addNetworkToLab] - OOB-NETWORK is deploying...
+[PyEVENG addNetworkToLab] - OOB-NETWORK ( 201 ) has been deployed!
+[PyEVENG addLinkToLab] - 1 1 is deploying...
+https://172.16.194.239/api/labs/Users/spine-leaf.unl/nodes/1/interfaces - data={"1":"1"}
+[PyEVENG addLinkToLab] - 3 1 is deploying...
+https://172.16.194.239/api/labs/Users/spine-leaf.unl/nodes/3/interfaces - data={"1":"1"}
+[PyEVENG addLinkToLab] - 1 2 is deploying...
+https://172.16.194.239/api/labs/Users/spine-leaf.unl/nodes/1/interfaces - data={"2":"2"}
+[PyEVENG addLinkToLab] - 4 1 is deploying...
+https://172.16.194.239/api/labs/Users/spine-leaf.unl/nodes/4/interfaces - data={"1":"2"}
+[PyEVENG addLinkToLab] - 1 3 is deploying...
+https://172.16.194.239/api/labs/Users/spine-leaf.unl/nodes/1/interfaces - data={"3":"3"}
+[PyEVENG addLinkToLab] - 5 1 is deploying...
+https://172.16.194.239/api/labs/Users/spine-leaf.unl/nodes/5/interfaces - data={"1":"3"}
+[PyEVENG addLinkToLab] - 1 4 is deploying...
+https://172.16.194.239/api/labs/Users/spine-leaf.unl/nodes/1/interfaces - data={"4":"4"}
+[PyEVENG addLinkToLab] - 6 1 is deploying...
+https://172.16.194.239/api/labs/Users/spine-leaf.unl/nodes/6/interfaces - data={"1":"4"}
+[PyEVENG addLinkToLab] - 2 4 is deploying...
+https://172.16.194.239/api/labs/Users/spine-leaf.unl/nodes/2/interfaces - data={"4":"5"}
+[PyEVENG addLinkToLab] - 6 2 is deploying...
+https://172.16.194.239/api/labs/Users/spine-leaf.unl/nodes/6/interfaces - data={"2":"5"}
+[PyEVENG addLinkToLab] - 2 3 is deploying...
+https://172.16.194.239/api/labs/Users/spine-leaf.unl/nodes/2/interfaces - data={"3":"6"}
+[PyEVENG addLinkToLab] - 5 2 is deploying...
+https://172.16.194.239/api/labs/Users/spine-leaf.unl/nodes/5/interfaces - data={"2":"6"}
+[PyEVENG addLinkToLab] - 2 2 is deploying...
+https://172.16.194.239/api/labs/Users/spine-leaf.unl/nodes/2/interfaces - data={"2":"7"}
+[PyEVENG addLinkToLab] - 4 2 is deploying...
+https://172.16.194.239/api/labs/Users/spine-leaf.unl/nodes/4/interfaces - data={"2":"7"}
+[PyEVENG addLinkToLab] - 2 1 is deploying...
+https://172.16.194.239/api/labs/Users/spine-leaf.unl/nodes/2/interfaces - data={"1":"8"}
+[PyEVENG addLinkToLab] - 3 2 is deploying...
+https://172.16.194.239/api/labs/Users/spine-leaf.unl/nodes/3/interfaces - data={"2":"8"}
+[PyEVENG addLinkToLab] - 1 0 is deploying...
+https://172.16.194.239/api/labs/Users/spine-leaf.unl/nodes/1/interfaces - data={"0":"9"}
+[PyEVENG addLinkToLab] - 2 0 is deploying...
+https://172.16.194.239/api/labs/Users/spine-leaf.unl/nodes/2/interfaces - data={"0":"9"}
+[PyEVENG addLinkToLab] - 3 0 is deploying...
+https://172.16.194.239/api/labs/Users/spine-leaf.unl/nodes/3/interfaces - data={"0":"9"}
+[PyEVENG addLinkToLab] - 4 0 is deploying...
+https://172.16.194.239/api/labs/Users/spine-leaf.unl/nodes/4/interfaces - data={"0":"9"}
+[PyEVENG addLinkToLab] - 5 0 is deploying...
+https://172.16.194.239/api/labs/Users/spine-leaf.unl/nodes/5/interfaces - data={"0":"9"}
+[PyEVENG addLinkToLab] - 6 0 is deploying...
+https://172.16.194.239/api/labs/Users/spine-leaf.unl/nodes/6/interfaces - data={"0":"9"}
+[PyEVENG startLabNode] - spine-leaf.unl Spine01 is starting...
+[PyEVENG startLabNode] - spine-leaf.unl Spine02 is starting...
+[PyEVENG startLabNode] - spine-leaf.unl Leaf01 is starting...
+[PyEVENG startLabNode] - spine-leaf.unl Leaf02 is starting...
+[PyEVENG startLabNode] - spine-leaf.unl Leaf03 is starting...
+[PyEVENG startLabNode] - spine-leaf.unl Leaf04 is starting...
+[PyEVENG stopLabNode] - spine-leaf.unl Spine01 is stopping...
+[PyEVENG stopLabNode] - spine-leaf.unl Spine02 is stopping...
+[PyEVENG stopLabNode] - spine-leaf.unl Leaf01 is stopping...
+[PyEVENG stopLabNode] - spine-leaf.unl Leaf02 is stopping...
+[PyEVENG stopLabNode] - spine-leaf.unl Leaf03 is stopping...
+[PyEVENG stopLabNode] - spine-leaf.unl Leaf04 is stopping...
+[deploy_config]
+#...
+#...
+# I remove the config output becase it is tooooooo long for the moment
+#...
+#...
+[PyEVENG startLabNode] - spine-leaf.unl Spine01 is starting...
+[PyEVENG startLabNode] - spine-leaf.unl Spine02 is starting...
+[PyEVENG startLabNode] - spine-leaf.unl Leaf01 is starting...
+[PyEVENG startLabNode] - spine-leaf.unl Leaf02 is starting...
+[PyEVENG startLabNode] - spine-leaf.unl Leaf03 is starting...
+[PyEVENG startLabNode] - spine-leaf.unl Leaf04 is starting...
+------------------------------------------------------------
+```
+
+
+
+#### Your lab is now deploy :smiley:
+
+
+
+And you can manage your device directly from your local machine
+
+```shell
+/Volumes/Data/gitlab/python-eveng-api(master*) » ssh -l cumulus spine01
+cumulus@spine01's password:
+------------------------------------------------------------
+/Volumes/Data/gitlab/python-eveng-api(master*) » ssh -l cumulus spine02
+cumulus@spine02's password:
+```
+
+(Spine02 is added in my ```/etc/hosts```)
+
+```shell
+/Volumes/Data/gitlab/python-eveng-api(master*) » cat /etc/hosts | grep -i spine02
+10.0.4.102	spine02
+```
+
+```10.0.4.102``` is the OOB IP address defined in your YAML  ```configs:```
+
+```yaml
+- node: Spine02
+    type: full
+    config: /Volumes/Data/gitlab/python-eveng-api/backup/cumulus-spine-leaf.unl/Spine02
+```
+
+```shell
+(master*) » grep -i -A 3 "eth0" backup/cumulus-spine-leaf.unl/Spine02/interfaces
+auto eth0
+iface eth0
+    address 10.0.4.102/24
+    gateway 10.0.4.1
+```
+
+
+
+
+
