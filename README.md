@@ -146,7 +146,7 @@ If you want backup your devices after modifications.
 A YAML file contains an architecture that describe a simple Data Center architecture
 
 * 2 Spines
-* 3 Leaves
+* 4 Leaves
 * Leaves are connected on Spine
   * Leaf01 swp1 -> Spine01 swp1
   * Leaf02 swp1 -> Spine01 swp2
