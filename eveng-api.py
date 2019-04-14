@@ -197,13 +197,20 @@ def stopLab(ymlF, vmInfo):
 def deploy_all (path):
     ymlF, vmInfo = open_files(path)
 
-    create_lab(ymlF, vmInfo)
-    deploy_device(ymlF, vmInfo)
-    deploy_links(ymlF, vmInfo)
+    if "project" in ymlF.keys():
+        create_lab(ymlF, vmInfo)
+    
+    if "devices" in ymlF().keys():
+        deploy_device(ymlF, vmInfo)
+    
+    if "links" in ymlF().keys():
+        deploy_links(ymlF, vmInfo)
     # start hosts for create folders
     startLab(ymlF, vmInfo)
     stopLab(ymlF, vmInfo)
-    deploy_config(ymlF, vmInfo)
+    
+    if "configs" in ymlF().keys():
+        deploy_config(ymlF, vmInfo)
     startLab(ymlF, vmInfo)
 
 # -----------------------------------------------------------------------------------------------------------------------------
