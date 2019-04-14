@@ -1,6 +1,5 @@
 ---
 path_vm_info: /Volumes/Data/gitlab/python-eveng-api/vm/vm_info.yml
-path_to_save: /Volumes/Data/gitlab/python-eveng-api/architecture/
 project:
   path: /Users/
   name: spine-leaf
