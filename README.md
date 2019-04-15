@@ -320,7 +320,7 @@ https://172.16.194.239/api/labs/Users/spine-leaf.unl/nodes/6/interfaces - data={
 
 #### Your lab is now deploy :smiley:
 
-
+![](./image/archi.png)
 
 And you can manage your device directly from your local machine
 
