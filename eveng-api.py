@@ -145,6 +145,17 @@ def main(create, deploy, oob, config, start, modify, backup, stop, remove):
             api.stopLabAllNodes(stop[:i])
         except Exception as e:
             print(e)
+
+    if remove != "#":
+        i = remove.find(',')
+        print(str(remove[i+1:]))
+        vmInfo = open_all(str(remove[i+1:]))
+        try:
+            api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'], vmInfo['https_port'],
+                                  vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'])
+            api.deleteLab(remove[:i])
+        except Exception as e:
+            print(e)
     
     
     exit(EXIT_SUCCESS)
@@ -166,52 +177,64 @@ def pushOOBConf(path):
 # -----------------------------------------------------------------------------------------------------------------------------
 #### Create a Lab based on a YAML File ####
 def create_lab(labToCreate, vmInfo):
-    #labToCreate, vmInfo = open_files(path)
-    print("[create_lab]")
-    try:
-        api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'], vmInfo['https_port'],
+    api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'], vmInfo['https_port'],
                           vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'])
-        api.createLab(labToCreate['project'])
-    except Exception as e:
-        print(e)
+    api.createLab(labToCreate['project'])
 
+# -----------------------------------------------------------------------------------------------------------------------------
+#
+#
 def startLab(ymlF,vmInfo):
-    try:
-        api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'], vmInfo['https_port'],
-                              vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'])
-        api.startLabAllNodes(ymlF['project']['name']+".unl")
-    except Exception as e:
-        print(e)
+    api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'], vmInfo['https_port'],
+                          vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'])
+    api.startLabAllNodes(ymlF['project']['name']+".unl")
 
+# -----------------------------------------------------------------------------------------------------------------------------
+#
+#
 def stopLab(ymlF, vmInfo):
-    try:
-        api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'], vmInfo['https_port'],
-                              vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'])
-        api.stopLabAllNodes(ymlF['project']['name'] + ".unl")
-    except Exception as e:
-        print(e)
+    api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'], vmInfo['https_port'],
+                          vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'])
+    api.stopLabAllNodes(ymlF['project']['name'] + ".unl")
 
+# -----------------------------------------------------------------------------------------------------------------------------
+#
+#
+def removeLab(ymlF, vmInfo):
+    api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'], vmInfo['https_port'],
+                          vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'])
+    api.deleteLab(ymlF['project'])
 
 # -----------------------------------------------------------------------------------------------------------------------------
 #### Create a Topology (devices, links) based on a YAML File ####
 def deploy_all (path):
+    
     ymlF, vmInfo = open_files(path)
 
-    if "project" in ymlF.keys():
-        create_lab(ymlF, vmInfo)
-    
-    if "devices" in ymlF().keys():
-        deploy_device(ymlF, vmInfo)
-    
-    if "links" in ymlF().keys():
-        deploy_links(ymlF, vmInfo)
-    # start hosts for create folders
-    startLab(ymlF, vmInfo)
-    stopLab(ymlF, vmInfo)
-    
-    if "configs" in ymlF().keys():
-        deploy_config(ymlF, vmInfo)
-    startLab(ymlF, vmInfo)
+    try:
+        if "project" in ymlF.keys():
+            create_lab(ymlF, vmInfo)
+        
+        if "devices" in ymlF.keys():
+            deploy_device(ymlF, vmInfo)
+        
+        if "links" in ymlF.keys():
+            deploy_links(ymlF, vmInfo)
+        # start hosts for create folders
+        startLab(ymlF, vmInfo)
+        stopLab(ymlF, vmInfo)
+        
+        if "configs" in ymlF.keys():
+            deploy_config(ymlF, vmInfo)
+        
+        startLab(ymlF, vmInfo)
+
+    except Exception as e:
+        print(e)
+        print("[eveng-api - deploy_all] - error during la creation !")
+        removeLab(ymlF, vmInfo)
+        
+
 
 # -----------------------------------------------------------------------------------------------------------------------------
 #

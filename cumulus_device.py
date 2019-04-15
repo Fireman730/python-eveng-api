@@ -107,7 +107,7 @@ class CumulusDevice(abstract_device.DeviceQEMUAbstract):
 
         print(self._path)
         try:
-            ftp_client.put(localpath=(str(self._path)),remotepath=(str("/mnt/disk/etc/network/interfaces")))
+            ftp_client.put(localpath=(str(self._path+"/interfaces")),remotepath=(str("/mnt/disk/etc/network/interfaces")))
         except Exception as e:
             print("[CumulusDevice - pushOOB] error during sftp put transfert.")
             print(e)

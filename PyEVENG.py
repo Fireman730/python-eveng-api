@@ -196,17 +196,42 @@ class PyEVENG:
     #
     def addConfigToNodesLab(self, configToDeploy:dict(), labName:str()):
         for config in configToDeploy:
+            print(config)
+            nodeImage = self.getNodeImageAndNodeID(labName, config['node'])
             if config['type'] == "full":
-                cumulus = cumulus_device.CumulusDevice(
-                    self._ipAddress, self._root, self._password, config['config'],
-                    self._pod, labName, self.getLabID(labName), config['node'], self.getNodeIDbyNodeName(labName, config['node']))
+                if "CUMULUS" in nodeImage[0]:
+                    self.pushCumulusFullConfig(config, labName)
+                #
+                # Others ELIF
+                # elif "EXTREME in nodeImage "
+                #
+            
+
+            elif config['type'] == "oob":
+                if "CUMULUS" in nodeImage[0]:
+                    self.pushCumulusOOBConfig(config, labName)
+                #
+                # Others ELIF
+                # elif "EXTREME in nodeImage "
+                #
+
+
+    def pushCumulusFullConfig(self, configToDeploy: dict(), labName: str()):
+        """
+        This function will call xxx_device.py for push Full configuration
+
+        Args:
+            param1 (str): EVE-NG lab name
+            param1 (str): Node name
+            param3 (str): Path to file to push
+        """
+        cumulus = cumulus_device.CumulusDevice(
+            self._ipAddress, self._root, self._password, configToDeploy['config'],
+            self._pod, labName, self.getLabID(labName), configToDeploy['node'], self.getNodeIDbyNodeName(labName, configToDeploy['node']))
                 
-                cumulus.pushConfig()
+        cumulus.pushConfig()
 
-
-
-
-    def pushOOBConfiFile(self, filesToPushOnNodes:dict()):
+    def pushCumulusOOBConfig(self, configToDeploy: dict(), labName: str()):
         """
         This function will call xxx_device.py for push OOB configuration
 
@@ -215,16 +240,11 @@ class PyEVENG:
             param1 (str): Node name
             param3 (str): Path to file to push
         """
-        print("[PyEVENG - pushOOBConfiFile]")
-        for device in filesToPushOnNodes['devices']:
-            print(device)
-            nodeImage, nodeID = self.getNodeImageAndNodeID(
-                device['labname'], device['hostname'])
+        cumulus = cumulus_device.CumulusDevice(
+            self._ipAddress, self._root, self._password, configToDeploy['config'],
+            self._pod, labName, self.getLabID(labName), configToDeploy['node'], self.getNodeIDbyNodeName(labName, configToDeploy['node']))
 
-            if "CUMULUS" in nodeImage:
-                self.pushCumulusOOB(
-                    device['config'], device['labname'], device['hostname'], nodeID)
-            
+        cumulus.pushOOB()
 
     def pushCumulusOOB(self, pathToConfigFileOOB, labName, nodeName, nodeID):
 
@@ -266,6 +286,7 @@ class PyEVENG:
         """
         allNodesID = self.getLabNodesID(labName)
         allNodes = self.getLabNodes(labName)
+
         for node in allNodes['data'].values():
             if node['name'] == nodeName:
                 return node['image'].upper(), node['id']
@@ -313,7 +334,7 @@ class PyEVENG:
             str: That contains node image
         """
         response = requests.get(
-            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes/"+nodeID, cookies=self._cookies, verify=False)
+            self._url+"/api/labs/"+str(self._userFolder)+"/"+str(labName)+"/nodes/"+str(nodeID), cookies=self._cookies, verify=False)
         self.requestsError(response.status_code)
         return json.loads(response.content)["data"]["image"]
 
@@ -763,27 +784,47 @@ class PyEVENG:
 
     # --------------------------------------------------------------------------------------------------
     #
-    # CREATE functions
+    # CREATE / DELETE functions
     #
     def createLab(self, labInformations:dict()):
         """
-        This function Will create a Lab
+        This function will create a Lab
 
         Args:
             param1 (dict): All lab informations
         """
-        print("[PyEVENG addNodeToLab] -", labInformations['name'], "is creating...")
+        print("[PyEVENG createLab] -",
+              labInformations['name'], "is creating...")
+        
         response = requests.post(
             self._url+"/api/labs", data=json.dumps(labInformations), cookies=self._cookies, verify=False)
 
         self.requestsError(response.status_code)
-        print("[PyEVENG addNodeToLab] -",
+        print("[PyEVENG createLab] -",
               labInformations['name'], "has been created...")
+
+    # =========
+    #
+    def deleteLab(self, labInformations: dict()):
+        """
+        This function will delete a Lab
+
+        Args:
+            param1 (dict): All lab informations
+        """
+        print("[PyEVENG deleteLab] -",
+              labInformations['name'], "is deleting...")
+
+        response = requests.delete(
+            self._url+"/api/labs/"+str(self._userFolder)+"/"+str(labInformations['name'])+".unl", data=json.dumps(labInformations), cookies=self._cookies, verify=False)
+
+        self.requestsError(response.status_code)
+        print("[PyEVENG createLab] -",
+              labInformations['name'], "has been deleted...")
     # --------------------------------------------------------------------------------------------------
     #
     # EDIT (POST) functions
     #
-
     def addNodeToLab(self, nodesToAdd: dict(), labName: str()):
         """
         This function add a node to a Lab
@@ -803,11 +844,13 @@ class PyEVENG:
         else:
             #self.lock_lab()
             response = requests.post(
-                self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes", data=json.dumps(nodesToAdd), cookies=self._cookies, verify=False)
+                self._url+"/api/labs/"+str(self._userFolder)+"/"+str(labName)+"/nodes", data=json.dumps(nodesToAdd), cookies=self._cookies, verify=False)
 
             self.requestsError(response.status_code)
             print("[PyEVENG addNodeToLab] -", nodesToAdd['name'], "has been deployed!")
     
+    # =========
+    #
     def addNodesToLab(self, nodesToAdd: dict(), labName:str()):
         """
         This function add some nodes to a Lab
@@ -826,7 +869,8 @@ class PyEVENG:
             print("[PyEVENG addNodesToLab] - some nodes haven't been deployed!")
             raise Exception("[PyEVENG addNodesToLab] - Nodes deployment error !")
         
-    
+    # =========
+    #
     def setNetworkVisibilityTo0(self, network: dict(), labName: str()):
         """
         This function will set network visibility to 0
@@ -844,7 +888,8 @@ class PyEVENG:
                 self._url+"/api/labs/"+self._userFolder+"/"+str(labName)+"/networks/"+str(networkID['id']), data="{\"visibility\":0}", cookies=self._cookies, verify=False)
             self.requestsError(response.status_code)
 
-    
+    # =========
+    #
     def addNetworksToLab(self, networksToAdd: dict(), labName:str()):
         """
         This function add some network to a Lab
@@ -873,7 +918,8 @@ class PyEVENG:
                 print("[PyEVENG addNetworkToLab] -",
                       data['name'], " is already deployed!")
 
-
+    # =========
+    #
     def addNetworkToLab(self, networkToAdd: dict(), labName: str()) -> str():
         """
         This function add some links to a Lab
@@ -895,6 +941,8 @@ class PyEVENG:
         
         return (json.loads(response.content)['data']['id'])
 
+    # =========
+    #
     def addNetworksLinksToLab(self, interfacesToAdd: dict(), labName: str()):
         """
         This function will connect a node to a Network.
@@ -913,6 +961,8 @@ class PyEVENG:
         self.addLinksToLab(interfacesToAdd, labName)
         self.setNetworkVisibilityTo0(interfacesToAdd, labName)
 
+    # =========
+    #
     def addLinksToLab(self, interfaceToAdd: dict(), labName: str()):
         """
         This function add some links to a Lab
@@ -932,7 +982,8 @@ class PyEVENG:
                 self.addLinkToLab(link['id'], self.getNodeIDbyNodeName(labName, link['dst']),
                                   self.getNodeInterfaceID(labName, self.getNodeIDbyNodeName(labName, link['dst']), link['dport']), labName)
 
-        
+    # =========
+    #
     def addLinkToLab(self, networkID: str(), nodeID:str(), interfaceID:str(), labName: str()):
         """
         This function will connect a node to a Network.
@@ -982,8 +1033,8 @@ class PyEVENG:
                 "api= PyEVENG.PyEVENG(login, mdp, ip, port, ssl, user, pod) \n" + \
                     "api.login() \n api.getLabNodes"
 
-
-
+    # =========
+    #
     def check_param_type_str(self, param:str()):
         """
         This function will check if the parameter is correct
@@ -1011,7 +1062,8 @@ class PyEVENG:
             raise Exception("Error during lock_lab")
         ssh.close
         
-
+    # =========
+    #
     def sshConnect(self) -> paramiko.SSHClient():
         sshClient = paramiko.SSHClient()
         sshClient.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -1020,6 +1072,8 @@ class PyEVENG:
 
         return sshClient
 
+    # =========
+    #
     def __init__(self, username, password, ipAddress, port=99999, useHTTPS=False, userFolder="Users", pod="0", root="root", rmdp="eve"):
         """
         Constructor / Initializer of PyEVENG
