@@ -241,6 +241,8 @@ def deploy_all (path):
         startLab(ymlF, vmInfo)
     except EVENG_Exception as eve:
         print(eve._message)
+        if eve._error != 12:
+            removeLab(ymlF, vmInfo)
     except Exception as e:
         print(e)
         print("[eveng-api - deploy_all] - error during la creation !")

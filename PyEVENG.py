@@ -340,7 +340,7 @@ class PyEVENG:
         Returns:
             str: That contains node status
         """
-        return (str(self.getLabNode(labName, nodeID))['data']['status'])
+        return str(self.getLabNode(labName, nodeID)['data']['status'])
 
 
     def getNodeImage(self, labName: str(), nodeID: str()) -> str():
@@ -684,14 +684,17 @@ class PyEVENG:
             param1 (str): EVE-NG lab name
             param1 (str): EVE-NG node ID
         """
-        
-        print("[PyEVENG startLabNode] -",
-              labName, self.getNodeNameByID(labName, nodeID), "is starting...")
-
         if self.getNodeStatus(labName, nodeID) != "2":
+            print("[PyEVENG startLabNode] -",
+                  labName, self.getNodeNameByID(labName, nodeID), "is starting...")
+
             response = requests.get(
                 self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes/"+nodeID+"/start", cookies=self._cookies, verify=False)
             self.requestsError(response.status_code)
+
+            if self.getNodeStatus(labName, nodeID) == "2":
+                print("[PyEVENG startLabNode] -", labName, self.getNodeNameByID(labName, nodeID), "is started !")
+
 
     def startLabAllNodes(self, labName:str()):
         """
@@ -727,6 +730,10 @@ class PyEVENG:
             response = requests.get(
                 self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes/"+nodeID+"/stop/stopmode=3", cookies=self._cookies, verify=False)
             self.requestsError(response.status_code)
+
+            if self.getNodeStatus(labName, nodeID) == "0":
+                print("[PyEVENG stopLabNode] -",
+                      labName, self.getNodeNameByID(labName, nodeID), "is stopped !")
 
     def stopLabAllNodes1(self, labName):
         """
@@ -888,7 +895,7 @@ class PyEVENG:
                   nodesToAdd['name'], "\" is already deployed!")
 
         else:
-            #self.lock_lab()
+            self.lock_lab()
             response = requests.post(
                 self._url+"/api/labs/"+str(self._userFolder)+"/"+str(labName)+"/nodes", data=json.dumps(nodesToAdd), cookies=self._cookies, verify=False)
 
@@ -913,7 +920,7 @@ class PyEVENG:
             print("[PyEVENG addNodesToLab] - all nodes have been deployed!")
         else:
             print("[PyEVENG addNodesToLab] - some nodes haven't been deployed!")
-            raise Exception("[PyEVENG addNodesToLab] - Nodes deployment error !")
+            raise EVENG_Exception(str("[PyEVENG addNodesToLab] - Nodes deployment error !"), 21)
         
     # =========
     #
