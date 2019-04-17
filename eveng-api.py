@@ -31,6 +31,13 @@ except ImportError as importError:
     exit(EXIT_FAILURE)
 
 try:
+    from exceptions.EveExceptions import EVENG_Exception
+except ImportError as importError:
+    print("Error import listdir")
+    print(importError)
+    exit(EXIT_FAILURE)
+
+try:
     import PyEVENG
 except ImportError as importError:
     print("Error import PyEVE-NG")
@@ -211,6 +218,10 @@ def deploy_all (path):
     
     ymlF, vmInfo = open_files(path)
 
+    #api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'], vmInfo['https_port'],
+    #                      vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'])
+    #print(api.getLabsInFolder())
+
     try:
         if "project" in ymlF.keys():
             create_lab(ymlF, vmInfo)
@@ -228,7 +239,8 @@ def deploy_all (path):
             deploy_config(ymlF, vmInfo)
         
         startLab(ymlF, vmInfo)
-
+    except EVENG_Exception as eve:
+        print(eve._message)
     except Exception as e:
         print(e)
         print("[eveng-api - deploy_all] - error during la creation !")

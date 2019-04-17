@@ -15,6 +15,13 @@ EXIT_FAILURE = 1
 # Import Library
 #
 try:
+    from exceptions.EveExceptions import EVENG_Exception
+except ImportError as importError:
+    print("Error import listdir")
+    print(importError)
+    exit(EXIT_FAILURE)
+
+try:
     from os import listdir
     from os.path import isfile, join
     from os import mkdir
@@ -625,6 +632,26 @@ class PyEVENG:
         return json.loads(response.content)
 
 
+    def getLabsInFolder(self) -> dict():
+        """
+        This function will return a list that contains all lab name in the folder
+
+        Returns:
+            list: That contains all lab name
+        """
+
+        response = requests.get(self._url+"/api/folders/"+str(self._userFolder),
+                                cookies=self._cookies, verify=False)
+        self.requestsError(response.status_code)
+        data = json.loads(response.content)
+
+        labsInFolder = list()
+        for lab in data['data']['labs']:
+            labsInFolder.append(lab['file'])
+
+        return labsInFolder
+
+
     def getUsers(self):
         """
         This function will return a JSON that contains user informations
@@ -809,6 +836,9 @@ class PyEVENG:
         Args:
             param1 (dict): All lab informations
         """
+        if str(labInformations['name']+".unl") in self.getLabsInFolder():
+            raise EVENG_Exception(str("[EXCEPTION][PyEVENG - createLab] - Lab ("+labInformations['name']+") already exists in this folder"), 12)
+        
         print("[PyEVENG createLab] -",
               labInformations['name'], "is creating...")
         
