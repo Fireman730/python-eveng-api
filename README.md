@@ -91,6 +91,18 @@ If you want backup your devices after modifications.
 
 ## Run the script
 
+```yml
+project:
+  # Lab description
+devices:
+  # devices to add
+links:
+  # links between devices
+configs:
+  # config to push in devices
+```
+
+
 ```shell
 
 # ---------------------------------------------------------------------------
@@ -99,33 +111,22 @@ If you want backup your devices after modifications.
 
 # 1. Deploy your topology on your lab
 ./eveng-api.py --deploy=/path/to/yml/topology
+    
+    # This step will :
+    # - create Lab
+    # - create devices
+    # - create links
+    # - start nodes for create folders
+    # - stop nodes
+    # - push config on nodes
+    # - start nodes
 
-# This step is automatic
-# /!\ The directory VM will not be created if the VM have never been started
-./eveng-api.py --start=labName.unl,/path/to/vm/info/yaml/file.yml
+# If lab creation doesn't work - lab will be remove
 
 # ---------------------------------------------------------------------------
-# Case 1 copy config file into your devices before your lab start
-### 2a. Copy your config into dev
-./eveng-api.py --config=/path/to/backup
-./eveng-api.py --ansible=/path/to/playbooks
-
-# --> --config is interessting if you want recreate your production network
-# in a virtual environnement. Based on your backup you can rebuild your network.
-# When your network is up, you can run Ansible/Chef/Python/Salt scripts.
-# In this case --config has to deploy network for joining nodes
-
-# Case 2 start nodes and deploy config via Ansible
-### 2b. 
-## Create your OOB network - you need to create a network that is mapped on
-## your laptop/server virtual interface. You can run Ansible script on OOB net.
-./eveng-api.py --oob=/path/to/oob.yml
-./eveng-api.py --ansible=/path/to/playbooks
-
-# --> --oob is interessting if you want test your scripts for deploy your network
-# from scratch. --oob will configure your out-of-band for access to your devices
-# and run your Ansible/Chef/Python/Salt scripts
-
+# At this point you can run Ansible/Salt/Chef/Python script on your network
+# via the oob management network.
+# You can see architecture in the WEB page and manage via CLI/Shell
 # ---------------------------------------------------------------------------
 
 # 3. If your network works fine backup nodes !
@@ -138,8 +139,6 @@ If you want backup your devices after modifications.
 ./eveng-api.py --remove=labName.unl,/path/to/vm/info/yaml/file.yml
 
 ```
-
-
 
 ## Example
 
