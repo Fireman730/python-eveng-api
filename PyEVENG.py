@@ -322,7 +322,21 @@ class PyEVENG:
         self.requestsError(response.status_code)
         return json.loads(response.content)
 
-    def getNodeImage(self, labName, nodeID):
+    def getNodeStatus(self, labName:str(), nodeID:str()) -> str():
+        """
+        This function will return a string that contains nodes status according to node ID and the lab name given in parameter
+
+        Args:
+            param1 (str): EVE-NG lab name
+            param2 (str): EVE-NG node ID
+
+        Returns:
+            str: That contains node status
+        """
+        return (str(self.getLabNode(labName, nodeID))['data']['status'])
+
+
+    def getNodeImage(self, labName: str(), nodeID: str()) -> str():
         """
         This function will return a string that contains nodes image according to node ID and the lab name given in parameter
 
@@ -647,9 +661,10 @@ class PyEVENG:
         print("[PyEVENG startLabNode] -",
               labName, self.getNodeNameByID(labName, nodeID), "is starting...")
 
-        response = requests.get(
-            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes/"+nodeID+"/start", cookies=self._cookies, verify=False)
-        self.requestsError(response.status_code)
+        if self.getNodeStatus(labName, nodeID) != "2":
+            response = requests.get(
+                self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes/"+nodeID+"/start", cookies=self._cookies, verify=False)
+            self.requestsError(response.status_code)
 
     def startLabAllNodes(self, labName:str()):
         """
@@ -680,10 +695,11 @@ class PyEVENG:
 
         print("[PyEVENG stopLabNode] -",
               labName, self.getNodeNameByID(labName, nodeID), "is stopping...")
-
-        response = requests.get(
-            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes/"+nodeID+"/stop/stopmode=3", cookies=self._cookies, verify=False)
-        # self.requestsError(response.status_code)
+        
+        if self.getNodeStatus(labName, nodeID) != "0":
+            response = requests.get(
+                self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes/"+nodeID+"/stop/stopmode=3", cookies=self._cookies, verify=False)
+            self.requestsError(response.status_code)
 
     def stopLabAllNodes1(self, labName):
         """
