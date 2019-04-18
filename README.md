@@ -53,7 +53,23 @@ Example based on Cumulus.
 This repo contains functions for Cumulus Network. If you need more device types you need implement functions for them.
 
 **Your help is welcome**
-##### Become a contributor !! 
+#### Become a contributor !! 
+
+### Objective
+The main objective of this project is automatically deploy a network architecture on EVE-NG based on a YAML file.
+YAML file will contains your lab architecture.
+* Links
+* Devices
+
+You can also deploy a configuration into your devices.
+With this feature you can deploy your lab based on your production network backup.
+With a simple command you can create your production network in a virtual environnement and test your scripts or your CLI.
+
+This step can be insert into a CI/CD pipeline.
+Deploy architecture and test your modification or you code.
+If ok, your modification will be applied in your production lab.
+
+An other repository is in developement about "How can we test ou virtual network" and "How can we validate that modifications work fine"
 
 ## Project Structure
 
