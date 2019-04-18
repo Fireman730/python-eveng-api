@@ -34,7 +34,7 @@ class EVENG_Exception(Exception):
         return self._error
 
     def getMessage(self):
-        self._message
+        return self._message
 
     def __init__(self, message, error):
 
