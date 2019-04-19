@@ -2,7 +2,7 @@
 
 ###### Development in progress ! 
 
-This script has been tested with *EVE-NG - 2.0.5-12-PRO*
+This script has been tested with *EVE-NG - 2.0.5-12-PRO* ```19.04.2019```
 
 ```shell
 ./eveng-api.py --deploy=./architecture/2spines_4leafs.yml  

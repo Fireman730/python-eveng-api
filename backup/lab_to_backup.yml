@@ -1,5 +1,5 @@
 ---
-path_vm_info: /Volumes/Data/gitlab/python-eveng-api/VM/VM_informations.yml
+path_vm_info: /Volumes/Data/gitlab/python-eveng-api/vm/vm_info.yml
 # List of lab that you want backup
 # This file contains backup informations
 labs:
@@ -7,7 +7,7 @@ labs:
     pod: 0
     folder: Users
     # All devices will be sava in "bck_path/labename/hostname/{files}"
-    bck_path: /Volumes/Data/gitlab/python-eveng-api/backup
+    bck_path: /Volumes/Data/gitlab/python-eveng-api/tmp
     # Backup type. It can be "Verbose" or "Simple"
     # "Simple" will only backup "/etc/network/interface" "/etc/frr/frr.conf". More info in this repo on folder "commands/config_files_simple.yml
     # "Verbose" will backup all config file. More info in this repo on folder "commands/config_files_verbose.yml and "commands/config_files_verbose_shell.yml"
@@ -22,11 +22,11 @@ labs:
       - Leaf04
   
   # Second lab to backup
-  - labname: extreme-spb-smlt.unl
-    pod: 0
-    folder: Users
-    bck_path: /Volumes/Data/gitlab/python-eveng-api/backup
-    bck_type: verbose
-    hostname: 
-      - all
+  #- labname: extreme-spb-smlt.unl
+  #  pod: 0
+  #  folder: Users
+  #  bck_path: /Volumes/Data/gitlab/python-eveng-api/backup
+  #  bck_type: verbose
+  #  hostname: 
+  #    - all
     
