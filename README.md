@@ -2,6 +2,21 @@
 
 ###### Development in progress ! 
 
+This script has been tested with *EVE-NG - 2.0.5-12-PRO*
+
+```shell
+./eveng-api.py --deploy=./architecture/2spines_4leafs.yml  
+#
+# Execution some tasks
+#
+./eveng-api.py --stop=spine-leaf.unl,./vm/vm_info.yml
+./eveng-api.py --start=spine-leaf.unl,./vm/vm_info.yml
+./eveng-api.py --backup=./backup/lab_to_backup.yml
+./eveng-api.py --remove=spine-leaf.unl,./vm/vm_info.yml
+```
+
+
+
 
 ## Project presentation
 Every days you hear about "CI/CD", pipeline or DevOps.
