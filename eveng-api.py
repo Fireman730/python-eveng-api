@@ -110,10 +110,13 @@ def pjson(jsonPrint):
 def main(deploy, start, backup, stop, remove):
 
     if deploy != "#":
-        ymlF, vmInfo = open_files(deploy)
-        validateYamlFileForPyEVENG(ymlF, vmInfo)
-        deploy_all(ymlF, vmInfo)
-        exit(EXIT_SUCCESS)
+        try:
+            ymlF, vmInfo = open_files(deploy)
+            validateYamlFileForPyEVENG(ymlF, vmInfo)
+            deploy_all(ymlF, vmInfo)
+            exit(EXIT_SUCCESS)
+        except EVENG_Exception as eveError:
+            print(eveError._message)
 
     if backup != "#":
         backup_lab(backup)
@@ -143,7 +146,7 @@ def main(deploy, start, backup, stop, remove):
 
     if remove != "#":
         i = remove.find(',')
-        
+
         vmInfo = open_all(str(remove[i+1:]))
         try:
             api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'], vmInfo['https_port'],

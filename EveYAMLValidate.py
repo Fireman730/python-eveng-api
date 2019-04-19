@@ -190,8 +190,8 @@ def checkDeviceElementWithPath(listElement: list(), pathToYamlFile: str(), dictT
 def checkDeviceElement(listElement: list(), yamlContent: dict(), dictToVerify: str() = "devices", paramToVerify: str() = "type") -> bool:
     for device in yamlContent[dictToVerify]:
         if device[paramToVerify] not in listElement:
-            raise EVENG_Exception(str("[EveYAMLValidate.py - checkDeviceElement] - Virtualization type "+str(
-                device[paramToVerify])+" is not available on this EVE-NG (qemu, iol, dynamips)."), 900)
+            raise EVENG_Exception(str("[EveYAMLValidate.py - checkDeviceElement] - Type "+str(dictToVerify)+":"+str(paramToVerify)+": \""+str(
+                device[paramToVerify])+"\" is not available on this EVE-NG."), 900)
     return True
 #
 #### Check Image (Cumulus, Extreme, Cisco, Arista, ...) ####
