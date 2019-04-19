@@ -17,23 +17,25 @@ EXIT_FAILURE = 1
 try:
     import json
     import ast
-    from dicttoxml import dicttoxml
     import xmltodict
-    import pprint
-    from json2xml import json2xml, readfromurl, readfromstring, readfromjson
-    from xml.dom import minidom
     from xmljson import badgerfish as bf
-    from xml.etree.ElementTree import fromstring
     from shutil import copyfile
 except ImportError as importError:
-    print("Error import json")
+    print("Error import json, ast, xmltodict, xmljson, shutil")
+    print(importError)
+    exit(EXIT_FAILURE)
+
+try:
+    from EveYAMLValidate import validateYamlFileForPyEVENG
+except ImportError as importError:
+    print("Error import EveYAMLValidate")
     print(importError)
     exit(EXIT_FAILURE)
 
 try:
     from exceptions.EveExceptions import EVENG_Exception
 except ImportError as importError:
-    print("Error import listdir")
+    print("Error import EVENG_Exception")
     print(importError)
     exit(EXIT_FAILURE)
 
@@ -100,31 +102,17 @@ def pjson(jsonPrint):
 
 #### Main function ####
 @click.command()
-@click.option('--create', default="#", help='Path to yaml file that contains lab to create.')
 @click.option('--deploy', default="#", help='Path to yaml file that contains topology to deploy.')
-@click.option('--oob', default="#", help='Path to yaml file that contains path to VM info, path to file config and devices.')
-@click.option('--config', default="#", help='Path to directory that contains nodes configuration files.')
 @click.option('--start', default="#", help='Labname you want to start')
-@click.option('--modify', default="#", help='Path to Ansible playbooks to execute.')
 @click.option('--backup', default="#", help='Path to yaml file that contains informations about backups.')
 @click.option('--stop', default="#", help='Labname you want to stop')
 @click.option('--remove', default="#", help='Labname you want to remove')
-def main(create, deploy, oob, config, start, modify, backup, stop, remove):
-
-    if create != "#":
-        #create_lab(create)
-        exit(EXIT_SUCCESS)
+def main(deploy, start, backup, stop, remove):
 
     if deploy != "#":
-        #yamlF, vm = open_files(deploy)
-        #deploy_device(yamlF, vm)
-        #deploy_links(deploy)
-        #assert validateYamlFileForPyEVENG(open_all(deploy))
-        deploy_all(deploy)
-        exit(EXIT_SUCCESS)
-
-    if oob != "#":
-        pushOOBConf(oob)
+        ymlF, vmInfo = open_files(deploy)
+        validateYamlFileForPyEVENG(ymlF, vmInfo)
+        deploy_all(ymlF, vmInfo)
         exit(EXIT_SUCCESS)
 
     if backup != "#":
@@ -167,21 +155,6 @@ def main(create, deploy, oob, config, start, modify, backup, stop, remove):
     
     exit(EXIT_SUCCESS)
 # -----------------------------------------------------------------------------------------------------------------------------
-#### Push Out-of-Band configuration ####
-def pushOOBConf(path):
-    ymlF, vmInfo = open_files(path)
-
-    try:
-        api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'], vmInfo['https_port'],
-                              vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'])
-        
-        api.pushOOBConfiFile(ymlF)
-    except Exception as e:
-        print(e)
-
-
-
-# -----------------------------------------------------------------------------------------------------------------------------
 #### Create a Lab based on a YAML File ####
 def create_lab(labToCreate, vmInfo):
     api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'], vmInfo['https_port'],
@@ -214,10 +187,7 @@ def removeLab(ymlF, vmInfo):
 
 # -----------------------------------------------------------------------------------------------------------------------------
 #### Create a Topology (devices, links) based on a YAML File ####
-def deploy_all (path):
-    
-    ymlF, vmInfo = open_files(path)
-
+def deploy_all (ymlF, vmInfo):
     #api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'], vmInfo['https_port'],
     #                      vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'])
     #print(api.getLabsInFolder())
@@ -260,8 +230,6 @@ def deploy_config(configToDeploy, vmInfo):
                           vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'])
     api.addConfigToNodesLab(configToDeploy['configs'],
                             configToDeploy['project']['name']+".unl")
-
-
 # -----------------------------------------------------------------------------------------------------------------------------
 #
 #

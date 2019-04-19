@@ -765,6 +765,39 @@ class PyEVENG:
     
     # ------------------------------------------------------------------------------------------
     # Authentification, Users and System
+    def getTemplateByModel(self, deviceType):
+        """
+        This function will return a list that contains all installed nodes
+
+        Args:
+            param1 (str): Device type - Example "cumulus"
+
+        Returns:
+            list: Information about device type
+        """
+        response = requests.get(
+            self._url+"/api/list/templates/"+str(deviceType), cookies=self._cookies, verify=False)
+        self.requestsError(response.status_code)
+
+        return json.loads(response.content)
+
+    def getImageVersionByModel(self, deviceType):
+        """
+        This function will return a list that contains all installed nodes
+
+        Args:
+            param1 (str): Device type - Example "cumulus"
+
+        Returns:
+            list: Information about device type
+        """
+        response = requests.get(
+            self._url+"/api/list/templates/"+str(deviceType), cookies=self._cookies, verify=False)
+        self.requestsError(response.status_code)
+
+        content = json.loads(response.content)
+        return content['data']['options']['image']['value']
+    
     def getNodeInstall(self) -> dict():
         """
         This function will return a list that contains all installed nodes
