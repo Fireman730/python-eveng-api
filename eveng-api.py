@@ -148,6 +148,7 @@ def main(deploy, start, backup, stop, remove):
         try:
             api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'], vmInfo['https_port'],
                                   vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'])
+            print(remove[:i])
             api.deleteLab(remove[:i])
         except Exception as e:
             print(e)

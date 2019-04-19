@@ -891,22 +891,23 @@ class PyEVENG:
 
     # =========
     #
-    def deleteLab(self, labInformations: dict()):
+    def deleteLab(self, labName: dict()):
         """
         This function will delete a Lab
 
         Args:
-            param1 (dict): All lab informations
+            param1 (str): Lab name to delete
         """
+        print(labName)
         print("[PyEVENG deleteLab] -",
-              labInformations['name'], "is deleting...")
+              labName, "is deleting...")
 
         response = requests.delete(
-            self._url+"/api/labs/"+str(self._userFolder)+"/"+str(labInformations['name'])+".unl", data=json.dumps(labInformations), cookies=self._cookies, verify=False)
+            self._url+"/api/labs/"+str(self._userFolder)+"/"+str(labName)+".unl", cookies=self._cookies, verify=False)
 
         self.requestsError(response.status_code)
         print("[PyEVENG createLab] -",
-              labInformations['name'], "has been deleted...")
+              labName, "has been deleted...")
     # --------------------------------------------------------------------------------------------------
     #
     # EDIT (POST) functions
