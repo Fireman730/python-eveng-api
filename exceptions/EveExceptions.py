@@ -24,6 +24,7 @@ class EVENG_Exception(Exception):
       -> 11 Lab Already Exists
       -> 12 ...
     2X   =   Error in devices creation
+      -> 21 Not all nodes have been created
     3X   =   Error in links creation
     4X   =   Error in configs deployement
 
