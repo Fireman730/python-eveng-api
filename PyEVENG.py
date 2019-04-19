@@ -898,7 +898,6 @@ class PyEVENG:
         Args:
             param1 (str): Lab name to delete
         """
-        print(labName)
         print("[PyEVENG deleteLab] -",
               labName, "is deleting...")
 

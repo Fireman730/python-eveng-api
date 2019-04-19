@@ -143,12 +143,11 @@ def main(deploy, start, backup, stop, remove):
 
     if remove != "#":
         i = remove.find(',')
-        print(str(remove[i+1:]))
+        
         vmInfo = open_all(str(remove[i+1:]))
         try:
             api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'], vmInfo['https_port'],
                                   vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'])
-            print(remove[:i])
             api.deleteLab(remove[:i])
         except Exception as e:
             print(e)
