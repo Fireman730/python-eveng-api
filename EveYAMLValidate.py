@@ -102,7 +102,7 @@ def validateYamlFileForPyEVENG(yamlContent: dict(), vmInfo):
     # Check that each devices have a different UUID
     assert checkIfDuplicateParam(yamlContent, "devices", "uuid")
     # Check that links is connected to existing devices
-    assert checkIfLinkConnectedToExistingDevice(yamlContent)
+    # assert checkIfLinkConnectedToExistingDevice(yamlContent)
     # Check that each device ports are used only one time - not connected to many devices
     assert checkIfPortUseManyTime(yamlContent)
     # Check that links:node is in devices:name
@@ -140,7 +140,8 @@ def checkIfConfigsNodesExists(yamlContent: dict()) -> bool:
 
     for node in yamlContent['configs']:
         if node['node'] not in allDevices:
-            return False
+            raise EVENG_Exception(
+                str("[EveYAMLValidate.py - checkIfConfigsNodesExists] - Node "+str(node['node'])+" but node in your devices to add."), 900)
     return True
 
 ## Check if path_to_vm info value is a yaml file ###
@@ -148,7 +149,12 @@ def CheckIfPathToVMKeyGoToYAMLfileWithPath(pathToYamlFile: str()) -> bool:
     return CheckIfPathToVMKeyGoToYAMLfile(open_yaml_files(pathToYamlFile))
 
 def CheckIfPathToVMKeyGoToYAMLfile(yamlContent: dict()) -> bool:
-    return ("yml" == str(yamlContent['path_vm_info'])[-3:])
+    if ("yml" == str(yamlContent['path_vm_info'])[-3:]):
+        return True
+    else:
+        raise EVENG_Exception(str("[EveYAMLValidate.py - CheckIfPathToVMKeyGoToYAMLfile] - path_to_vm need to be a yaml file. Change your value ("+str(
+            str(yamlContent['path_vm_info']))+"."), 900)
+
 
 ### Check that keys devices:, project: and links: are in your YAML file. Configs: is not mandatory ###
 def checkifKeysAreInYamlFileWithPath(pathToYamlFile: str()) -> bool:
@@ -159,7 +165,8 @@ def checkifKeysAreInYamlFile(yamlContent: dict()) -> bool:
     allKeys = yamlContent.keys()
     for mandatoryKey in MANDATORY_YAML_KEYS:
         if mandatoryKey not in allKeys:
-            return False
+            raise EVENG_Exception(str("[EveYAMLValidate.py - checkifKeysAreInYamlFile] - Key ("+str(
+                mandatoryKey)+") is missing please add all mandatory keys (path_vm_info, project, devices, links."), 900)
     return True
 #
 ### Check that keys is corrects ###
@@ -170,7 +177,8 @@ def checkIfYamlFileKeysAreCorrectWithPath(pathToYamlFile: str()) -> bool:
 def checkIfYamlFileKeysAreCorrect(yamlContent: dict()) -> bool:
     for key in yamlContent.keys():
         if key not in YAML_KEYS:
-            return False
+            raise EVENG_Exception(str("[EveYAMLValidate.py - checkIfYamlFileKeysAreCorrect] - "+str(
+                key)+" is not a key accepted in your YAML file."), 900)
     return True
 
 #
@@ -182,7 +190,8 @@ def checkDeviceElementWithPath(listElement: list(), pathToYamlFile: str(), dictT
 def checkDeviceElement(listElement: list(), yamlContent: dict(), dictToVerify: str() = "devices", paramToVerify: str() = "type") -> bool:
     for device in yamlContent[dictToVerify]:
         if device[paramToVerify] not in listElement:
-            return False
+            raise EVENG_Exception(str("[EveYAMLValidate.py - checkDeviceElement] - Virtualization type "+str(
+                device[paramToVerify])+" is not available on this EVE-NG (qemu, iol, dynamips)."), 900)
     return True
 #
 #### Check Image (Cumulus, Extreme, Cisco, Arista, ...) ####
@@ -196,11 +205,14 @@ def checkIfImageIsAvaiable(pyeveng, yamlContent: dict(), dictToVerify: str() = "
     for device in yamlContent['devices']:
         images = pyeveng.getImageVersionByModel(device['template'])
         if device[paramToVerify] not in images:
-            return False
+            raise EVENG_Exception(str("[EveYAMLValidate.py - checkIfImageIsAvaiable] - Image "+str(
+                device[paramToVerify])+" is not available on this EVE-NG."), 900)
     return True
+
 #
 #### Check if a link is connected to a existing device ####
 #
+"""
 def checkIfLinkConnectedToExistingDeviceWithPath(pathToYamlFile: str(), devicesToVerify: str() = "devices", linksToVerify: str() = "links", deviceParamToVerify: str() = "name", linksDeviceToVerify: list = ['src', 'dst']):
     return checkIfLinkConnectedToExistingDevice(open_yaml_files(pathToYamlFile), devicesToVerify, linksToVerify, deviceParamToVerify, linksDeviceToVerify)
 
@@ -214,8 +226,10 @@ def checkIfLinkConnectedToExistingDevice(yamlContent: dict(), devicesToVerify: s
     for link in yamlContent[linksToVerify]:
         if link['dst'] != "OOB-NETWORK":
             if link[linksDeviceToVerify[0]] not in allDevices or link[linksDeviceToVerify[1]] not in allDevices:
-                return False
+                raise EVENG_Exception(str("[EveYAMLValidate.py - checkIfLinkConnectedToExistingDevice] - There is a link on "+str(
+                    linksHost)+" but this node is not create in devices."), 900)
     return True
+"""
 #
 #### Check if links: node is in devices:name ####
 #
@@ -247,7 +261,7 @@ def checkIfLinksHostIsExisting(yamlContent: dict(), dictToVerify: str() = "links
 
     for linksHost in allHostInLinks:
         if linksHost not in allDevices:
-            return False
+            raise EVENG_Exception(str("[EveYAMLValidate.py - checkIfLinksHostIsExisting] - There is a link on "+str(linksHost)+" but this node is not create in devices.") , 900)
     return True
 
 #
@@ -275,13 +289,15 @@ def checkIfPortUseManyTime(yamlContent: dict(), dictToVerify: str() = "links", p
     for link in yamlContent[dictToVerify]:
         if link['dst'] != "OOB-NETWORK":
             if link[paramToVerify[1]] in allHostInLinks[link[paramToVerify[0]]]:
-                return False
+                raise EVENG_Exception(
+                    str("[EveYAMLValidate.py - checkIfPortUseManyTime] - Port "+str(link[paramToVerify[1]])+" on "+str(link['src'])+" is use several times"), 900)
             else:
                 allHostInLinks[link[paramToVerify[0]]].append(
                     link[paramToVerify[1]])
 
             if link[paramToVerify[3]] in allHostInLinks[link[paramToVerify[2]]]:
-                return False
+                raise EVENG_Exception(
+                    str("[EveYAMLValidate.py - checkIfPortUseManyTime] - Port "+str(link[paramToVerify[3]])+" on "+str(link['dst'])+" is use several times"), 900)
             else:
                 allHostInLinks[link[paramToVerify[2]]].append(
                     link[paramToVerify[3]])
@@ -289,7 +305,9 @@ def checkIfPortUseManyTime(yamlContent: dict(), dictToVerify: str() = "links", p
         else:
             for oobConnection in link['src']:
                 if oobConnection['port'] in allHostInLinks[oobConnection['host']]:
-                    return False
+                    raise EVENG_Exception(
+                        str("[EveYAMLValidate.py - checkIfPortUseManyTime] - Port "+str(
+                            oobConnection['port'])+" on "+str(oobConnection['host'])+" is use several times"), 900)
                 else:
                     allHostInLinks[oobConnection['host']].append(
                         oobConnection['port'])
@@ -308,7 +326,8 @@ def checkIfDuplicateParam(yamlContent: dict(), dictToVerify: str() = "devices", 
     listParam = list()
     for node in yamlContent[dictToVerify]:
         if node[paramToVerify] in listParam:
-            return False
+            raise EVENG_Exception(
+                str("[EveYAMLValidate.py - checkIfDuplicateParam] - Two devices have the name : "+str(node[paramToVerify])), 900)
         listParam.append(node[paramToVerify])
     return True
 #
