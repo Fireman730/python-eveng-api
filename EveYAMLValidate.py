@@ -204,6 +204,7 @@ def checkIfImageIsAvaiable(pyeveng, yamlContent: dict(), dictToVerify: str() = "
     
     for device in yamlContent['devices']:
         images = pyeveng.getImageVersionByModel(device['template'])
+        
         if device[paramToVerify] not in images:
             raise EVENG_Exception(str("[EveYAMLValidate.py - checkIfImageIsAvaiable] - Image "+str(
                 device[paramToVerify])+" is not available on this EVE-NG."), 900)

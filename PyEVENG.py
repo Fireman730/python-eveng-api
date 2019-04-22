@@ -796,7 +796,12 @@ class PyEVENG:
         self.requestsError(response.status_code)
 
         content = json.loads(response.content)
-        return content['data']['options']['image']['value']
+        
+        listResult = list()
+        for value in content['data']['options']['image']['list'].values():
+            listResult.append(value)
+
+        return listResult
     
     def getNodeInstall(self) -> dict():
         """
@@ -864,6 +869,8 @@ class PyEVENG:
         """
         response = requests.post(
             self._url+"/api/auth/logout", cookies=self._cookies, verify=False)
+
+        
 
     # --------------------------------------------------------------------------------------------------
     #
