@@ -387,5 +387,46 @@ iface eth0
 
 
 
+## Import QCOW2 (Cumulus)
+
+Download image on Cumulus Network website :
+
+* https://cumulusnetworks.com/products/cumulus-vx/download/
+
+Upload in your EVE-NG VM
+
+On your OS (MacOSX for example)
+
+```shell
+scp ./cumulus-linux-3.7.5-vx-amd64-qemu.qcow2 root@172.16.194.239:/tmp
+```
+
+Connecte on your EVE-NG VM
+
+```shell
+ssh -l root 172.16.194.239
+```
+
+Create a directory
+
+```shell
+mkdir /opt/unetlab/addons/qemu/cumulus-vx-3.7.5
+```
+
+Move your qcow2
+
+```shell
+mv /tmp/cumulus-linux-3.7.5-vx-amd64-qemu.qcow2 /opt/unetlab/addons/qemu/cumulus-vx-3.7.5/virtioa.qcow2
+```
+
+Fix permissions
+
+```shell
+/opt/unetlab/wrappers/unl_wrapper -a fixpermissions
+```
 
 
+
+You can find all informations on EVE-NG website
+
+* https://www.eve-ng.net/documentation/howto-s
