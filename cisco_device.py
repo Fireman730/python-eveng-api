@@ -67,7 +67,18 @@ class CiscoDevice(abstract_device.DeviceQEMUAbstract):
     #
     #
     def mountNBD(self, sshClient: paramiko.SSHClient):
-        pass
+        first = True
+        for command in self._shellCommandsMountNBD:
+            print("[EVE-NG shell mount]", command)
+            stdin, stdout, stderr = sshClient.exec_command(command)
+            output = "".join(stdout.readlines())
+            if first:
+                print("[EVE-NG shell mount]", "sudo qemu-nbd -c /dev/nbd0 /opt/unetlab/tmp/" + str(
+                    self._pod) + "/" + str(self._labID) + "/" + str(self._nodeID) + "/virtioa.qcow2")
+                stdin, stdout, stderr = sshClient.exec_command(
+                    "sudo qemu-nbd -c /dev/nbd0 /opt/unetlab/tmp/" + str(self._pod) + "/" + str(self._labID) + "/" + str(self._nodeID) + "/hda.qcow2")
+                output = stdout.readlines()
+                first = False
     
     # ------------------------------------------------------------------------------------------------------------
     #

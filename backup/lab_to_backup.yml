@@ -22,11 +22,20 @@ labs:
       - Leaf04
   
   # Second lab to backup
-  #- labname: extreme-spb-smlt.unl
-  #  pod: 0
-  #  folder: Users
-  #  bck_path: /Volumes/Data/gitlab/python-eveng-api/backup
-  #  bck_type: verbose
-  #  hostname: 
-  #    - all
+  - labname: extreme-spb-smlt.unl
+    pod: 0
+    folder: Users
+    bck_path: /Volumes/Data/gitlab/python-eveng-api/backup
+    bck_type: verbose
+    hostname: 
+      - all
+
+  # Third lab to backup
+  - labname: dmvpn-ospf-qos.unl
+    pod: 0
+    folder: Network
+    bck_path: /Volumes/Data/gitlab/python-eveng-api/backup
+    bck_type: verbose
+    hostname: 
+      - all
     

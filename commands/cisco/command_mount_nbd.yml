@@ -3,3 +3,4 @@
 - sudo partx -a /dev/nbd0
 - sudo mkdir -p /mnt/disk
 - sudo mount /dev/nbd0p2 /mnt/disk/
+- sudo cd /mnt/disk/ && sed -e '1d;2d' nvram | tac | sed -e '1d;2d' | tac > config.cfg
