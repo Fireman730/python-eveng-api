@@ -91,7 +91,22 @@ class CiscoDevice(abstract_device.DeviceQEMUAbstract):
     #
     #
     def pushConfig(self):
-        pass
+        configFiles = [f for f in listdir(self._path) if "DS" not in f and isfile(join(self._path, f))]
+        
+        ssh = self.sshConnect()
+        self.mountNBD(ssh)
+        ftp_client = ssh.open_sftp()
+
+        for file in configFiles:
+            try:
+                print("[CumulusDevice - getConfig] copy",
+                      str(self._path+"/"+file), "to", str("/mnt/disk/"+file))
+                ftp_client.put(localpath=(str(self._path+"/"+file)), remotepath=(str("/mnt/disk/"+file)))
+            except Exception as e:
+                print(e)
+
+        self.umountNBD(ssh)
+        ssh.close()
     # ------------------------------------------------------------------------------------------------------------
     #
     #
