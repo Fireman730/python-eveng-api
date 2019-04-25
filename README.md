@@ -1,6 +1,9 @@
 # EVE-NG for CI/CD pipeline.
 
-###### Development in progress ! 
+         Development in progress ! 
+         Implementation for VyOS, Cisco and Extreme Network is coming soon
+         
+         Improved addition of new device types in progress
 
 This script has been tested with *EVE-NG - 2.0.5-12-PRO* ```19.04.2019```
 
