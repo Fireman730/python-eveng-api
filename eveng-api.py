@@ -211,7 +211,7 @@ def deploy_all (ymlF, vmInfo):
         if "configs" in ymlF.keys():
             deploy_config(ymlF, vmInfo)
         
-        startLab(ymlF, vmInfo)
+        #startLab(ymlF, vmInfo)
     except EVENG_Exception as eve:
         print(eve._message)
         if eve._error != 12:

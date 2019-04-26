@@ -229,7 +229,9 @@ class PyEVENG:
             if config['type'] == "full":
                 if "CUMULUS" in nodeImage[0]:
                     self.pushCumulusFullConfig(config, labName)
-                #
+                
+                elif "VIOS" in nodeImage[0]:
+                    self.pushCiscoConfig(config, labName)
                 # Others ELIF
                 # elif "EXTREME in nodeImage "
                 #
@@ -238,20 +240,34 @@ class PyEVENG:
             elif config['type'] == "oob":
                 if "CUMULUS" in nodeImage[0]:
                     self.pushCumulusOOBConfig(config, labName)
-                #
+                
+                elif "VIOS" in nodeImage[0]:
+                    self.pushCiscoConfig(config, labName)
                 # Others ELIF
                 # elif "EXTREME in nodeImage "
                 #
 
+    def pushCiscoConfig(self, configToDeploy: dict(), labName: str()):
+        """
+        This function will call cisco_device.py for push Full configuration
+
+        Args:
+            param1 (dict): Informations about config
+            param2 (str): Lab name
+        """
+        cisco = cisco_device.CiscoDevice(
+            self._ipAddress, self._root, self._password, configToDeploy['config'],
+            self._pod, labName, self.getLabID(labName), configToDeploy['node'], self.getNodeIDbyNodeName(labName, configToDeploy['node']))
+                
+        cisco.pushConfig()
 
     def pushCumulusFullConfig(self, configToDeploy: dict(), labName: str()):
         """
-        This function will call xxx_device.py for push Full configuration
+        This function will call cumulus_device.py for push Full configuration
 
         Args:
-            param1 (str): EVE-NG lab name
-            param1 (str): Node name
-            param3 (str): Path to file to push
+            param1 (dict): Informations about config
+            param2 (str): Lab name
         """
         cumulus = cumulus_device.CumulusDevice(
             self._ipAddress, self._root, self._password, configToDeploy['config'],
@@ -264,9 +280,8 @@ class PyEVENG:
         This function will call xxx_device.py for push OOB configuration
 
         Args:
-            param1 (str): EVE-NG lab name
-            param1 (str): Node name
-            param3 (str): Path to file to push
+            param1 (dict): Informations about config
+            param2 (str): Lab name
         """
         cumulus = cumulus_device.CumulusDevice(
             self._ipAddress, self._root, self._password, configToDeploy['config'],

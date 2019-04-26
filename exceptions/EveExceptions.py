@@ -19,15 +19,18 @@ class EVENG_Exception(Exception):
     """
     This class is used for EVENG Exception
 
-    0X   =   Erro with API call
-    1X   =   Error in lab creation
+    0XY   =   Erro with API call
+    1XY   =   Error in lab creation
       -> 11 Lab Already Exists
       -> 12 ...
-    2X   =   Error in devices creation
+    2XY   =   Error in devices creation
       -> 21 Not all nodes have been created
-    3X   =   Error in links creation
-    4X   =   Error in configs deployement
-
+    3XY   =   Error in links creation
+    4XY   =   Error in configs deployement
+    8XY   =   Error with SSH command
+      -> 801 UMOUNT
+      -> 802 MOUNT
+    9XY   = Error in YAML file
 
     """
 
