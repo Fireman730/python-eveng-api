@@ -26,7 +26,7 @@ except ImportError as importError:
     exit(EXIT_FAILURE)
 
 try:
-    from EveYAMLValidate import validateYamlFileForPyEVENG
+    from tests.EveYAMLValidate import validateYamlFileForPyEVENG
 except ImportError as importError:
     print("Error import EveYAMLValidate")
     print(importError)
@@ -40,7 +40,7 @@ except ImportError as importError:
     exit(EXIT_FAILURE)
 
 try:
-    import PyEVENG
+    import api.PyEVENG as PyEVENG
 except ImportError as importError:
     print("Error import PyEVE-NG")
     print(importError)
@@ -57,13 +57,6 @@ try:
     import yaml
 except ImportError as importError:
     print("Error import yaml")
-    print(importError)
-    exit(EXIT_FAILURE)
-
-try:
-    from EveYAMLValidate import validateYamlFileForPyEVENG
-except ImportError as importError:
-    print("Error import eveng-yaml-validation")
     print(importError)
     exit(EXIT_FAILURE)
 ######################################################
@@ -211,7 +204,7 @@ def deploy_all (ymlF, vmInfo):
         if "configs" in ymlF.keys():
             deploy_config(ymlF, vmInfo)
         
-        #startLab(ymlF, vmInfo)
+        startLab(ymlF, vmInfo)
     except EVENG_Exception as eve:
         print(eve._message)
         if eve._error != 12:
