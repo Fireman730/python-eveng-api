@@ -2,5 +2,5 @@
 # sudo qemu-nbd -c /dev/nbd0 /opt/unetlab/tmp/pod/labID/nodeID/hda.qcow2
 - sudo partx -a /dev/nbd0
 - sudo mkdir -p /mnt/disk
-- sudo mount /dev/nbd0p2 /mnt/disk/
-- sudo cd /mnt/disk/ && sed -e '1d;2d' nvram | tac | sed -e '1d;2d' | tac > config.cfg
+- sudo mount /dev/nbd0p1 /mnt/disk/
+- sudo  sed -e '1d;2d' /mnt/disk/nvram | tac | sed -e '1d;2d' | tac > /mnt/disk/config.cfg
