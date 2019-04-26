@@ -1,0 +1,11 @@
+---
+path_vm_info: /Volumes/Data/gitlab/python-eveng-api/vm/vm_info.yml
+labs:
+  - labname: dmvpn-ospf-qos.unl
+    pod: 0
+    folder: Network
+    bck_path: /Volumes/Data/gitlab/python-eveng-api/backup
+    bck_type: verbose
+    hostname: 
+      - all
+    

@@ -1,0 +1,183 @@
+---
+path_vm_info: /Volumes/Data/gitlab/python-eveng-api/vm/vm_info.yml
+project:
+  path: /Users/
+  name: dmvpn-ospf-qos
+  version: 1
+  author: DylanHamel
+  description: DMVPN implementation with IPSEC
+  body: Network Lab DMVPN
+
+devices:
+  - type: qemu
+    template: viosl2
+    config: Unconfigured
+    delay: 0
+    icon: Switch L3.png
+    image: viosl2-adventerprisek9-m.03.2017
+    name: GVA10
+    left: 177%
+    top: 288%
+    ram: 1024
+    console: telnet
+    cpu: 1
+    ethernet: 8
+    uuid: 0c5f57ad-fcff-47b1-b43b-4ba39b8545dd
+  - type: qemu
+    template: vios
+    config: Unconfigured
+    delay: 0
+    icon: router.png
+    image: vios-adventerprisek9-m.SPA.156-1.T
+    name: ISP01
+    left: 642%
+    top: 288%
+    ram: 1024
+    console: telnet
+    cpu: 1
+    ethernet: 8
+    uuid: 76ce24d3-56c4-4055-b258-d4e2b1f5788d
+  - type: qemu
+    template: vios
+    config: Unconfigured
+    delay: 0
+    icon: router.png
+    image: vios-adventerprisek9-m.SPA.156-1.T
+    name: GVA01
+    left: 339%
+    top: 330%
+    ram: 1024
+    console: telnet
+    cpu: 1
+    ethernet: 4
+    uuid: b7f171f9-bba4-4443-89fc-06028c9b53e3
+  - type: qemu
+    template: vios
+    config: Unconfigured
+    delay: 0
+    icon: router.png
+    image: vios-adventerprisek9-m.SPA.156-1.T
+    name: GVA02
+    left: 339%
+    top: 249%
+    ram: 1024
+    console: telnet
+    cpu: 1
+    ethernet: 4
+    uuid: 83bdae5c-f8db-466d-8624-dcd97fccf3b7
+  - type: qemu
+    template: vios
+    config: Unconfigured
+    delay: 0
+    icon: router.png
+    image: vios-adventerprisek9-m.SPA.156-1.T
+    name: ZRH01
+    left: 642%
+    top: 129%
+    ram: 1024
+    console: telnet
+    cpu: 1
+    ethernet: 4
+    uuid: ad952f7b-1abf-4823-81f5-25de2ac4780d
+  - type: qemu
+    template: vios
+    config: Unconfigured
+    delay: 0
+    icon: router.png
+    image: vios-adventerprisek9-m.SPA.156-1.T
+    name: LDN01
+    left: 642%
+    top: 459%
+    ram: 1024
+    console: telnet
+    cpu: 1
+    ethernet: 4
+    uuid: 140f53ae-70b5-476f-8965-c24667043169
+  - type: qemu
+    template: vios
+    config: Unconfigured
+    delay: 0
+    icon: router.png
+    image: vios-adventerprisek9-m.SPA.156-1.T
+    name: BCN01
+    left: 972%
+    top: 288%
+    ram: 1024
+    console: telnet
+    cpu: 1
+    ethernet: 4
+    uuid: b11a2efc-df4a-474d-a3d6-1c4bbf068b7b
+
+links:
+  - id: 1
+    type: ethernet
+    network: bridge
+    src: GVA01
+    sport: Gi0/3
+    dst: GVA10
+    dport: Gi0/0
+  - id: 2
+    type: ethernet
+    network: bridge
+    src: GVA02
+    sport: Gi0/3
+    dst: GVA10
+    dport: Gi0/1
+  - id: 3
+    type: ethernet
+    network: bridge
+    src: GVA01
+    sport: Gi0/0
+    dst: ISP01
+    dport: Gi0/0
+  - id: 4
+    type: ethernet
+    network: bridge
+    src: GVA02
+    sport: Gi0/0
+    dst: ISP01
+    dport: Gi0/1
+  - id: 5
+    type: ethernet
+    network: bridge
+    src: ZRH01
+    sport: Gi0/0
+    dst: ISP01
+    dport: Gi0/5
+  - id: 6
+    type: ethernet
+    network: bridge
+    src: LDN01
+    sport: Gi0/0
+    dst: ISP01
+    dport: Gi0/7
+  - id: 7
+    type: ethernet
+    network: bridge
+    src: BCN01
+    sport: Gi0/0
+    dst: ISP01
+    dport: Gi0/6
+
+configs:
+  - node: GVA01
+    type: full
+    config: /Volumes/Data/gitlab/python-eveng-api/backup/dmvpn-ospf-qos.unl/GVA01
+  - node: GVA02
+    type: full
+    config: /Volumes/Data/gitlab/python-eveng-api/backup/dmvpn-ospf-qos.unl/GVA02
+  - node: GVA10
+    type: full
+    config: /Volumes/Data/gitlab/python-eveng-api/backup/dmvpn-ospf-qos.unl/GVA10
+  - node: ISP01
+    type: full
+    config: /Volumes/Data/gitlab/python-eveng-api/backup/dmvpn-ospf-qos.unl/ISP01
+  - node: BCN01
+    type: full
+    config: /Volumes/Data/gitlab/python-eveng-api/backup/dmvpn-ospf-qos.unl/BCN01
+  - node: LDN01
+    type: full
+    config: /Volumes/Data/gitlab/python-eveng-api/backup/dmvpn-ospf-qos.unl/LDN01
+  - node: ZRH01
+    type: full
+    config: /Volumes/Data/gitlab/python-eveng-api/backup/dmvpn-ospf-qos.unl/ZRH01

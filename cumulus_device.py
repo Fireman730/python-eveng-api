@@ -93,6 +93,9 @@ class CumulusDevice(abstract_device.DeviceQEMUAbstract):
                 if output is self._nodeName:
                     raise Exception("Wrong qcow2 is mount in /mnt/disk")
 
+            if "error adding partition 1" in output:
+                raise EVENG_Exception(
+                    "[CiscoDevice - mountNBD] - Error during partition sudo partx -a /dev/nbd0", 802)
     
     # ------------------------------------------------------------------------------------------------------------
     #
@@ -125,6 +128,8 @@ class CumulusDevice(abstract_device.DeviceQEMUAbstract):
         
         ssh = self.sshConnect()
         self.mountNBD(ssh)
+        self.checkMountNBD(ssh)
+
         ftp_client = ssh.open_sftp()
 
         for file in configFiles:
@@ -160,8 +165,11 @@ class CumulusDevice(abstract_device.DeviceQEMUAbstract):
         ssh = self.sshConnect()
 
         print("[CumulusDevice - getConfig]", self._labName, self._nodeName)
+        
         self.umountNBDWithOutCheck(ssh)
-        self.mountNBD(ssh)        
+        self.mountNBD(ssh)       
+        self.checkMountNBD(ssh)
+
         ftp_client = ssh.open_sftp()
 
         try:

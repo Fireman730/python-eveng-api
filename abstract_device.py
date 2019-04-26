@@ -14,6 +14,12 @@ EXIT_FAILURE = 1
 #
 # Import Library
 #
+try:
+    from exceptions.EveExceptions import EVENG_Exception
+except ImportError as importError:
+    print("Error import listdir")
+    print(importError)
+    exit(EXIT_FAILURE)
 
 try:
     import yaml
@@ -41,7 +47,6 @@ except ImportError as importError:
 # Class
 #
 class DeviceQEMUAbstract(ABC):
-
     
     _shellCommandsUmountNBD = yaml.load(
         open("./commands/common/command_umount_nbd.yml"))
@@ -53,6 +58,20 @@ class DeviceQEMUAbstract(ABC):
     @abstractmethod
     def mountNBD(self, sshClient: paramiko.SSHClient):
         pass
+
+    # ------------------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def checkMountNBD(self, sshClient: paramiko.SSHClient):
+        stdin, stdout, stderr = sshClient.exec_command(
+            "mount | grep nbd | wc -l")
+
+        o = "".join(stdout.readlines())
+    
+        if str(o[0]) != "1":
+            raise EVENG_Exception(
+                "[DeviceQEMUAbstract - checkMountNBD] - error with umount nbd", 802)
 
     # ------------------------------------------------------------------------------------------------------------
     #
@@ -73,7 +92,8 @@ class DeviceQEMUAbstract(ABC):
             o = "".join(stdout.readlines())
 
         if "nbd0" not in o:
-            raise Exception("Error during nbd disconnect")
+            raise EVENG_Exception(
+                "[DeviceQEMUAbstract - umountNBD] - error with umount nbd", 801)
 
     # ------------------------------------------------------------------------------------------------------------
     #

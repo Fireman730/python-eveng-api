@@ -14,7 +14,13 @@ EXIT_FAILURE = 1
 #
 # Import Library
 #
-
+try:
+    from exceptions.EveExceptions import EVENG_Exception
+except ImportError as importError:
+    print("Error import listdir")
+    print(importError)
+    exit(EXIT_FAILURE)
+    
 try:
     import yaml
 except ImportError as importError:
@@ -74,6 +80,10 @@ class ExtremeDevice(abstract_device.DeviceQEMUAbstract):
                     "sudo qemu-nbd -c /dev/nbd0 /opt/unetlab/tmp/" + str(self._pod) + "/" + str(self._labID) + "/" + str(self._nodeID) + "/hda.qcow2")
                 output = stdout.readlines()
                 first = False
+
+            if "error adding partition 1" in output:
+                raise EVENG_Exception(
+                    "[CiscoDevice - mountNBD] - Error during partition sudo partx -a /dev/nbd0", 802)
     # ------------------------------------------------------------------------------------------------------------
     #
     #
