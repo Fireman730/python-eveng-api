@@ -147,8 +147,15 @@ class CiscoDevice(devices.abstract_device.DeviceQEMUAbstract):
         self.checkMountNBD(ssh)
 
         ftp_client = ssh.open_sftp()
-
+    
         try:
+            print("[CiscoDevice - getConfig]",
+                  self._nodeName, "src -", str("/opt/unetlab/tmp/" + str(self._pod) + "/" + str(self._labID) + "/" + str(self._nodeID) + "/virtioa.qcow2"))
+            print("[CiscoDevice - getConfig]",
+                  self._nodeName, "dst -", str(self._path + "/virtioa.qcow2"))
+            ftp_client.get(
+                str("/opt/unetlab/tmp/" + str(self._pod) + "/" + str(self._labID) + "/" + str(self._nodeID) + "/virtioa.qcow2"), str(self._path +"/virtioa.qcow2"))
+
             for file in commands:
                 print("[CiscoDevice - getConfig]",
                       self._nodeName, "src -", file)
@@ -157,7 +164,7 @@ class CiscoDevice(devices.abstract_device.DeviceQEMUAbstract):
 
                 ftp_client.get(
                     file, str(self._path+"/"+str(file[file.rfind("/")+1:])))
-
+                    
         except Exception as e:
             print(e.with_traceback)
             self.umountNBD(ssh)
