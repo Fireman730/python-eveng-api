@@ -104,8 +104,11 @@ class CumulusDevice(devices.abstract_device.DeviceQEMUAbstract):
     def pushOOB(self):
         
         ssh = self.sshConnect()
+
         self.umountNBDWithOutCheck(ssh)
         self.mountNBD(ssh)
+        self.checkMountNBD(ssh)
+
         ftp_client = ssh.open_sftp()
 
         print(self._path)
@@ -116,6 +119,7 @@ class CumulusDevice(devices.abstract_device.DeviceQEMUAbstract):
             print(e)
 
         self.umountNBD(ssh)
+
         ftp_client.close()
         ssh.close()
 
@@ -142,6 +146,8 @@ class CumulusDevice(devices.abstract_device.DeviceQEMUAbstract):
                 print(e)
 
         self.umountNBD(ssh)
+        
+        ftp_client.close()
         ssh.close()
     # ------------------------------------------------------------------------------------------------------------
     #

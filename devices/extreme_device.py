@@ -121,6 +121,8 @@ class ExtremeDevice(devices.abstract_device.DeviceQEMUAbstract):
 
         self.umountNBDWithOutCheck(ssh)
         self.mountNBD(ssh)
+        self.checkMountNBD
+
         ftp_client = ssh.open_sftp()
 
         try:
@@ -137,6 +139,8 @@ class ExtremeDevice(devices.abstract_device.DeviceQEMUAbstract):
         print("[ExtremeDevice - getConfig]",
               self._nodeName, "has been backuped")
         self.umountNBD(ssh)
+
+        ftp_client.close()
         ssh.close()
 
     # ------------------------------------------------------------------------------------------------------------
