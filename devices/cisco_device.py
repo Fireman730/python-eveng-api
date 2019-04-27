@@ -103,21 +103,20 @@ class CiscoDevice(devices.abstract_device.DeviceQEMUAbstract):
     #
     #
     def pushConfig(self):
-        configFiles = [f for f in listdir(self._path) if "DS" not in f and isfile(join(self._path, f))]
         
         ssh = self.sshConnect()
-        self.mountNBD(ssh)
-        self.checkMountNBD(ssh)
         ftp_client = ssh.open_sftp()
 
-        for file in configFiles:
-            try:
-                print("[CiscoDevice - getConfig] copy",
-                      str(self._path+"/"+file), "to", str("/mnt/disk/"+file))
-                ftp_client.put(localpath=(str(self._path+"/"+file)), remotepath=(str("/mnt/disk/"+file)))
-            except Exception as e:
-                print(e)
+        try:
+            print("[CiscoDevice - getConfig] copy",
+                  str(self._path+"/virtioa.qcow2"), "to", "/opt/unetlab/tmp/" + str(self._pod) + "/" + str(self._labID) + "/" + str(self._nodeID) + "/virtioa.qcow2")
+            ftp_client.put(localpath=(str(self._path+"/virtioa.qcow2")), remotepath=("/opt/unetlab/tmp/" + str(
+                self._pod) + "/" + str(self._labID) + "/" + str(self._nodeID) + "/virtioa.qcow2"))
+        except Exception as e:
+            print(e)
+        
         self.umountNBD(ssh)
+        ftp_client.close()
         ssh.close()
     # ------------------------------------------------------------------------------------------------------------
     #
