@@ -2,4 +2,5 @@
 # sudo qemu-nbd -c /dev/nbd0 /opt/unetlab/tmp/pod/labID/nodeID/hda.qcow2
 - sudo partx -a /dev/nbd0
 - sudo mkdir -p /mnt/disk
-- sudo mount /dev/nbd0p2 /mnt/disk/
+- sudo mount /dev/nbd0p1 /mnt/disk/
+- sudo cat /mnt/disk/etc/hostname

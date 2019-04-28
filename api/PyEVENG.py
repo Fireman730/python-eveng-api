@@ -34,6 +34,7 @@ try:
     import devices.cumulus_device as cumulus_device
     import devices.extreme_device as extreme_device
     import devices.cisco_device as cisco_device
+    import devices.vyos_device as vyos_device
 except ImportError as importError:
     print("Error import cumulus_device")
     print(importError)
@@ -162,12 +163,37 @@ class PyEVENG:
         path = path+"/"+project_name+"/"+nodeName
 
         print("*************",nodeImage, "***************")
+        # CUMULUS LINUX
         if "CUMULUS" in nodeImage :
             self.getCumulusBackup(path, project_name, nodeName, nodeID)
+        # EXTREME NETWORK
         elif "EXTREME" in nodeImage:
             self.getExtremeBackup(path, project_name, nodeName, nodeID)
+        # CISCO
         elif "VIOS" in nodeImage:
             self.getCiscoBackup(path, project_name, nodeName, nodeID)
+        # VYOS VYATTA
+        elif "VYOS" in nodeImage:
+            self.getVyosBackup(path, project_name, nodeName, nodeID)
+    
+
+    def getVyosBackup(self, path, projectName, nodeName, nodeID):
+        """
+        This function backup VyOS configuration files in path given in parameter
+        Files will be retrieve with paramiko SFTP
+
+        Args:
+            param1 (str): Path where save configuration files.
+            param2 (str): EVE-NG Project Name.
+            param3 (str): EVE-NG Node ID.
+        
+        """
+        vyos = vyos_device.VyosDevice(
+            self._ipAddress, self._root, self._password, path,
+            self._pod, projectName, self.getLabID(projectName), nodeName, nodeID)
+
+        vyos.getConfigVerbose()
+
 
     def getCiscoBackup(self, path, projectName, nodeName, nodeID):
         """
