@@ -42,6 +42,13 @@ except ImportError as importError:
     print("Error import abc - Cumulus abstractmethod")
     print(importError)
     exit(EXIT_FAILURE)
+
+try:
+    from exceptions.EveExceptions import EVENG_Exception
+except ImportError as importError:
+    print("Error import listdir")
+    print(importError)
+    exit(EXIT_FAILURE)
 ######################################################
 #
 # Constantes
@@ -182,11 +189,12 @@ class CumulusDevice(devices.abstract_device.DeviceQEMUAbstract):
             for file in commands:
                 ftp_client.get(
                     file, str(self._path+"/"+str(file[file.rfind("/")+1:])))
-
+            """
             if v:
                 for filename, command in self._shellCommandsCatFiles.items():
                     stdin, stdout, stderr = ssh.exec_command(command)
                     ftp_client.get("/tmp/"+filename, self._path+"/"+filename)
+            """
         except Exception as e:
             print(e.with_traceback)
             self.umountNBD(ssh)
