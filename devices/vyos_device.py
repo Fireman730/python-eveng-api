@@ -118,13 +118,54 @@ class VyosDevice(devices.abstract_device.DeviceQEMUAbstract):
     #
     #
     def pushOOB(self):
-        self.pushConfig()
+        ssh = self.sshConnect()
+
+        self.umountNBDWithOutCheck(ssh)
+        self.mountNBD(ssh)
+        self.checkMountNBD(ssh)
+
+        ftp_client = ssh.open_sftp()
+
+        print(self._path)
+        try:
+            ftp_client.put(localpath=(str(self._path+"/interfaces")),
+                           remotepath=(str("/mnt/disk/etc/network/interfaces")))
+        except Exception as e:
+            print("[VyosDevice - pushOOB] error during sftp put transfert.")
+            print(e)
+
+        self.umountNBD(ssh)
+
+        ftp_client.close()
+        ssh.close()
     # ------------------------------------------------------------------------------------------------------------
     #
     #
     #
     def pushConfig(self):
-        pass
+        configFiles = [f for f in listdir(
+            self._path) if "DS" not in f and isfile(join(self._path, f))]
+
+        ssh = self.sshConnect()
+        self.mountNBD(ssh)
+        self.checkMountNBD(ssh)
+
+        ftp_client = ssh.open_sftp()
+
+        for file in configFiles:
+            try:
+                if file not in self._noPushConfigFiles:
+                    print("[VyosConfig - pushConfig] copy",
+                          str(self._path+"/"+file), "to", str(self._pushConfigFiles[file])+file)
+                    ftp_client.put(localpath=(str(self._path+"/"+file)),
+                                   remotepath=(str(self._pushConfigFiles[file])+file))
+            except Exception as e:
+                print(e)
+
+        self.umountNBD(ssh)
+
+        ftp_client.close()
+        ssh.close()
     # ------------------------------------------------------------------------------------------------------------
     #
     #
