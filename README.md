@@ -433,3 +433,16 @@ Fix permissions
 You can find all informations on EVE-NG website
 
 * https://www.eve-ng.net/documentation/howto-s
+
+
+
+#### Need to be fixed
+
+1) Push Config to VYOS - Need to be tested
+   
+2) Push Config to Nexus - Lab can be deploy but config can't be push
+   
+3) Cisco ports are administravely down by default
+   1) Find if it's possible to modify qcow2 on backup machine
+   
+   
