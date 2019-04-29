@@ -1,0 +1,39 @@
+---
+path_vm_info: /Volumes/Data/gitlab/python-eveng-api/vm/vm_info.yml
+project:
+  path: /Users/
+  name: nexus-deploy
+  version: 1
+  author: DylanHamel
+  description: Deploy Nexus
+  body: Deploy Cisco Nexus
+
+devices:
+  - type: qemu
+    template: nxosv9k
+    config: Unconfigured
+    delay: 0
+    icon: Nexus7K.png
+    image: nxosv9k-7.0.3.I5.1
+    name: Leaf02
+    left: 177%
+    top: 288%
+    ram: 1024
+    console: telnet
+    cpu: 1
+    ethernet: 8
+    uuid: 0c5f57ad-fcff-47aa-b43b-4ba39b8545dd
+
+links:
+  - id: 1
+    network: pnet4
+    src:
+      - host: Leaf02
+        port: Mgmt0
+    dst: OOB-NETWORK
+    dport: oob
+   
+configs:
+  - node: Leaf02
+    type: full
+    config: /Volumes/Data/gitlab/python-eveng-api/backup/ansible-cisco-spine-leaf.unl/Leaf02

@@ -1,0 +1,5 @@
+- sudo modprobe nbd max_part=8
+# sudo qemu-nbd -c /dev/nbd0 /opt/unetlab/tmp/pod/labID/nodeID/hda.qcow2
+- sudo partx -a /dev/nbd0
+- sudo mkdir -p /mnt/disk
+- sudo mount /dev/nbd0p5 /mnt/disk/
