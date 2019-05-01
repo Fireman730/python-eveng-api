@@ -279,8 +279,6 @@ class PyEVENG:
         for config in configToDeploy:
             nodeImage = self.getNodeImageAndNodeID(labName, config['node'])
             if config['type'] == "full":
-                print("EXTREME" in nodeImage)
-                print("EXTREME" in nodeImage[0])
                 if "CUMULUS" in nodeImage[0]:
                     self.pushCumulusFullConfig(config, labName)
                 elif "VIOS" in nodeImage[0]:
