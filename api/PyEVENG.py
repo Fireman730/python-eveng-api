@@ -281,25 +281,26 @@ class PyEVENG:
             if config['type'] == "full":
                 if "CUMULUS" in nodeImage[0]:
                     self.pushCumulusFullConfig(config, labName)
+                # CISCO
                 elif "VIOS" in nodeImage[0]:
                     self.pushCiscoConfig(config, labName)
                 # CISCO NEXUS
                 elif "NXOS" in nodeImage[0]:
                     self.pushNexusConfig(config, labName)
+                # EXTREME NETWORK
                 elif "EXTREME" in nodeImage[0]:
                     self.pushExtremeConfig(config, labName)
                 # Others ELIF
                 #
-            
 
             elif config['type'] == "oob":
                 if "CUMULUS" in nodeImage[0]:
                     self.pushCumulusOOBConfig(config, labName)
-                elif "NXOS" in nodeImage:
+                elif "NXOS" in nodeImage[0]:
                     self.pushNexusConfig(config, labName)
                 elif "VIOS" in nodeImage[0]:
                     self.pushCiscoConfig(config, labName)
-                elif "EXTREME" in nodeImage:
+                elif "EXTREME" in nodeImage[0]:
                     self.pushExtremeConfig(config, labName)
                         
                 # Others ELIF
@@ -495,7 +496,6 @@ class PyEVENG:
             string: Node Interface ID
         """
         data = self.getLabNodeInterfaces(labName, nodeID)
-
         for index, value in enumerate(data['data']['ethernet']):
             if value['name'] == interfaceName:
                 return index
@@ -1191,7 +1191,8 @@ class PyEVENG:
         for link in interfaceToAdd:
             if link['dst'] == "OOB-NETWORK":
                 for oobInterface in link['src']:
-                    self.addLinkToLab(link['id'], self.getNodeIDbyNodeName(labName, oobInterface['host']), oobInterface['port'][-1:], labName)
+                    self.addLinkToLab(link['id'], self.getNodeIDbyNodeName(labName, oobInterface['host']), self.getNodeInterfaceID(
+                        labName, self.getNodeIDbyNodeName(labName, oobInterface['host']), oobInterface['port']), labName)
 
             else:
                 self.addLinkToLab(link['id'], self.getNodeIDbyNodeName(labName, link['src']),
