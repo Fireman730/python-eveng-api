@@ -31,6 +31,7 @@ class EVENG_Exception(Exception):
       -> 801 UMOUNT
       -> 802 MOUNT
     9XY   = Error in YAML file
+      -> 910 - Lab to backup not in Folder
 
     """
 

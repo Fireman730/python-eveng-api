@@ -124,9 +124,9 @@ class PyEVENG:
         for lab in yamlFiles['labs']:
             self._userFolder = lab['folder']
 
-            #
-            # ADD CHECK IF LAB EXIST IN FOLDER !!!
-            #
+            if lab['labname'] not in self.getLabsInFolder():
+                raise EVENG_Exception(
+                    "[PyEVENG - getBackupNodesConfig]"+str(lab['labname'])+" doesn't exist in "+str(lab['folder']), 910)
 
             if "all" in lab['hostname']:
                 for hostname in self.getLabNodesName(lab['labname']):
@@ -755,7 +755,7 @@ class PyEVENG:
         return json.loads(response.content)
 
 
-    def getLabsInFolder(self) -> dict():
+    def getLabsInFolder(self) -> list():
         """
         This function will return a list that contains all lab name in the folder
 

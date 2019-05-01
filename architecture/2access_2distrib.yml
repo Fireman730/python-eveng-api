@@ -109,6 +109,19 @@ links:
     sport: port7
     dst: Distribution02
     dport: port7
+  - id: 7
+    network: pnet4
+    src:
+      - host: Access01
+        port: Mgmt
+      - host: Access02
+        port: Mgmt
+      - host: Distribution01
+        port: Mgmt
+      - host: Distribution02
+        port: Mgmt
+    dst: OOB-NETWORK
+    dport: oob
 
 configs:
   - node: Access01
