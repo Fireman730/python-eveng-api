@@ -1,0 +1,125 @@
+---
+path_vm_info: /Volumes/Data/gitlab/python-eveng-api/vm/vm_info.yml
+project:
+  path: /Users/
+  name: extreme-mlt-vlan
+  version: 1
+  author: DylanHamel
+  description: Lan with Extreme Network
+  body: Deploy Extreme Lab
+
+devices:
+  - type: qemu
+    template: extremexos
+    config: Unconfigured
+    delay: 0
+    icon: Switch L3.png
+    image: extremexos-22.4.1.4
+    name: Access01
+    left: 177%
+    top: 381%
+    ram: 1024
+    console: telnet
+    cpu: 1
+    ethernet: 8
+    uuid: 0c5f57ad-fcff-47b1-b43b-4ba39b8545da
+  - type: qemu
+    template: extremexos
+    config: Unconfigured
+    delay: 0
+    icon: Switch L3.png
+    image: extremexos-22.4.1.4
+    name: Access02
+    left: 177%
+    top: 180%
+    ram: 1024
+    console: telnet
+    cpu: 1
+    ethernet: 8
+    uuid: 0c5f57ad-fcff-47b1-b43b-4ba39b8545db
+  - type: qemu
+    template: extremexos
+    config: Unconfigured
+    delay: 0
+    icon: Switch L3.png
+    image: extremexos-22.4.1.4
+    name: Distribution01
+    left: 300%
+    top: 381%
+    ram: 1024
+    console: telnet
+    cpu: 1
+    ethernet: 8
+    uuid: 0c5f57ad-fcff-47b1-b43b-4ba39b8545dc
+  - type: qemu
+    template: extremexos
+    config: Unconfigured
+    delay: 0
+    icon: Switch L3.png
+    image: extremexos-22.4.1.4
+    name: Distribution02
+    left: 177%
+    top: 381%
+    ram: 1024
+    console: telnet
+    cpu: 1
+    ethernet: 8
+    uuid: 0c5f57ad-fcff-47b1-b43b-4ba39b8545dd
+
+links:
+  - id: 1
+    type: ethernet
+    network: bridge
+    src: Access01
+    sport: port1
+    dst: Distribution01
+    dport: port1
+  - id: 2
+    type: ethernet
+    network: bridge
+    src: Access01
+    sport: port2
+    dst: Distribution02
+    dport: port1
+  - id: 3
+    type: ethernet
+    network: bridge
+    src: Access02
+    sport: port1
+    dst: Distribution01
+    dport: port2
+  - id: 4
+    type: ethernet
+    network: bridge
+    src: Access02
+    sport: port2
+    dst: Distribution02
+    dport: port2
+  - id: 5
+    type: ethernet
+    network: bridge
+    src: Distribution01
+    sport: port6
+    dst: Distribution02
+    dport: port6
+  - id: 6
+    type: ethernet
+    network: bridge
+    src: Distribution01
+    sport: port7
+    dst: Distribution02
+    dport: port7
+
+configs:
+  - node: Access01
+    type: full
+    config: /Volumes/Data/gitlab/python-eveng-api/backup/extreme-spb-smlt.unl/Access01
+  - node: Access02
+    type: full
+    config: /Volumes/Data/gitlab/python-eveng-api/backup/extreme-spb-smlt.unl/Access02
+  - node: Distribution01
+    type: full
+    config: /Volumes/Data/gitlab/python-eveng-api/backup/extreme-spb-smlt.unl/Distribution01
+  - node: Distribution02
+    type: full
+    config: /Volumes/Data/gitlab/python-eveng-api/backup/extreme-spb-smlt.unl/Distribution02

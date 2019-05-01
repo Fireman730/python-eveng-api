@@ -95,7 +95,25 @@ class ExtremeDevice(devices.abstract_device.DeviceQEMUAbstract):
     #
     #
     def pushConfig(self):
-        pass
+
+        ssh = self.sshConnect()
+        self.mountNBD(ssh)
+        self.checkMountNBD(ssh)
+
+        ftp_client = ssh.open_sftp()
+
+        try:           
+            print("[ExtremeDevice - pushConfig] copy",
+                  str(self._path+"/config.cfg"), "to", "/mnt/disk/config.cfg")
+            ftp_client.put(localpath=(str(self._path+"/"+"/config.cfg")),
+                           remotepath="/mnt/disk/config.cfg")
+        except Exception as e:
+            print(e)
+
+        self.umountNBD(ssh)
+
+        ftp_client.close()
+        ssh.close()
     # ------------------------------------------------------------------------------------------------------------
     #
     #

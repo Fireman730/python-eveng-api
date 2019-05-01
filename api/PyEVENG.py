@@ -35,6 +35,7 @@ try:
     import devices.extreme_device as extreme_device
     import devices.cisco_device as cisco_device
     import devices.vyos_device as vyos_device
+    import devices.nexus_device as nexus_device
 except ImportError as importError:
     print("Error import cumulus_device")
     print(importError)
@@ -122,6 +123,11 @@ class PyEVENG:
     def getBackupNodesConfig(self, yamlFiles: dict()):
         for lab in yamlFiles['labs']:
             self._userFolder = lab['folder']
+
+            #
+            # ADD CHECK IF LAB EXIST IN FOLDER !!!
+            #
+
             if "all" in lab['hostname']:
                 for hostname in self.getLabNodesName(lab['labname']):
                     self.getBackupConfig(lab['bck_path'], lab['labname'], hostname)
@@ -172,6 +178,9 @@ class PyEVENG:
         # CISCO
         elif "VIOS" in nodeImage:
             self.getCiscoBackup(path, project_name, nodeName, nodeID)
+        # CISCO NEXUS
+        elif "NXOS" in nodeImage:
+            self.getNexusBackup(path, project_name, nodeName, nodeID)
         # VYOS VYATTA
         elif "VYOS" in nodeImage:
             self.getVyosBackup(path, project_name, nodeName, nodeID)
@@ -194,6 +203,22 @@ class PyEVENG:
 
         vyos.getConfigVerbose()
 
+    def getNexusBackup(self, path, projectName, nodeName, nodeID):
+        """
+        This function backup Cisco Nexus configuration files in path given in parameter
+        Files will be retrieve with paramiko SFTP
+
+        Args:
+            param1 (str): Path where save configuration files.
+            param2 (str): EVE-NG Project Name.
+            param3 (str): EVE-NG Node ID.
+        
+        """
+        nexus = nexus_device.NexusDevice(
+            self._ipAddress, self._root, self._password, path,
+            self._pod, projectName, self.getLabID(projectName), nodeName, nodeID)
+
+        nexus.getConfigVerbose()
 
     def getCiscoBackup(self, path, projectName, nodeName, nodeID):
         """
@@ -252,28 +277,64 @@ class PyEVENG:
     #
     def addConfigToNodesLab(self, configToDeploy:dict(), labName:str()):
         for config in configToDeploy:
-            print(config)
             nodeImage = self.getNodeImageAndNodeID(labName, config['node'])
             if config['type'] == "full":
+                print("EXTREME" in nodeImage)
+                print("EXTREME" in nodeImage[0])
                 if "CUMULUS" in nodeImage[0]:
                     self.pushCumulusFullConfig(config, labName)
-                
                 elif "VIOS" in nodeImage[0]:
                     self.pushCiscoConfig(config, labName)
+                # CISCO NEXUS
+                elif "NXOS" in nodeImage[0]:
+                    self.pushNexusConfig(config, labName)
+                elif "EXTREME" in nodeImage[0]:
+                    self.pushExtremeConfig(config, labName)
                 # Others ELIF
-                # elif "EXTREME in nodeImage "
                 #
             
 
             elif config['type'] == "oob":
                 if "CUMULUS" in nodeImage[0]:
                     self.pushCumulusOOBConfig(config, labName)
-                
+                elif "NXOS" in nodeImage:
+                    self.pushNexusConfig(config, labName)
                 elif "VIOS" in nodeImage[0]:
                     self.pushCiscoConfig(config, labName)
+                elif "EXTREME" in nodeImage:
+                    self.pushExtremeConfig(config, labName)
+                        
                 # Others ELIF
                 # elif "EXTREME in nodeImage "
                 #
+
+    def pushExtremeConfig(self, configToDeploy: dict(), labName: str()):
+        """
+        This function will call extreme_device.py for push Full configuration
+
+        Args:
+            param1 (dict): Informations about config
+            param2 (str): Lab name
+        """
+        extreme = extreme_device.ExtremeDevice(
+            self._ipAddress, self._root, self._password, configToDeploy['config'],
+            self._pod, labName, self.getLabID(labName), configToDeploy['node'], self.getNodeIDbyNodeName(labName, configToDeploy['node']))
+
+        extreme.pushConfig()
+
+    def pushNexusConfig(self, configToDeploy: dict(), labName: str()):
+        """
+        This function will call nexus_device.py for push Full configuration
+
+        Args:
+            param1 (dict): Informations about config
+            param2 (str): Lab name
+        """
+        nexus = nexus_device.NexusDevice(
+            self._ipAddress, self._root, self._password, configToDeploy['config'],
+            self._pod, labName, self.getLabID(labName), configToDeploy['node'], self.getNodeIDbyNodeName(labName, configToDeploy['node']))
+
+        nexus.pushConfig()
 
     def pushCiscoConfig(self, configToDeploy: dict(), labName: str()):
         """
