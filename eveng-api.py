@@ -96,17 +96,18 @@ def pjson(jsonPrint):
 #### Main function ####
 @click.command()
 @click.option('--deploy', default="#", help='Path to yaml file that contains topology to deploy.')
+@click.option('--force', default=False, help='If --force=True, if a lab exists on the EVE-NG VM it will be remove.')
 @click.option('--start', default="#", help='Labname you want to start')
 @click.option('--backup', default="#", help='Path to yaml file that contains informations about backups.')
 @click.option('--stop', default="#", help='Labname you want to stop')
 @click.option('--remove', default="#", help='Labname you want to remove')
-def main(deploy, start, backup, stop, remove):
+def main(deploy, force, start, backup, stop, remove):
 
     if deploy != "#":
         try:
             ymlF, vmInfo = open_files(deploy)
             validateYamlFileForPyEVENG(ymlF, vmInfo)
-            deploy_all(ymlF, vmInfo)
+            deploy_all(ymlF, vmInfo, force)
             exit(EXIT_SUCCESS)
         except EVENG_Exception as eveError:
             print(eveError._message)
@@ -183,12 +184,20 @@ def removeLab(ymlF, vmInfo):
 
 # -----------------------------------------------------------------------------------------------------------------------------
 #### Create a Topology (devices, links) based on a YAML File ####
-def deploy_all (ymlF, vmInfo):
+def deploy_all (ymlF, vmInfo, force):
     #api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'], vmInfo['https_port'],
     #                      vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'])
     #print(api.getLabsInFolder())
 
     try:
+        # Remove the lab if option --force=True
+        try:
+            if force is True:
+                removeLab(ymlF, vmInfo)
+            print("[eveng-api - deploy_all] - lab"+str(ymlFymlF['project']['name'])+".unl has been removed !")
+        except Exception as e:
+            pass
+
         if "project" in ymlF.keys():
             create_lab(ymlF, vmInfo)
         
