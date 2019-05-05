@@ -1283,13 +1283,24 @@ class PyEVENG:
     # =========
     #
     def sshConnect(self) -> paramiko.SSHClient():
-        sshClient = paramiko.SSHClient()
-        sshClient.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        sshClient.connect(hostname=self._ipAddress,
-                          username=self._root, password=self._rootPassword)
+        try:
+            sshClient = paramiko.SSHClient()
+            sshClient.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            sshClient.connect(hostname=self._ipAddress,
+                              username=self._root, password=self._rootPassword)
 
-        return sshClient
-
+            return sshClient
+        except paramiko.AuthenticationException as e:
+            print("[PyEVENG - sshConnect] - Authentication issue during the SSH connection to EVE-NG VM")
+        except paramiko.BadHostKeyException as e:
+            print("[PyEVENG - sshConnect] - Bad Host Key issue during the SSH connection to EVE-NG VM")
+        except paramiko.ChannelException as e:
+            print("[PyEVENG - sshConnect] - Channel issue during the SSH connection to EVE-NG VM")
+        except paramiko.SSHException as e:
+            print("[PyEVENG - sshConnect] - SSH issue during the SSH connection to EVE-NG VM : {str(e)}")
+        except TimeoutError as e:
+            print("[PyEVENG - sshConnect] - Timeout during the SSH conenction to EVE-NG VM")
+    
     # =========
     #
     def __init__(self, username, password, ipAddress, port=99999, useHTTPS=False, userFolder="Users", pod="0", root="root", rmdp="eve"):
