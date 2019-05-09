@@ -28,13 +28,13 @@ https://www.eve-ng.net/community/community-2
 
 * Import VM
 
-![install/1.png](.././image/install/1.png)
+![install/1.png](./../image/install/1.png)
 
 
 
 * Select EVE-NG OVA
 
-![install/2.png](.././image/install/2.png)
+![install/2.png](./../image/install/2.png)
 
 
 
@@ -46,7 +46,7 @@ https://www.eve-ng.net/community/community-2
 
 * New Network Adapter
 
-![install/4.png](.././image/install/4.png)
+![install/4.png](./../image/install/4.png)
 
 
 
@@ -62,7 +62,7 @@ https://www.eve-ng.net/community/community-2
 
   With this connection i will be able to reach directly from my MacBookPro to network device virtualized on EVE-NG.
 
-![install/5.png](.././image/install/5.png)
+![install/5.png](./../image/install/5.png)
 
 
 
@@ -128,11 +128,11 @@ Connect to your EVE-NG VM with HTTP/S
 * Username = admin
 * Password = eve
 
-![install/6.png](.././image/install/6.png)
+![install/6.png](./../image/install/6.png)
 
 * Create your own folder
 
-![install/7.png](.././image/install/7.png)
+![install/7.png](./../image/install/7.png)
 
 * Adapt the ``./vm/vm_community.yml`` file with your EVE-NG VM informations
 
@@ -422,11 +422,11 @@ http://192.168.1.131/api/labs/Users/spine-leaf.unl/nodes/6/stop
 
 Architecture is deployed in your EVE-NG
 
-![install/8.png](.././image/install/8.png)
+![install/8.png](./../image/install/8.png)
 
 To connect on host just click on it
 
-![install/9.png](.././image/install/9.png)
+![install/9.png](./../image/install/9.png)
 
 You can see that this script push the configuration
 
