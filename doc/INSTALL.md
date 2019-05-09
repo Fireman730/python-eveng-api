@@ -40,7 +40,7 @@ https://www.eve-ng.net/community/community-2
 
 * Add a new peripheral
 
-![install/3.png](.././image/install/3.png)
+![install/3.png](./../image/install/3.png)
 
 
 
