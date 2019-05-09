@@ -14,7 +14,7 @@ devices:
     config: Unconfigured
     delay: 0
     icon: router.png
-    image: cumulus-vx-3.7.3
+    image: cumulus-vx-3.7.5
     name: Spine01
     left: 45%
     top: 20%
@@ -28,7 +28,7 @@ devices:
     config: Unconfigured
     delay: 0
     icon: router.png
-    image: cumulus-vx-3.7.3
+    image: cumulus-vx-3.7.5
     name: Spine02
     left: 55%
     top: 20%
@@ -42,7 +42,7 @@ devices:
     config: Unconfigured
     delay: 0
     icon: router.png
-    image: cumulus-vx-3.7.3
+    image: cumulus-vx-3.7.5
     name: Leaf01
     left: 35%
     top: 35%
@@ -56,7 +56,7 @@ devices:
     config: Unconfigured
     delay: 0
     icon: router.png
-    image: cumulus-vx-3.7.3
+    image: cumulus-vx-3.7.5
     name: Leaf02
     left: 45%
     top: 35%
@@ -70,7 +70,7 @@ devices:
     config: Unconfigured
     delay: 0
     icon: router.png
-    image: cumulus-vx-3.7.3
+    image: cumulus-vx-3.7.5
     name: Leaf03
     left: 55%
     top: 35%
@@ -84,7 +84,7 @@ devices:
     config: Unconfigured
     delay: 0
     icon: router.png
-    image: cumulus-vx-3.7.3
+    image: cumulus-vx-3.7.5
     name: Leaf04
     left: 65%
     top: 35%
@@ -176,23 +176,23 @@ links:
         port: eth0
     dst: OOB-NETWORK
     dport: oob
-   
+
 configs:
   - node: Spine01
-    type: full
-    config: /Volumes/Data/gitlab/python-eveng-api/backup/cumulus-spine-leaf.unl/Spine01
+    type: oob
+    config: /Volumes/Data/gitlab/python-eveng-api/backup/cumulus-spine-leaf.unl/_OOB/Spine01
   - node: Spine02
-    type: full
-    config: /Volumes/Data/gitlab/python-eveng-api/backup/cumulus-spine-leaf.unl/Spine02
+    type: oob
+    config: /Volumes/Data/gitlab/python-eveng-api/backup/cumulus-spine-leaf.unl/_OOB/Spine02
   - node: Leaf01
-    type: full
-    config: /Volumes/Data/gitlab/python-eveng-api/backup/cumulus-spine-leaf.unl/Leaf01
+    type: oob
+    config: /Volumes/Data/gitlab/python-eveng-api/backup/cumulus-spine-leaf.unl/_OOB/Leaf01
   - node: Leaf02
-    type: full
-    config: /Volumes/Data/gitlab/python-eveng-api/backup/cumulus-spine-leaf.unl/Leaf02
+    type: oob
+    config: /Volumes/Data/gitlab/python-eveng-api/backup/cumulus-spine-leaf.unl/_OOB/Leaf02
   - node: Leaf03
-    type: full
-    config: /Volumes/Data/gitlab/python-eveng-api/backup/cumulus-spine-leaf.unl/Leaf03
+    type: oob
+    config: /Volumes/Data/gitlab/python-eveng-api/backup/cumulus-spine-leaf.unl/_OOB/Leaf03
   - node: Leaf04
-    type: full
-    config: /Volumes/Data/gitlab/python-eveng-api/backup/cumulus-spine-leaf.unl/Leaf04 
+    type: oob
+    config: /Volumes/Data/gitlab/python-eveng-api/backup/cumulus-spine-leaf.unl/_OOB/Leaf04

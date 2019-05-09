@@ -3,39 +3,39 @@ path_vm_info: /Volumes/Data/gitlab/python-eveng-api/vm/vm_info.yml
 # List of lab that you want backup
 # This file contains backup informations
 labs:
-  - labname: cumulus-spine-leaf.unl
-    pod: 0
-    folder: Users
-    # All devices will be sava in "bck_path/labename/hostname/{files}"
-    bck_path: /Volumes/Data/gitlab/python-eveng-api/backup
-    # Backup type. It can be "Verbose" or "Simple"
-    # "Simple" will only backup "/etc/network/interface" "/etc/frr/frr.conf". More info in this repo on folder "commands/config_files_simple.yml
-    # "Verbose" will backup all config file. More info in this repo on folder "commands/config_files_verbose.yml and "commands/config_files_verbose_shell.yml"
-    bck_type: verbose
-    # List of hostname that you want backup - You can use keyword "all"
-    hostname:
-      - Spine01
-      - Spine02
-      - Leaf01
-      - Leaf02
-      - Leaf03
-      - Leaf04
+  #- labname: cumulus-spine-leaf.unl
+  #  pod: 0
+  #  folder: Users
+  #  # All devices will be sava in "bck_path/labename/hostname/{files}"
+  #  bck_path: /Volumes/Data/gitlab/python-eveng-api/backup
+  #  # Backup type. It can be "Verbose" or "Simple"
+  #  # "Simple" will only backup "/etc/network/interface" "/etc/frr/frr.conf". More info in this repo on folder "commands/config_files_simple.yml
+  #  # "Verbose" will backup all config file. More info in this repo on folder "commands/config_files_verbose.yml and "commands/config_files_verbose_shell.yml"
+  #  bck_type: verbose
+  #  # List of hostname that you want backup - You can use keyword "all"
+  #  hostname:
+  #    - Spine01
+  #    - Spine02
+  #    - Leaf01
+  #    - Leaf02
+  #    - Leaf03
+  #    - Leaf04
   
   # Second lab to backup
   - labname: extreme-spb-smlt.unl
-    pod: 0
-    folder: Users
-    bck_path: /Volumes/Data/gitlab/python-eveng-api/backup
-    bck_type: verbose
-    hostname: 
-      - all
-  
-  # Third lab to backup
-  - labname: dmvpn-ospf-qos.unl
     pod: 0
     folder: Network
     bck_path: /Volumes/Data/gitlab/python-eveng-api/backup
     bck_type: verbose
     hostname: 
       - all
+  
+  # Third lab to backup
+  #- labname: dmvpn-ospf-qos.unl
+  #  pod: 0
+  #  folder: Network
+  #  bck_path: /Volumes/Data/gitlab/python-eveng-api/backup
+  #  bck_type: verbose
+  #  hostname: 
+  #    - all
     

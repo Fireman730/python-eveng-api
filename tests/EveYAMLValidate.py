@@ -87,7 +87,7 @@ MANDATORY_YAML_KEYS = ["path_vm_info", "project", "devices", "links"]
 def validateYamlFileForPyEVENG(yamlContent: dict(), vmInfo):
 
     apiEVENG = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'], vmInfo['https_port'],
-                               vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'])
+                               vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'], community=vmInfo['community'])
 
     # Check that path_to_vm info value is a yaml file
     assert CheckIfPathToVMKeyGoToYAMLfile(yamlContent)

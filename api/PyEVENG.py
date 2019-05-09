@@ -86,6 +86,10 @@ class PyEVENG:
     The main aim is provided an Python script for automate an deploy your network un EVE-NG    
     """
     # ------------------------------------------------------------------------------------------
+    # Class CONST
+    # 
+    
+    # ------------------------------------------------------------------------------------------
     # Other commands
     # Using SSH
     
@@ -762,9 +766,9 @@ class PyEVENG:
         Returns:
             list: That contains all lab name
         """
-
         response = requests.get(self._url+"/api/folders/"+str(self._userFolder),
                                 cookies=self._cookies, verify=False)
+
         self.requestsError(response.status_code)
         data = json.loads(response.content)
 
@@ -838,7 +842,11 @@ class PyEVENG:
         """
         This function will stop a node of a lab according to lab name and node id given in parameter
 
+        for EVE-NG PRO
         https://127.0.0.1/api/labs/Users/spine-leaf.unl/nodes/2/stop/stopmode=3
+
+        for EVE-NG Community
+        https://127.0.0.1/api/labs/Users/spine-leaf.unl/nodes/2/stop
 
         Args:
             param1 (str): EVE-NG lab name
@@ -850,8 +858,19 @@ class PyEVENG:
               labName, self.getNodeNameByID(labName, nodeID), "is stopping...")
         
         if self.getNodeStatus(labName, nodeID) != "0":
-            response = requests.get(
-                self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes/"+nodeID+"/stop/stopmode=3", cookies=self._cookies, verify=False)
+            if self._community is False:
+                print(self._url+"/api/labs/"+self._userFolder+"/" +
+                      labName+"/nodes/"+nodeID+"/stop/stopmode=3")
+
+                response = requests.get(
+                    self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes/"+nodeID+"/stop/stopmode=3", cookies=self._cookies, verify=False)
+        
+            else:
+                print(self._url+"/api/labs/"+self._userFolder+"/" +
+                      labName+"/nodes/"+nodeID+"/stop")
+                response = requests.get(
+                    self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes/"+nodeID+"/stop", cookies=self._cookies, verify=False)
+
             self.requestsError(response.status_code)
 
             if self.getNodeStatus(labName, nodeID) == "0":
@@ -884,7 +903,8 @@ class PyEVENG:
         nodesID = self.getLabNodesID(labName)
 
         for nodeID in nodesID:
-          self.stopLabNode(labName, nodeID)
+            print(nodesID, labName)
+            self.stopLabNode(labName, nodeID)
     
     # ------------------------------------------------------------------------------------------
     # Authentification, Users and System
@@ -981,10 +1001,15 @@ class PyEVENG:
         """
         # For avoid InsecureRequestWarning error
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+        
+        print("[PyEVENG - login] ...")
+        
         response = requests.post(
             self._url+"/api/auth/login", data='{"username":"admin","password":"eve"}', verify=False)
 
         self.requestsError(response.status_code)
+        print(f"[PyEVENG - login] ({response.status_code}) logged !")
+
         self._cookies = response.cookies
 
     def logout(self):
@@ -1303,7 +1328,7 @@ class PyEVENG:
     
     # =========
     #
-    def __init__(self, username, password, ipAddress, port=99999, useHTTPS=False, userFolder="Users", pod="0", root="root", rmdp="eve"):
+    def __init__(self, username, password, ipAddress, port=99999, useHTTPS=False, userFolder="Users", pod="0", root="root", rmdp="eve", community=True):
         """
         Constructor / Initializer of PyEVENG
 
@@ -1327,6 +1352,7 @@ class PyEVENG:
         self._pod = pod
         self._root = root
         self._rootPassword = rmdp
+        self._community = community
 
         if useHTTPS:
             self._url = "https://" + ipAddress

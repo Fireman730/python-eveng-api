@@ -93,7 +93,10 @@ def pjson(jsonPrint):
     print(json.dumps(jsonPrint, indent=4, sort_keys=True))
     print("---------------------------------------------------------------------------------")
 
-#### Main function ####
+######################################################
+#
+# MAIN Functions
+#
 @click.command()
 @click.option('--deploy', default="#", help='Path to yaml file that contains topology to deploy.')
 @click.option('--force', default=False, help='If --force=True, if a lab exists on the EVE-NG VM it will be remove.')
@@ -122,7 +125,7 @@ def main(deploy, force, start, backup, stop, remove):
         vmInfo = open_all(str(start[i+1:]))
         try:
             api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'], vmInfo['https_port'],
-                              vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'])
+                                  vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'], community=vmInfo['community'])
             api.startLabAllNodes(start[:i])
         except Exception as e:
             print(e)
@@ -133,7 +136,7 @@ def main(deploy, force, start, backup, stop, remove):
         vmInfo = open_all(str(stop[i+1:]))
         try:
             api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'], vmInfo['https_port'],
-                                  vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'])
+                                  vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'], community=vmInfo['community'])
             api.stopLabAllNodes(stop[:i])
         except Exception as e:
             print(e)
@@ -144,7 +147,7 @@ def main(deploy, force, start, backup, stop, remove):
         vmInfo = open_all(str(remove[i+1:]))
         try:
             api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'], vmInfo['https_port'],
-                                  vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'])
+                                  vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'], community=vmInfo['community'])
             api.deleteLab(remove[:i])
         except Exception as e:
             print(e)
@@ -155,7 +158,7 @@ def main(deploy, force, start, backup, stop, remove):
 #### Create a Lab based on a YAML File ####
 def create_lab(labToCreate, vmInfo):
     api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'], vmInfo['https_port'],
-                          vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'])
+                          vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'], community=vmInfo['community'])
     api.createLab(labToCreate['project'])
 
 # -----------------------------------------------------------------------------------------------------------------------------
@@ -163,7 +166,7 @@ def create_lab(labToCreate, vmInfo):
 #
 def startLab(ymlF,vmInfo):
     api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'], vmInfo['https_port'],
-                          vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'])
+                          vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'], community=vmInfo['community'])
     api.startLabAllNodes(ymlF['project']['name']+".unl")
 
 # -----------------------------------------------------------------------------------------------------------------------------
@@ -171,7 +174,7 @@ def startLab(ymlF,vmInfo):
 #
 def stopLab(ymlF, vmInfo):
     api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'], vmInfo['https_port'],
-                          vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'])
+                          vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'], community=vmInfo['community'])
     api.stopLabAllNodes(ymlF['project']['name'] + ".unl")
 
 # -----------------------------------------------------------------------------------------------------------------------------
@@ -179,14 +182,14 @@ def stopLab(ymlF, vmInfo):
 #
 def removeLab(ymlF, vmInfo):
     api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'], vmInfo['https_port'],
-                          vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'])
+                          vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'], community=vmInfo['community'])
     api.deleteLab(ymlF['project'])
 
 # -----------------------------------------------------------------------------------------------------------------------------
 #### Create a Topology (devices, links) based on a YAML File ####
 def deploy_all (ymlF, vmInfo, force):
     #api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'], vmInfo['https_port'],
-    #                      vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'])
+    #                      vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'], community=vmInfo['community'])
     #print(api.getLabsInFolder())
 
     try:
@@ -194,7 +197,7 @@ def deploy_all (ymlF, vmInfo, force):
         try:
             if force is True:
                 removeLab(ymlF, vmInfo)
-            print("[eveng-api - deploy_all] - lab"+str(ymlFymlF['project']['name'])+".unl has been removed !")
+            print("[eveng-api - deploy_all] - lab"+str(ymlF['project']['name'])+".unl has been removed !")
         except Exception as e:
             pass
 
@@ -232,7 +235,7 @@ def deploy_config(configToDeploy, vmInfo):
     print("[deploy_config]")
 
     api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'], vmInfo['https_port'],
-                          vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'])
+                          vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'], community=vmInfo['community'])
     api.addConfigToNodesLab(configToDeploy['configs'],
                             configToDeploy['project']['name']+".unl")
 # -----------------------------------------------------------------------------------------------------------------------------
@@ -244,7 +247,7 @@ def deploy_device(deviceToDeploy, vmInfo):
     #print(deviceToDeploy['project'])
 
     api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'], vmInfo['https_port'],
-                              vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'])
+                          vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'], community=vmInfo['community'])
     api.addNodesToLab(deviceToDeploy['devices'],
                       deviceToDeploy['project']['name']+".unl")
 
@@ -255,7 +258,7 @@ def deploy_links(linksToDeploy, vmInfo):
     print("[deploy_links]")
 
     api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'], vmInfo['https_port'],
-                          vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'])
+                          vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'], community=vmInfo['community'])
 
     api.addNetworksLinksToLab(linksToDeploy['links'],
                               linksToDeploy['project']['name']+".unl")
@@ -268,7 +271,7 @@ def old_deploy_links(linksToDeploy, vmInfo):
     print("[deploy_links]")
 
     api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'], vmInfo['https_port'],
-                          vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'])
+                          vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'], community=vmInfo['community'])
 
     api.retrieveUNL(linksToDeploy['project']['name'],
                     linksToDeploy['path_to_save']+linksToDeploy['project']['name']+".unl")
@@ -374,7 +377,7 @@ def backup_lab(path):
 
     try:
         api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'],
-                              vmInfo['https_port'], vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'])
+                              vmInfo['https_port'], vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'], community=vmInfo['community'])
         
         api.getBackupNodesConfig(labtoBackup)
     except Exception as e:
