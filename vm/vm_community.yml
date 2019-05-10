@@ -14,3 +14,5 @@ ssh_root: root
 ssh_pass: eve
 # Community Version
 community: true
+# Community Version
+community: true
