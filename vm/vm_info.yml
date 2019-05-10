@@ -12,3 +12,5 @@ https_ssl: true
 ssh_root: root
 # Default eve
 ssh_pass: eve
+# Community Version
+community: false
