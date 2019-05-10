@@ -1,12 +1,53 @@
 #!/usr/bin/env python3.7
 # -*- coding: utf-8 -*-
 
-__author__ = "Dylan Hamel"
-__version__ = "0.1"
-__email__ = "dylan.hamel@protonmail.com"
-__status__ = "Prototype"
+"""
+This file contains a Class (PyEVENG) thah contains REST API Call to EVE-NG VM.
+Some functionalities use a SSH connection.
 
+You can create a object as with the followind code:
+```
+api = PyEVENG.PyEVENG(username=httpsUsername, password=httpsPassword, ipAddress=ipAddress, port=myPort, useHTTPS=httpsSSL,          
+            userFolder=myFolder, pod=myPod,  root=sshRoot, rmdp=sshPass, community=myCommunity)
+```
+
+With your PyEVENG object you can GET and PUT some informations to/from the EVE-NG devices.
+
+Below any features :
+
+* login()
+* get_backup_nodes_config()
+* get_backup_config()
+* add_config_to_nodes_lab()
+
+Backup are implemented for :
+* Cisco IOS L3/l2
+* Cumulus Linux
+* VyOS
+* Cisco Nexus 9k
+* Extreme Network
+
+Push Config are implemented for:
+* Cisco IOS L3/l2
+* Cumulus Linux
+* Extreme Network
+
+"""
+
+__author__     = "Dylan Hamel"
+__maintainer__ = "Dylan Hamel"
+__version__    = "1.0"
+__email__      = "dylan.hamel@protonmail.com"
+__status__     = "Production"
+__copyright__  = "Copyright 2019"
+__license__    = "MIT"
+
+
+######################################################
+#
 # Default value used for exit()
+#
+
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
 
@@ -17,7 +58,7 @@ EXIT_FAILURE = 1
 try:
     from exceptions.EveExceptions import EVENG_Exception
 except ImportError as importError:
-    print("Error import listdir")
+    print("Error import [PyEVENG] listdir")
     print(importError)
     exit(EXIT_FAILURE)
 
@@ -26,7 +67,7 @@ try:
     from os.path import isfile, join
     from os import mkdir
 except ImportError as importError:
-    print("Error import listdir")
+    print("Error import [PyEVENG] listdir")
     print(importError)
     exit(EXIT_FAILURE)
 
@@ -37,42 +78,42 @@ try:
     import devices.vyos_device as vyos_device
     import devices.nexus_device as nexus_device
 except ImportError as importError:
-    print("Error import cumulus_device")
+    print("Error import [PyEVENG] xyz_device")
     print(importError)
     exit(EXIT_FAILURE)
 
 try:
     import paramiko
 except ImportError as importError:
-    print("Error import paramiko")
+    print("Error import [PyEVENG] paramiko")
     print(importError)
     exit(EXIT_FAILURE)
 
 try:
     import urllib3
 except ImportError as importError:
-    print("Error import urllib3")
+    print("Error import [PyEVENG] urllib3")
     print(importError)
     exit(EXIT_FAILURE)
 
 try:
     import requests
 except ImportError as importError:
-    print("Error import requests")
+    print("Error import [PyEVENG] requests")
     print(importError)
     exit(EXIT_FAILURE)
 
 try:
     import json
 except ImportError as importError:
-    print("Error import json")
+    print("Error import [PyEVENG] json")
     print(importError)
     exit(EXIT_FAILURE)
 
 try:
     import sphinx
 except ImportError as importError:
-    print("Error import sphinx")
+    print("Error import [PyEVENG] sphinx")
     print(importError)
     exit(EXIT_FAILURE)
 
@@ -82,49 +123,56 @@ except ImportError as importError:
 #
 class PyEVENG:
     """
+    
     This class is a Python client for retrieve information about your EVE-NG VM.
     The main aim is provided an Python script for automate an deploy your network un EVE-NG    
+    
     """
     # ------------------------------------------------------------------------------------------
+    #
     # Class CONST
     # 
     
     # ------------------------------------------------------------------------------------------
+    #
     # Other commands
     # Using SSH
     
-    def retrieveUNL(self, labName, pathToXML):
-        labPath = "/opt/unetlab/labs/"+self._userFolder+"/"
-        print("[PyEVENG - retrieveUNL] -", labPath+labName+".unl")
-
-        try:
-            ssh = self.sshConnect()
-            ftp_client = ssh.open_sftp()
-            ftp_client.get(str(labPath+labName+".unl"), pathToXML)
-            ftp_client.close()
-            ssh.close()
-        except Exception as e:
-            print(e)
 
 
-    def replaceUNL(self, labName, pathToUNL):
-        labPath = "/opt/unetlab/labs/"+self._userFolder+"/"
-        print("[PyEVENG - replaceUNL] -", labPath+labName)
-        try:
-            ssh = self.sshConnect()
-            ftp_client = ssh.open_sftp()
-            ftp_client.put(pathToUNL,
-                           str(labPath+labName+".unl"))
-            ftp_client.close()
-            ssh.close()
-        except Exception as e:
-            print(e)
-
-
-    # ------------------------------------------------------------------------------------------
-    # Getters (project, labs, node, config, ...)
-    # Using REST API only
+    # ==========================================================================================
+    # ==========================================================================================
+    # 
+    # Following functions are used to backup device configuration
+    # They use SFTP - Paramiko and call xyz_device.py classes that implement xyz_abstract.py class
+    # 
+    
+    # ----------------------------------------------------------
+    #
+    #
     def getBackupNodesConfig(self, yamlFiles: dict()):
+        """
+        This function will recover all devices that need to be backed up.
+        
+
+        ```
+          - labname: dmvpn-ospf-qos.unl
+            pod: 0
+            folder: Network
+            bck_path: /Volumes/Data/gitlab/python-eveng-api/backup
+            bck_type: verbose
+            hostname:               # <<== This list
+              - all
+        ```
+
+        This function will not execute the backup !
+        It will also call the function for execute the backup for each devices.
+
+        Args:
+            param1 (dict): YAML that contains informations about backup
+                            => Example in ./backup/lab_to_backup.yml
+        
+        """
         for lab in yamlFiles['labs']:
             self._userFolder = lab['folder']
 
@@ -139,14 +187,27 @@ class PyEVENG:
                 for hostname in lab['hostname']:
                     self.getBackupConfig(lab['bck_path'], lab['labname'], hostname)
 
-    
+    # ----------------------------------------------------------
+    #
+    #
     def getBackupConfig(self, path:str(), project_name: str(), nodeName: str()):
         """
-        This function will return a string that defines device image
+        This function will find the node image.
+        According to the image. this function will call the function for backup the device.
+
+        Each device type need to extend the ``./devices/abstract_device.py`` class and implement backup functions.
+        When device are implemented you can add a condition.
+
+        Example:
+          lif "NEW_DEVICE" in nodeImage:
+            self.get_newDevice_backup(path, project_name, nodeName, nodeID)
+
+        You also need to implement the get_newDevice_backup(...) function for create a object of your new class.
 
         Args:
-            param1 (str): EVE-NG Project Name.
-            param2 (str): EVE-NG Node ID.
+            param1 (str): Path where store the device backups.
+            param2 (str): EVE-NG Project Name.
+            param3 (str): EVE-NG Node Name.
         
         Returns:
             str: Device image
@@ -189,16 +250,19 @@ class PyEVENG:
         elif "VYOS" in nodeImage:
             self.getVyosBackup(path, project_name, nodeName, nodeID)
     
-
+    # ----------------------------------------------------------
+    #
+    #
     def getVyosBackup(self, path, projectName, nodeName, nodeID):
         """
-        This function backup VyOS configuration files in path given in parameter
+        This function backup VyOS configuration files in path  given in parameter
         Files will be retrieve with paramiko SFTP
 
         Args:
             param1 (str): Path where save configuration files.
             param2 (str): EVE-NG Project Name.
-            param3 (str): EVE-NG Node ID.
+            param3 (str): EVE-NG Node Name.
+            param4 (str): EVE-NG Node ID.
         
         """
         vyos = vyos_device.VyosDevice(
@@ -207,6 +271,9 @@ class PyEVENG:
 
         vyos.getConfigVerbose()
 
+    # ----------------------------------------------------------
+    #
+    #
     def getNexusBackup(self, path, projectName, nodeName, nodeID):
         """
         This function backup Cisco Nexus configuration files in path given in parameter
@@ -215,7 +282,8 @@ class PyEVENG:
         Args:
             param1 (str): Path where save configuration files.
             param2 (str): EVE-NG Project Name.
-            param3 (str): EVE-NG Node ID.
+            param3 (str): EVE-NG Node Name.
+            param4 (str): EVE-NG Node ID.
         
         """
         nexus = nexus_device.NexusDevice(
@@ -224,6 +292,9 @@ class PyEVENG:
 
         nexus.getConfigVerbose()
 
+    # ----------------------------------------------------------
+    #
+    #
     def getCiscoBackup(self, path, projectName, nodeName, nodeID):
         """
         This function backup Cisco configuration files in path given in parameter
@@ -232,7 +303,8 @@ class PyEVENG:
         Args:
             param1 (str): Path where save configuration files.
             param2 (str): EVE-NG Project Name.
-            param3 (str): EVE-NG Node ID.
+            param3 (str): EVE-NG Node Name.
+            param4 (str): EVE-NG Node ID.
         
         """
         cisco = cisco_device.CiscoDevice(
@@ -241,6 +313,9 @@ class PyEVENG:
 
         cisco.getConfigVerbose()
 
+    # ----------------------------------------------------------
+    #
+    #
     def getExtremeBackup(self, path, projectName, nodeName, nodeID):
         """
         This function backup Extreme Network configuration files in path given in parameter
@@ -249,7 +324,8 @@ class PyEVENG:
         Args:
             param1 (str): Path where save configuration files.
             param2 (str): EVE-NG Project Name.
-            param3 (str): EVE-NG Node ID.
+            param3 (str): EVE-NG Node Name.
+            param4 (str): EVE-NG Node ID.
         
         """
         extreme = extreme_device.ExtremeDevice(
@@ -258,6 +334,9 @@ class PyEVENG:
 
         extreme.getConfigVerbose()
 
+    # ----------------------------------------------------------
+    #
+    #
     def getCumulusBackup(self, path, projectName, nodeName, nodeID):
         """
         This function backup Cumulus Network configuration files in path given in parameter
@@ -266,7 +345,8 @@ class PyEVENG:
         Args:
             param1 (str): Path where save configuration files.
             param2 (str): EVE-NG Project Name.
-            param3 (str): EVE-NG Node ID.
+            param3 (str): EVE-NG Node Name.
+            param4 (str): EVE-NG Node ID.
         
         """
         cumulus = cumulus_device.CumulusDevice(
