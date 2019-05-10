@@ -1,5 +1,4 @@
 ---
-path_vm_info: /Volumes/Data/gitlab/python-eveng-api/vm/vm_info.yml
 labs:
   - labname: ansible-cisco-spine-leaf.unl
     pod: 0
