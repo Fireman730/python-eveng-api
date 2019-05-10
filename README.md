@@ -1,26 +1,22 @@
 # EVE-NG for CI/CD pipeline.
 
-         Development in progress ! 
-         Implementation for VyOS, Cisco Nexus is coming soon
-         Improved addition of new device types in progress
-
----
-
-This script has been tested with *EVE-NG - 2.0.5-12-PRO* ```19.04.2019```
+This script has been tested with *EVE-NG - 2.0.5-12-PRO* ```19.04.2019``` and *Community Edition 2.0.3-95* ```09.05.2019```
 
 ```shell
-./eveng-api.py --deploy=./architecture/2spines_4leafs.yml
-./eveng-api.py --deploy=./architecture/2access_2distrib.yml 
+
+# [--vm=] default value is {./vm/vm_info.yml}
+# --vm=./vm/vm_info.yml is useless if your VM informations are at this path
+
+./eveng-api.py --vm=./vm/vm_info.yml --deploy=./architecture/2spines_4leafs.yml
+./eveng-api.py --vm=./vm/vm_info.yml --deploy=./architecture/2access_2distrib.yml 
 #
 # Execution some tasks
 #
-./eveng-api.py --stop=spine-leaf.unl,./vm/vm_info.yml
-./eveng-api.py --start=spine-leaf.unl,./vm/vm_info.yml
-./eveng-api.py --backup=./backup/lab_to_backup.yml
-./eveng-api.py --remove=spine-leaf.unl,./vm/vm_info.yml
+./eveng-api.py --vm=./vm/vm_info.yml --stop=spine-leaf.unl
+./eveng-api.py --vm=./vm/vm_info.yml --start=spine-leaf.unl
+./eveng-api.py --vm=./vm/vm_info.yml --backup=./backup/lab_to_backup.yml
+./eveng-api.py --vm=./vm/vm_info.yml --remove=spine-leaf.unl
 ```
-
-
 
 
 ## Project presentation
