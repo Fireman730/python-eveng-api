@@ -1,0 +1,7 @@
+requests
+PyYAML
+paramiko
+urllib3
+json
+sphinx
+click
