@@ -1,14 +1,19 @@
 #!/usr/bin/env python3.7
 # -*- coding: utf-8 -*-
 
-__author__ = "Dylan Hamel"
-__version__ = "1.0"
-__email__ = "dylan.hamel@protonmail.com"
-__status__ = "Prototype"
+"""
+Description ...
 
+"""
+
+
+__author__     = "Dylan Hamel"
 __maintainer__ = "Dylan Hamel"
-__copyright__ = "Copyright 2019"
-__license__ = "MIT"
+__version__    = "1.0"
+__email__      = "dylan.hamel@protonmail.com"
+__status__     = "Production"
+__copyright__  = "Copyright 2019"
+__license__    = "MIT"
 
 ######################################################
 #
@@ -112,13 +117,22 @@ def main(deploy, vm, force, start, backup, stop, remove):
     # ymlF that contains lab to deploy informations
     #
     vmInfo = open_file(vm)
-    ymlF   = open_file(deploy)
+    
+    if backup != "#" or deploy != "#":
+        ymlF = open_file(deploy)
 
     #
     # Create the object that is connected with EVE-NG API
     #
-    api = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'], vmInfo['https_port'],
-                    vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'], community=vmInfo['community'])
+    api = PyEVENG.PyEVENG(vmInfo['https_username'],
+                            vmInfo['https_password'],
+                            vmInfo['ip'],
+                            vmInfo['https_port'],
+                            vmInfo['https_ssl'],
+                            root=vmInfo['ssh_root'],
+                            rmdp=vmInfo['ssh_pass'],
+                            community=vmInfo['community']
+    )
 
     # ======================================================================================================
     if deploy != "#":
@@ -127,7 +141,7 @@ def main(deploy, vm, force, start, backup, stop, remove):
             #
             # Validate your yaml file
             #
-            validateYamlFileForPyEVENG(ymlF, vmInfo)
+            validateYamlFileForPyEVENG(api, ymlF, vmInfo)
             
             #
             # Call function that will create Lab, deploy devices, deploy links and push config
@@ -164,7 +178,7 @@ def main(deploy, vm, force, start, backup, stop, remove):
 #
 #
 #### Create a Topology (devices, links) based on a YAML File ####
-def deploy_all (api: PyEVE.PyEVE(), ymlF: dict(), vmInfo: dict(), force: bool()):
+def deploy_all (api: PyEVENG.PyEVENG, ymlF: dict(), vmInfo: dict(), force: bool()):
     """
     This function will create your network step by step.
 
@@ -187,7 +201,7 @@ def deploy_all (api: PyEVE.PyEVE(), ymlF: dict(), vmInfo: dict(), force: bool())
         #
         
         if force is True:
-            removeLab(ymlF, vmInfo)
+            api.deleteLab(ymlF['project']['name']+".unl")
             print("[eveng-api - deploy_all] - lab"+str(ymlF['project']['name'])+".unl has been removed !")
 
         # 
@@ -199,12 +213,12 @@ def deploy_all (api: PyEVE.PyEVE(), ymlF: dict(), vmInfo: dict(), force: bool())
         
         if "devices" in ymlF.keys():
             print("[eveng-api - deploy_all] - deploy devices")
-            api.addNodesToLab(deviceToDeploy['devices'],
+            api.addNodesToLab(ymlF['devices'],
                     ymlF['project']['name']+".unl")
         
         if "links" in ymlF.keys():
             print("[eveng-api - deploy_all] - deploy links")
-            api.addNetworksLinksToLab(linksToDeploy['links'],
+            api.addNetworksLinksToLab(ymlF['links'],
                     ymlF['project']['name']+".unl")
         
         #
@@ -216,12 +230,12 @@ def deploy_all (api: PyEVE.PyEVE(), ymlF: dict(), vmInfo: dict(), force: bool())
         #
         # Stop hosts to push config with mount NBD
         #
-        api.startLabAllNodes(ymlF['project']['name']+".unl")
+        api.stopLabAllNodes(ymlF['project']['name']+".unl")
         
         if "configs" in ymlF.keys():
             print("[eveng-api - deploy_all] - push configs")
-            api.addConfigToNodesLab(configToDeploy['configs'],
-                    configToDeploy['project']['name']+".unl")
+            api.addConfigToNodesLab(ymlF['configs'],
+                                    ymlF['project']['name']+".unl")
         
         # 
         # Restart hosts when config files are pushed
@@ -231,13 +245,13 @@ def deploy_all (api: PyEVE.PyEVE(), ymlF: dict(), vmInfo: dict(), force: bool())
     except EVENG_Exception as eve:
         print(eve._message)
         if eve._error != 12:
-            removeLab(api, ymlF, vmInfo)
+            api.deleteLab(ymlF['project']['name']+".unl")
 
 
     except Exception as e:
         print(e)
         print("[eveng-api - deploy_all] - error during la creation !")
-        removeLab(ymlF, vmInfo)
+        api.deleteLab(ymlF['project']['name']+".unl")
 
 # ----------------------------------------------------
 #
@@ -256,7 +270,7 @@ def open_file(path: str()) -> dict():
 
     with open(path, 'r') as yamlFile:
         try:
-            data = yaml.load(s1)
+            data = yaml.load(yamlFile)
         except yaml.YAMLError as exc:
             print(exc)
     

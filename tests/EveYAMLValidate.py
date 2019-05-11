@@ -75,8 +75,8 @@ except ImportError as importError:
 IMAGE_TYPES = ["iol", "dynamips", "qemu"]
 CONSOLE_TYPES = ["telnet", "vnc"]
 CONFIG_TYPES = ["full", "oob"]
-YAML_KEYS = ["path_vm_info", "project", "devices", "links", "configs"]
-MANDATORY_YAML_KEYS = ["path_vm_info", "project", "devices", "links"]
+YAML_KEYS = ["project", "devices", "links", "configs"]
+MANDATORY_YAML_KEYS = ["project", "devices", "links"]
 ######################################################
 #
 # MAIN Functions
@@ -84,13 +84,10 @@ MANDATORY_YAML_KEYS = ["path_vm_info", "project", "devices", "links"]
 # Runs all test functins
 # Call test functions below ...
 #
-def validateYamlFileForPyEVENG(yamlContent: dict(), vmInfo):
-
-    apiEVENG = PyEVENG.PyEVENG(vmInfo['https_username'], vmInfo['https_password'], vmInfo['ip'], vmInfo['https_port'],
-                               vmInfo['https_ssl'], root=vmInfo['ssh_root'], rmdp=vmInfo['ssh_pass'], community=vmInfo['community'])
+def validateYamlFileForPyEVENG(api: PyEVENG.PyEVENG, yamlContent: dict(), vmInfo):
 
     # Check that path_to_vm info value is a yaml file
-    assert CheckIfPathToVMKeyGoToYAMLfile(yamlContent)
+    # assert CheckIfPathToVMKeyGoToYAMLfile(yamlContent)
     # Check that YAML file contains project:, devices: and links: keys
     assert checkifKeysAreInYamlFile(yamlContent)
     # Check that YAML file keys are corrects
@@ -116,7 +113,7 @@ def validateYamlFileForPyEVENG(yamlContent: dict(), vmInfo):
     assert checkDeviceElement(
         CONFIG_TYPES, yamlContent, dictToVerify="configs", paramToVerify="type")
     # Check that device image is available in the EVE-NG
-    assert checkIfImageIsAvaiable(apiEVENG, yamlContent)
+    assert checkIfImageIsAvaiable(api, yamlContent)
     # Check that nodes in configs: node is in devices added
     assert checkIfConfigsNodesExists(yamlContent)
 

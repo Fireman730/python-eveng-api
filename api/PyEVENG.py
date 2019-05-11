@@ -938,6 +938,7 @@ class PyEVENG:
               labName, self.getNodeNameByID(labName, nodeID), "is stopping...")
         
         if self.getNodeStatus(labName, nodeID) != "0":
+            
             if self._community is False:
                 print(self._url+"/api/labs/"+self._userFolder+"/" +
                       labName+"/nodes/"+nodeID+"/stop/stopmode=3")
@@ -983,7 +984,6 @@ class PyEVENG:
         nodesID = self.getLabNodesID(labName)
 
         for nodeID in nodesID:
-            print(nodesID, labName)
             self.stopLabNode(labName, nodeID)
     
     # ------------------------------------------------------------------------------------------
