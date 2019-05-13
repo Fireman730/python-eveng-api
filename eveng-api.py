@@ -67,6 +67,14 @@ except ImportError as importError:
     print("Error import [eveng-api] yaml")
     print(importError)
     exit(EXIT_FAILURE)
+
+try:
+    import pprint
+    PP = pprint.PrettyPrinter(indent=4)
+except ImportError as importError:
+    print("Error import [eveng-api] pprint")
+    print(importError)
+    exit(EXIT_FAILURE)
 ######################################################
 #
 # Constantes
@@ -103,7 +111,8 @@ def pjson(jsonPrint: dict()):
 @click.option('--backup', default="#", help='Path to yaml file that contains informations about backups.')
 @click.option('--stop', default="#", help='Labname you want to stop')
 @click.option('--remove', default="#", help='Labname you want to remove')
-def main(deploy, vm, force, start, backup, stop, remove):
+@click.option('--test', default=False, help='This argument will test your VM parameter in --vm')
+def main(deploy, vm, force, start, backup, stop, remove, test):
     """
     This function is the main function of this project.
     It will retrieve arguments and run Functions
@@ -135,6 +144,11 @@ def main(deploy, vm, force, start, backup, stop, remove):
     )
 
     # ======================================================================================================
+    if test:
+        PP.pprint(api.status())
+        api.logout()
+    
+    
     if deploy != "#":
         try:
 
@@ -147,6 +161,7 @@ def main(deploy, vm, force, start, backup, stop, remove):
             # Call function that will create Lab, deploy devices, deploy links and push config
             #
             deploy_all(api, ymlF, vmInfo, force)
+            api.logout()
 
             exit(EXIT_SUCCESS)
 
@@ -156,19 +171,23 @@ def main(deploy, vm, force, start, backup, stop, remove):
     # ======================================================================================================
     if backup != "#":
         api.getBackupNodesConfig(ymlF)
+        api.logout()
         exit(EXIT_SUCCESS)
 
     # ======================================================================================================
     if start != "#":
         api.startLabAllNodes(start)
+        api.logout()
         exit(EXIT_SUCCESS)
 
     if stop != "#":
         api.stopLabAllNodes(stop)
+        api.logout()
         exit(EXIT_SUCCESS)
 
     if remove != "#":
         api.deleteLab(remove)
+        api.logout()
         exit(EXIT_SUCCESS)
 
     

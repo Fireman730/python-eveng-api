@@ -1096,9 +1096,13 @@ class PyEVENG:
         """
         This function logout to EVE-NG        
         """
-        response = requests.post(
+        print("[PyEVENG - logout] ...")
+        response = requests.get(
             self._url+"/api/auth/logout", cookies=self._cookies, verify=False)
 
+        self.requestsError(response.status_code)
+
+        print(f"[PyEVENG - logout] ({response.status_code}) EVE-NG says Byyye :) !")
         
 
     # --------------------------------------------------------------------------------------------------
