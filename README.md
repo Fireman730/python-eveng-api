@@ -16,6 +16,8 @@ This script has been tested with *EVE-NG - 2.0.5-12-PRO* ```19.04.2019``` and *C
 ./eveng-api.py --vm=./vm/vm_info.yml --start=spine-leaf.unl
 ./eveng-api.py --vm=./vm/vm_info.yml --backup=./backup/lab_to_backup.yml
 ./eveng-api.py --vm=./vm/vm_info.yml --remove=spine-leaf.unl
+./eveng-api.py --vm=./vm/vm_info.yml --test=True
+./eveng-api.py --vm=./vm/vm_info.yml --images=True
 ```
 
 
