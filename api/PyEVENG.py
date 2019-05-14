@@ -1085,7 +1085,7 @@ class PyEVENG:
         print("[PyEVENG - login] ...")
         
         response = requests.post(
-            self._url+"/api/auth/login", data='{"username":"admin","password":"eve"}', verify=False)
+            self._url+"/api/auth/login", data='{"username":"'+self._username+'","password":"'+self._password+'"}', verify=False)
 
         self.requestsError(response.status_code)
         print(f"[PyEVENG - login] ({response.status_code}) logged !")
