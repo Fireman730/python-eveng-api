@@ -113,7 +113,7 @@ def pjson(jsonPrint: dict()):
 @click.option('--remove', default="#", help='Labname you want to remove')
 @click.option('--test', default=False, help='This argument will test your VM parameter in --vm.')
 @click.option('--images', default=False, help='This argument will list images available on EVE-NG VM.')
-def main(deploy, vm, force, start, backup, stop, remove, test):
+def main(deploy, vm, force, start, backup, stop, remove, test, images):
     """
     This function is the main function of this project.
     It will retrieve arguments and run Functions
@@ -149,7 +149,7 @@ def main(deploy, vm, force, start, backup, stop, remove, test):
         PP.pprint(api.status())
         api.logout()
     
-    if test:
+    if images:
         PP.pprint(api.getNodeInstall())
         api.logout()
     
