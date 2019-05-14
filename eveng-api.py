@@ -111,7 +111,8 @@ def pjson(jsonPrint: dict()):
 @click.option('--backup', default="#", help='Path to yaml file that contains informations about backups.')
 @click.option('--stop', default="#", help='Labname you want to stop')
 @click.option('--remove', default="#", help='Labname you want to remove')
-@click.option('--test', default=False, help='This argument will test your VM parameter in --vm')
+@click.option('--test', default=False, help='This argument will test your VM parameter in --vm.')
+@click.option('--images', default=False, help='This argument will list images available on EVE-NG VM.')
 def main(deploy, vm, force, start, backup, stop, remove, test):
     """
     This function is the main function of this project.
@@ -148,6 +149,9 @@ def main(deploy, vm, force, start, backup, stop, remove, test):
         PP.pprint(api.status())
         api.logout()
     
+    if test:
+        PP.pprint(api.getNodeInstall())
+        api.logout()
     
     if deploy != "#":
         try:
