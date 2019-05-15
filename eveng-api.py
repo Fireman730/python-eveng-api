@@ -27,6 +27,20 @@ EXIT_FAILURE = 1
 # Import Library
 #
 try:
+    import tools.ip
+except ImportError as importError:
+    print("Error import [PyEVENG] tools.ip")
+    print(importError)
+    exit(EXIT_FAILURE)
+
+try:
+    import tools.routing
+except ImportError as importError:
+    print("Error import [eveng-api] tools.routing")
+    print(importError)
+    exit(EXIT_FAILURE)
+
+try:
     import json
 except ImportError as importError:
     print("Error import [eveng-api] json")
@@ -119,7 +133,6 @@ def main(deploy, vm, force, start, backup, stop, remove, test, images):
     It will retrieve arguments and run Functions
 
     """
-
 
     # Open files and retrieve informations
     # VM IP, username, password, etc.

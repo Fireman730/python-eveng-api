@@ -13,6 +13,7 @@ iface lo inet loopback
 auto eth0
 iface eth0
     address 10.0.4.102/24
+    address 10.0.5.102/24
     gateway 10.0.4.1
 
 auto swp1

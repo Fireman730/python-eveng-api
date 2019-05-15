@@ -56,6 +56,20 @@ EXIT_FAILURE = 1
 # Import Library
 #
 try:
+    import tools.ip
+except ImportError as importError:
+    print("Error import [PyEVENG] tools.ip")
+    print(importError)
+    exit(EXIT_FAILURE)
+
+try:
+    import tools.routing
+except ImportError as importError:
+    print("Error import [PyEVENG] tools.routing")
+    print(importError)
+    exit(EXIT_FAILURE)
+
+try:
     from exceptions.EveExceptions import EVENG_Exception
 except ImportError as importError:
     print("Error import [PyEVENG] listdir")
@@ -1119,6 +1133,7 @@ class PyEVENG:
         if str(labInformations['name']+".unl") in self.getLabsInFolder():
             raise EVENG_Exception(str("[EXCEPTION][PyEVENG - createLab] - Lab ("+labInformations['name']+") already exists in this folder"), 12)
         
+        self._project = labInformations['name']+".unl"
         print("[PyEVENG createLab] -",
               labInformations['name'], "is creating...")
         
@@ -1297,9 +1312,34 @@ class PyEVENG:
             param1 (dict): Nodes Informamations
             param2 (str): Labname
         """
+        ssh = self.sshConnect()
+
         for link in interfaceToAdd:
             if link['dst'] == "OOB-NETWORK":
+                #
+                # Create The new interface
+                # 
+                        
+                index = link['dport'].find("/")
+                ipMgmtEve = link['dport'][:index]
+                ipMaskEveCidr = link['dport'][index+1:]
+                ipMaskEve = tools.ip.convertCIDRtoNetmask(
+                    ipMaskEveCidr)
+
+                print(
+                    "[PyEVENG - addLinksToLab] - sudo ifconfig {} up && sudo ifconfig {} {} netmask {}".format(link['network'], link['network'], ipMgmtEve, ipMaskEve))
+                stdin, stdout, stderr = ssh.exec_command(
+                    "sudo ifconfig {} up && sudo ifconfig {} {} netmask {}".format(link['network'], link['network'], ipMgmtEve, ipMaskEve))
+                o = "".join(stdout.readlines())
+
+
                 for oobInterface in link['src']:
+                    
+                    #
+                    self.create_iptables_nat(
+                        ssh, link['network'], oobInterface['ip_mgmt'], oobInterface['ssh'], ipMgmtEve, oobInterface['nat'])
+                    #
+
                     self.addLinkToLab(link['id'], self.getNodeIDbyNodeName(labName, oobInterface['host']), self.getNodeInterfaceID(
                         labName, self.getNodeIDbyNodeName(labName, oobInterface['host']), oobInterface['port']), labName)
 
@@ -1308,6 +1348,78 @@ class PyEVENG:
                                   self.getNodeInterfaceID(labName, self.getNodeIDbyNodeName(labName, link['src']), link['sport']), labName)
                 self.addLinkToLab(link['id'], self.getNodeIDbyNodeName(labName, link['dst']),
                                   self.getNodeInterfaceID(labName, self.getNodeIDbyNodeName(labName, link['dst']), link['dport']), labName)
+
+        ssh.close()
+    # =========
+    #
+    def create_iptables_nat(self, ssh:paramiko.SSHClient(), interface:str(), hostsIP:str(), sshMgmt:str(), eveIP:str(), eveSsh:str()):
+        """
+        This function will create iptables on the EVE-NG VM
+            * SNAT
+            * ALLOWED
+            * DNAT
+
+        Args:
+            param1 (str): SSH Connexion to EVE-NG VM
+            param2 (str): EVE-NG interface on which one devices are connected
+            param3 (str): device ip address
+            param4 (str): device ssh management port
+        """
+        commands = list()
+
+        #
+        # Create Folder
+        #
+        stdin, stdout, stderr = ssh.exec_command("mkdir -p ~/.eveng")
+        o = "".join(stdout.readlines())
+
+        #
+        # Create file
+        #
+        print("[PyEVENG - create_iptables_nat] - create file", self._project)
+        stdin, stdout, stderr = ssh.exec_command(
+            "touch ~/.eveng/"+self._project)
+        o = "".join(stdout.readlines())
+
+        #
+        # DNAT
+        #
+        print("[PyEVENG - create_iptables_nat] -",
+              tools.routing.IPTABLES_DNAT.format("A", eveSsh, hostsIP, sshMgmt))
+        stdin, stdout, stderr = ssh.exec_command(
+            tools.routing.IPTABLES_DNAT.format("A", eveSsh, hostsIP, sshMgmt))
+        o = "".join(stdout.readlines())
+       
+        commands.append(tools.routing.IPTABLES_DNAT.format("D", eveSsh, hostsIP, sshMgmt))
+        
+        #
+        # FIREWALL
+        #
+        print("[PyEVENG - create_iptables_nat] -",
+              tools.routing.IPTABLES_ALLOWED.format("A", eveSsh))
+        stdin, stdout, stderr = ssh.exec_command(
+            tools.routing.IPTABLES_ALLOWED.format("A", eveSsh))
+        o = "".join(stdout.readlines())
+
+        commands.append(tools.routing.IPTABLES_ALLOWED.format("D", eveSsh))
+
+        #
+        # SNAT
+        #
+        print("[PyEVENG - create_iptables_nat] -",
+              tools.routing.IPTABLES_SNAT.format("A", interface, eveIP))
+        stdin, stdout, stderr = ssh.exec_command(
+            tools.routing.IPTABLES_SNAT.format("A", interface, eveIP))
+        o = "".join(stdout.readlines())
+        
+        commands.append(tools.routing.IPTABLES_SNAT.format("D", interface, eveIP))
+
+        sftp = ssh.open_sftp()
+        f = sftp.open("/root/.eveng/"+self._project, 'a')
+        for command in commands:
+            f.write(command+"\n")
+        
+        f.close()
 
     # =========
     #
@@ -1320,9 +1432,9 @@ class PyEVENG:
 
         Args:
             param1 (str): Lab Names
-            param1 (str): Nodes Names
-            param2 (str): Node interface ID
-            param3 (str): Network ID
+            param2 (str): Nodes Names
+            param3 (str): Node interface ID
+            param4 (str): Network ID
         """
         print("[PyEVENG addLinkToLab] -",
               nodeID, interfaceID, "is deploying...")
@@ -1437,6 +1549,7 @@ class PyEVENG:
         self._root = root
         self._rootPassword = rmdp
         self._community = community
+        self._project = ""
 
         if useHTTPS:
             self._url = "https://" + ipAddress
