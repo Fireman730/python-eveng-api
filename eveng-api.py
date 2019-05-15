@@ -26,12 +26,6 @@ EXIT_FAILURE = 1
 #
 # Import Library
 #
-try:
-    import tools.ip
-except ImportError as importError:
-    print("Error import [PyEVENG] tools.ip")
-    print(importError)
-    exit(EXIT_FAILURE)
 
 try:
     import tools.routing
