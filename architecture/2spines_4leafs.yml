@@ -1,7 +1,7 @@
 ---
 project:
   path: /Users/
-  name: spine-leaf
+  name: test
   version: 1
   author: DylanHamel
   description: Spine and Leaf architecture for test befor prod
@@ -159,39 +159,59 @@ links:
     dst: Leaf01
     dport: swp2
   - id: 9
-    network: pnet4
+    network: pnet5
     src:
       - host: Spine01
         port: eth0
+        ip_mgmt: 10.0.5.101
+        ssh: 22
+        nat: 22101
       - host: Spine02
         port: eth0
+        ip_mgmt: 10.0.5.102
+        ssh: 22
+        nat: 22102
       - host: Leaf01
         port: eth0
+        ip_mgmt: 10.0.5.201
+        ssh: 22
+        nat: 22201
       - host: Leaf02
         port: eth0
+        ip_mgmt: 10.0.5.202
+        ssh: 22
+        nat: 22202
       - host: Leaf03
         port: eth0
+        ip_mgmt: 10.0.5.203
+        ssh: 22
+        nat: 22203
       - host: Leaf04
         port: eth0
+        ip_mgmt: 10.0.5.204
+        ssh: 22
+        nat: 22204
     dst: OOB-NETWORK
-    dport: oob
+    # Enter a free address in the range
+    # This ip addr will be assigned to EVE-NG VM
+    dport: 10.0.5.1/24
 
 configs:
   - node: Spine01
-    type: oob
-    config: /Volumes/Data/gitlab/python-eveng-api/backup/cumulus-spine-leaf.unl/_OOB/Spine01
+    type: full
+    config: /Volumes/Data/gitlab/python-eveng-api/backup/cumulus-spine-leaf.unl/Spine01
   - node: Spine02
-    type: oob
-    config: /Volumes/Data/gitlab/python-eveng-api/backup/cumulus-spine-leaf.unl/_OOB/Spine02
+    type: full
+    config: /Volumes/Data/gitlab/python-eveng-api/backup/cumulus-spine-leaf.unl/Spine02
   - node: Leaf01
-    type: oob
-    config: /Volumes/Data/gitlab/python-eveng-api/backup/cumulus-spine-leaf.unl/_OOB/Leaf01
+    type: full
+    config: /Volumes/Data/gitlab/python-eveng-api/backup/cumulus-spine-leaf.unl/Leaf01
   - node: Leaf02
-    type: oob
-    config: /Volumes/Data/gitlab/python-eveng-api/backup/cumulus-spine-leaf.unl/_OOB/Leaf02
+    type: full
+    config: /Volumes/Data/gitlab/python-eveng-api/backup/cumulus-spine-leaf.unl/Leaf02
   - node: Leaf03
-    type: oob
-    config: /Volumes/Data/gitlab/python-eveng-api/backup/cumulus-spine-leaf.unl/_OOB/Leaf03
+    type: full
+    config: /Volumes/Data/gitlab/python-eveng-api/backup/cumulus-spine-leaf.unl/Leaf03
   - node: Leaf04
-    type: oob
-    config: /Volumes/Data/gitlab/python-eveng-api/backup/cumulus-spine-leaf.unl/_OOB/Leaf04
+    type: full
+    config: /Volumes/Data/gitlab/python-eveng-api/backup/cumulus-spine-leaf.unl/Leaf04
