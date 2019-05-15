@@ -1,9 +1,66 @@
-import ipaddress
-import random
-import time
-import sys
-# NEW CLASS FOR CONVERT NETMASK AND MGMT IP ADDRESS
+#!/usr/bin/env python3.7
+# -*- coding: utf-8 -*-
 
+"""
+NEW CLASS FOR CONVERT NETMASK AND MGMT IP ADDRESS
+"""
+
+
+__author__ = "Dylan Hamel"
+__maintainer__ = "Dylan Hamel"
+__version__ = "1.0"
+__email__ = "dylan.hamel@protonmail.com"
+__status__ = "Production"
+__copyright__ = "Copyright 2019"
+__license__ = "MIT"
+
+######################################################
+#
+# Default value used for exit()
+#
+EXIT_SUCCESS = 0
+EXIT_FAILURE = 1
+
+######################################################
+#
+# Import Library
+#
+try:
+    import ipaddress
+except ImportError as importError:
+    print("Error import [ip.py] ipaddress")
+    print(importError)
+    exit(EXIT_FAILURE)
+
+try:
+    import random
+except ImportError as importError:
+    print("Error import [ip.py] random")
+    print(importError)
+    exit(EXIT_FAILURE)
+
+try:
+    import time
+except ImportError as importError:
+    print("Error import [ip.py] time")
+    print(importError)
+    exit(EXIT_FAILURE)
+
+try:
+    import sys
+except ImportError as importError:
+    print("Error import [ip.py] sys")
+    print(importError)
+    exit(EXIT_FAILURE)
+######################################################
+#
+# Constantes
+#
+
+######################################################
+#
+# Functions
+#
 
 def generateRandomIPAddressInSubnetBothWithAsk (ipAddress, netmask) :
     """
