@@ -20,6 +20,8 @@ This script has been tested with *EVE-NG - 2.0.5-12-PRO* ```19.04.2019``` and *C
 ./eveng-api.py --vm=./vm/vm_info.yml --images=True
 ```
 
+> You can find information about "How write your network architecture YAML file in https://gitlab.com/DylanHamel/python-eveng-api/wikis/home
+
 
 ## Project presentation
 Every days you hear about "CI/CD", pipeline or DevOps.
