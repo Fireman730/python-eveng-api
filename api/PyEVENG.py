@@ -56,6 +56,14 @@ EXIT_FAILURE = 1
 # Import Library
 #
 try:
+    import pprint
+    PP = pprint.PrettyPrinter(indent=4)
+except ImportError as importError:
+    print("Error import [eveng-api] pprint")
+    print(importError)
+    exit(EXIT_FAILURE)
+
+try:
     import tools.ip
 except ImportError as importError:
     print("Error import [PyEVENG] tools.ip")
@@ -1036,11 +1044,26 @@ class PyEVENG:
         content = json.loads(response.content)
         
         listResult = list()
-        for value in content['data']['options']['image']['list'].values():
-            listResult.append(value)
+        if "image" in content['data']['options'].keys():
+            if len(content['data']['options']['image']['list']) != 0:
+                for value in content['data']['options']['image']['list'].values():
+                    listResult.append(value)
 
         return listResult
     
+
+    def getNodeVersionInstall(self, deviceType:str()):
+        """
+        This function will return a list that contains all installed nodes
+
+
+        Returns:
+            list: That contains all installed nodes
+        """
+        data = self.getImageVersionByModel(deviceType)
+        return data
+
+
     def getNodeInstall(self) -> dict():
         """
         This function will return a list that contains all installed nodes

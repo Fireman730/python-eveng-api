@@ -157,7 +157,14 @@ def main(deploy, vm, force, start, backup, stop, remove, test, images):
         api.logout()
     
     if images:
-        PP.pprint(api.getNodeInstall())
+        deviceTypes = api.getNodeInstall()
+        result = dict()
+        for deviceType in deviceTypes.keys():
+            versions = api.getNodeVersionInstall(deviceType)
+            if versions is not "None":
+                result[deviceType] = versions
+        
+        PP.pprint(result)
         api.logout()
     
     if deploy != "#":
