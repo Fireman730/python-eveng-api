@@ -99,6 +99,7 @@ try:
     import devices.cisco_device as cisco_device
     import devices.vyos_device as vyos_device
     import devices.nexus_device as nexus_device
+    import devices.arista_device as arista_device
 except ImportError as importError:
     print("Error import [PyEVENG] xyz_device")
     print(importError)
@@ -271,7 +272,30 @@ class PyEVENG:
         # VYOS VYATTA
         elif "VYOS" in nodeImage:
             self.getVyosBackup(path, project_name, nodeName, nodeID)
-    
+        # VEOS ARISTA
+        elif "VEOS" in nodeImage:
+            self.getAristaBackup(path, project_name, nodeName, nodeID)
+
+    # ----------------------------------------------------------
+    #
+    #
+    def getAristaBackup(self, path, projectName, nodeName, nodeID):
+        """
+        This function backup Arista configuration files in path  given in parameter
+        Files will be retrieve with paramiko SFTP
+
+        Args:
+            param1 (str): Path where save configuration files.
+            param2 (str): EVE-NG Project Name.
+            param3 (str): EVE-NG Node Name.
+            param4 (str): EVE-NG Node ID.
+        
+        """
+        arista = arista_device.AristaDevice(
+            self._ipAddress, self._root, self._password, path,
+            self._pod, projectName, self.getLabID(projectName), nodeName, nodeID)
+
+        arista.getConfigVerbose()
     # ----------------------------------------------------------
     #
     #
@@ -396,6 +420,9 @@ class PyEVENG:
                 # EXTREME NETWORK
                 elif "EXTREME" in nodeImage[0]:
                     self.pushExtremeConfig(config, labName)
+                # ARISTA VEOS
+                elif "VEOS" in nodeImage[0]:
+                    self.pushAristaConfig(config, labName)
                 # Others ELIF
                 #
 
@@ -408,10 +435,28 @@ class PyEVENG:
                     self.pushCiscoConfig(config, labName)
                 elif "EXTREME" in nodeImage[0]:
                     self.pushExtremeConfig(config, labName)
+                # ARISTA VEOS
+                elif "VEOS" in nodeImage[0]:
+                    self.pushAristaConfig(config, labName)
                         
                 # Others ELIF
                 # elif "EXTREME in nodeImage "
                 #
+
+    def pushAristaConfig(self, configToDeploy: dict(), labName: str()):
+        """
+        This function will call arista_device.py for push Full configuration
+
+        Args:
+            param1 (dict): Informations about config
+            param2 (str): Lab name
+        """
+        arista = arista_device.AristaDevice(
+            self._ipAddress, self._root, self._password, configToDeploy['config'],
+            self._pod, labName, self.getLabID(labName), configToDeploy['node'], self.getNodeIDbyNodeName(labName, configToDeploy['node']))
+
+        arista.pushConfig()
+
 
     def pushExtremeConfig(self, configToDeploy: dict(), labName: str()):
         """
@@ -1342,25 +1387,26 @@ class PyEVENG:
                 #
                 # Create The new interface
                 # 
-                        
-                index = link['dport'].find("/")
-                ipMgmtEve = link['dport'][:index]
-                ipMaskEveCidr = link['dport'][index+1:]
-                ipMaskEve = tools.ip.convertCIDRtoNetmask(
-                    ipMaskEveCidr)
+                
+                if "ip_eve" in link.keys():
+                    index = link['ip_eve'].find("/")
+                    ipMgmtEve = link['ip_eve'][:index]
+                    ipMaskEveCidr = link['ip_eve'][index+1:]
+                    ipMaskEve = tools.ip.convertCIDRtoNetmask(
+                        ipMaskEveCidr)
 
-                print(
-                    "[PyEVENG - addLinksToLab] - sudo ifconfig {} up && sudo ifconfig {} {} netmask {}".format(link['network'], link['network'], ipMgmtEve, ipMaskEve))
-                stdin, stdout, stderr = ssh.exec_command(
-                    "sudo ifconfig {} up && sudo ifconfig {} {} netmask {}".format(link['network'], link['network'], ipMgmtEve, ipMaskEve))
-                o = "".join(stdout.readlines())
+                    print(
+                        "[PyEVENG - addLinksToLab] - sudo ifconfig {} up && sudo ifconfig {} {} netmask {}".format(link['network'], link['network'], ipMgmtEve, ipMaskEve))
+                    stdin, stdout, stderr = ssh.exec_command(
+                        "sudo ifconfig {} up && sudo ifconfig {} {} netmask {}".format(link['network'], link['network'], ipMgmtEve, ipMaskEve))
+                    o = "".join(stdout.readlines())
 
 
                 for oobInterface in link['src']:
                     
-                    #
-                    self.create_iptables_nat(
-                        ssh, link['network'], oobInterface['ip_mgmt'], oobInterface['ssh'], ipMgmtEve, oobInterface['nat'])
+                    if "ip_eve" in link.keys():
+                        self.create_iptables_nat(
+                            ssh, link['network'], oobInterface['ip_mgmt'], oobInterface['ssh'], ipMgmtEve, oobInterface['nat'])
                     #
 
                     self.addLinkToLab(link['id'], self.getNodeIDbyNodeName(labName, oobInterface['host']), self.getNodeInterfaceID(

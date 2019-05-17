@@ -1,0 +1,3 @@
+startup-config: /mnt/disk/startup-config
+zerotouch-config: /mnt/disk/zerotouch-config
+boot-config: /mnt/disk/boot-config

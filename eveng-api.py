@@ -134,9 +134,6 @@ def main(deploy, vm, force, start, backup, stop, remove, test, images):
     # ymlF that contains lab to deploy informations
     #
     vmInfo = open_file(vm)
-    
-    if backup != "#" or deploy != "#":
-        ymlF = open_file(deploy)
 
     #
     # Create the object that is connected with EVE-NG API
@@ -170,8 +167,9 @@ def main(deploy, vm, force, start, backup, stop, remove, test, images):
         api.logout()
     
     if deploy != "#":
+        ymlF = open_file(deploy)
         try:
-
+        
             #
             # Validate your yaml file
             #
@@ -190,6 +188,7 @@ def main(deploy, vm, force, start, backup, stop, remove, test, images):
 
     # ======================================================================================================
     if backup != "#":
+        ymlF = open_file(backup)
         api.getBackupNodesConfig(ymlF)
         api.logout()
         exit(EXIT_SUCCESS)
