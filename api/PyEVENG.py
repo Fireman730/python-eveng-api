@@ -1042,7 +1042,7 @@ class PyEVENG:
         self.requestsError(response.status_code)
 
         content = json.loads(response.content)
-        
+
         listResult = list()
         if "image" in content['data']['options'].keys():
             if len(content['data']['options']['image']['list']) != 0:

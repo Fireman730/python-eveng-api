@@ -161,10 +161,12 @@ def main(deploy, vm, force, start, backup, stop, remove, test, images):
         result = dict()
         for deviceType in deviceTypes.keys():
             versions = api.getNodeVersionInstall(deviceType)
-            if versions is not "None":
+            if len(versions):
                 result[deviceType] = versions
         
+        print("==================================================================")
         PP.pprint(result)
+        print("==================================================================")
         api.logout()
     
     if deploy != "#":
