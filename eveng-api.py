@@ -127,7 +127,8 @@ def exit_success():
 @click.option('--remove', default="#", help='Labname you want to remove')
 @click.option('--test', default=False, help='This argument will test your VM parameter in --vm.')
 @click.option('--images', default=False, help='This argument will list images available on EVE-NG VM.')
-def main(deploy, vm, force, start, backup, stop, remove, test, images):
+@click.option('--ports', default="null", help='This argument will print port name for you can create your architecture YAML.')
+def main(deploy, vm, force, start, backup, stop, remove, test, images, ports):
     """
     This function is the main function of this project.
     It will retrieve arguments and run Functions
@@ -155,6 +156,9 @@ def main(deploy, vm, force, start, backup, stop, remove, test, images):
     )
 
     # ======================================================================================================
+    if ports is not "null":
+        PP.pprint(open_file("./devices/_port_device.yml")[ports])
+
     if test:
         PP.pprint(api.status())
         api.logout()
@@ -215,8 +219,7 @@ def main(deploy, vm, force, start, backup, stop, remove, test, images):
         api.logout()
         exit_success()
 
-    
-    exit_success()  
+    exit_success()
 
 # ----------------------------------------------------
 #

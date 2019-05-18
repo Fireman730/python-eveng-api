@@ -1,0 +1,217 @@
+cumulus:
+    - eth0
+    - swp1
+    - swp2
+    - swp3
+    - swp4
+    - swp5
+    - swp6
+    - swp7
+    - swp8
+    - swp9
+    - swp10
+    - swp11
+    - swp12
+    - swp13
+    - swp14
+    - swp15
+
+veos:
+  - Mgmt1
+  - Eth1
+  - Eth2
+  - Eth3
+  - Eth4
+  - Eth5
+  - Eth6
+  - Eth7
+  - Eth8
+  - Eth9
+  - Eth10
+  - Eth11
+  - Eth12
+  - Eth13
+  - Eth14
+  - Eth15
+
+vyos:
+  - eth0
+  - eth1
+  - eth2
+  - eth3
+  - eth4
+  - eth5
+  - eth6
+  - eth7
+  - eth8
+  - eth9
+  - eth10
+  - eth11
+  - eth12
+  - eth13
+  - eth14
+  - eth15
+
+docker:
+  - eth0
+  - eth1
+  - eth2
+  - eth3
+  - eth4
+  - eth5
+  - eth6
+  - eth7
+  - eth8
+  - eth9
+  - eth10
+  - eth11
+  - eth12
+  - eth13
+  - eth14
+  - eth15
+
+csr1000v:
+  - Gi1
+  - Gi2
+  - Gi3
+  - Gi4
+  - Gi5
+  - Gi6
+  - Gi7
+  - Gi8
+  - Gi9
+  - Gi10
+  - Gi11
+  - Gi12
+  - Gi13
+  - Gi14
+  - Gi15
+  - Gi16
+
+vios:
+  - Gi0/0
+  - Gi0/1
+  - Gi0/2
+  - Gi0/3
+  - Gi0/4
+  - Gi0/5
+  - Gi0/5
+  - Gi0/6
+  - Gi0/7
+  - Gi0/8
+  - Gi0/9
+  - Gi0/10
+  - Gi0/11
+  - Gi0/12
+  - Gi0/13
+  - Gi0/14
+  - Gi0/15
+
+viosl2:
+  - Gi0/0
+  - Gi0/1
+  - Gi0/2
+  - Gi0/3
+  - Gi1/0
+  - Gi1/1
+  - Gi1/2
+  - Gi1/3
+  - Gi2/0
+  - Gi2/1
+  - Gi2/2
+  - Gi2/3
+  - Gi3/0
+  - Gi3/1
+  - Gi3/2
+  - Gi3/3
+
+xrv9k:
+  - Gi0/0/0/0
+  - Gi0/0/0/1
+  - Gi0/0/0/2
+  - Gi0/0/0/3
+  - Gi0/0/0/4
+  - Gi0/0/0/5
+  - Gi0/0/0/6
+  - Gi0/0/0/7
+  - Gi0/0/0/8
+  - Gi0/0/0/9
+  - Gi0/0/0/10
+  - Gi0/0/0/11
+  - Gi0/0/0/12
+  - "Internal Use"
+  - "Internal Use"
+  - "Mgmt0/0CPU0/0"
+
+
+extremexos:
+  - Mgmt
+  - Port1
+  - Port2
+  - Port3
+  - Port4
+  - Port5
+  - Port6
+  - Port7
+  - Port8
+  - Port9
+  - Port10
+  - Port11
+  - Port12
+  - Port13
+  - Port14
+  - Port15
+
+linux:
+  - e1
+  - e2
+  - e3
+  - e4
+  - e5
+  - e6
+  - e7
+  - e8
+  - e9
+  - e10
+  - e11
+  - e12
+  - e13
+  - e14
+  - e15
+  - e16
+
+ostinato:
+  - e1
+  - e2
+  - e3
+  - e4
+  - e5
+  - e6
+  - e7
+  - e8
+  - e9
+  - e10
+  - e11
+  - e12
+  - e13
+  - e14
+  - e15
+  - e16
+
+esxi:
+  - e1
+  - e2
+  - e3
+  - e4
+  - e5
+  - e6
+  - e7
+  - e8
+  - e9
+  - e10
+  - e11
+  - e12
+  - e13
+  - e14
+  - e15
+  - e16
