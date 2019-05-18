@@ -56,10 +56,31 @@ EXIT_FAILURE = 1
 # Import Library
 #
 try:
+    import time
+except ImportError as importError:
+    print("Error import [PyEVENG] time")
+    print(importError)
+    exit(EXIT_FAILURE)
+
+try:
+    import yaml
+except ImportError as importError:
+    print("Error import [PyEVENG] yaml")
+    print(importError)
+    exit(EXIT_FAILURE)
+
+try:
+    import pexpect
+except ImportError as importError:
+    print("Error import [PyEVENG] pexpect")
+    print(importError)
+    exit(EXIT_FAILURE)
+
+try:
     import pprint
     PP = pprint.PrettyPrinter(indent=4)
 except ImportError as importError:
-    print("Error import [eveng-api] pprint")
+    print("Error import [PyEVENG] pprint")
     print(importError)
     exit(EXIT_FAILURE)
 
@@ -651,6 +672,24 @@ class PyEVENG:
             if value['name'] == interfaceName:
                 return index
 
+    def get_node_interfaces(self, labName: str(), nodeID: str()) -> list():
+        """
+        This function will return a list that contains all ethernet interface names
+
+        Args:
+            param1 (str): EVE-NG lab name
+            param2 (str): EVE-NG node ID
+
+        Returns:
+            list: That contains nodes interface names
+        """
+        data = self.getLabNodeInterfaces(labName, nodeID)
+        result = list()
+        for interface in data['data']['ethernet']:
+            result.append(interface['name'])
+
+        return result
+
     def getLabNodeInterfaces(self, labName:str(), nodeID:str()) -> dict():
         """
         This function will return a JSON that contains informations about labs interfaces
@@ -819,6 +858,77 @@ class PyEVENG:
                     nodeID = node['id']
         return nodeID
         
+    def get_node_url(self, labName:str(), nodeID:str()) -> str():
+        """
+        This function will return telnet connection informations.
+
+        "1": {
+            "console": "telnet",
+            "delay": 0,
+            "id": 1,
+            "left": 177,
+            "icon": "Switch L3.png",
+            "image": "viosl2-adventerprisek9-m.03.2017",
+            "name": "GVA10",
+            "ram": 1024,
+            "status": 0,
+            "template": "viosl2",
+            "type": "qemu",
+            "top": 288,
+            "url": "telnet://172.16.194.239:0",             <<<======
+            "config_list": [],
+            "config": "0",
+            "cpu": 1,
+            "ethernet": 8,
+            "uuid": "0c5f57ad-fcff-47b1-b43b-4ba39b8545dd",
+            "firstmac": "50:00:00:01:00:00"
+        },
+
+        Args:
+            param1 (str): EVE-NG lab name
+            param2 (str): EVE-NG node ID
+
+        Returns:
+            str: Telnet connection informations
+
+        """
+
+        data = self.getLabNode(labName, nodeID)
+        return data['data']['url']
+
+    def get_node_telnet_port(self, labName: str(), nodeID: str()) -> str():
+        """
+        This function will return telnet port
+
+        Args:
+            param1 (str): EVE-NG lab name
+            param2 (str): EVE-NG node ID
+
+        Returns:
+            str: Telnet port
+        """
+
+        telnetInfo =  self.get_node_url(labName, nodeID)
+        index = telnetInfo.rfind(":")
+        return telnetInfo[index+1:]
+
+    def get_node_telnet_ip(self, labName: str(), nodeID: str()) -> str():
+        """
+        This function will return telnet port
+
+        Args:
+            param1 (str): EVE-NG lab name
+            param2 (str): EVE-NG node ID
+
+        Returns:
+            str: Telnet port
+        """
+
+        telnetInfo = self.get_node_url(labName, nodeID)
+        indexEnd = telnetInfo.rfind(":")
+        indexStart = telnetInfo.rfind("/")
+        return telnetInfo[indexStart+1:indexEnd]
+
 
     def getLabNode(self, labName:str(), nodeID:str()) -> dict():
         """
@@ -969,8 +1079,7 @@ class PyEVENG:
             if self.getNodeStatus(labName, nodeID) == "2":
                 print("[PyEVENG startLabNode] -", labName, self.getNodeNameByID(labName, nodeID), "is started !")
 
-
-    def startLabAllNodes(self, labName:str()):
+    def startLabAllNodes(self, labName: str(), *, enable=False):
         """
         This function will start all node of a lab
 
@@ -982,8 +1091,72 @@ class PyEVENG:
 
         nodesID = self.getLabNodesID(labName)
 
+        # First Start Device
         for nodeID in nodesID:
           self.startLabNode(labName, nodeID)
+
+        if enable:
+            first = True
+            print("[PyEVENG startLabAllNodes] - no shutdown interfaces ...")
+            for nodeID in nodesID:
+                nodeName = self.getNodeNameByID(labName, nodeID)
+                nodeImage = self.getNodeImageAndNodeID(labName, nodeName)
+                if "VIOS" in nodeImage[0]:
+                    telnetPort = self.get_node_telnet_port(labName, nodeID)
+                    telnetIP = self.get_node_telnet_ip(labName, nodeID)
+                    if first:
+                        time.sleep(60)
+                        first = False
+                    self.enable_port(labName, telnetIP, telnetPort, nodeID, nodeName)
+            print("[PyEVENG startLabAllNodes] - no shutdown interfaces done !")
+
+    def enable_port(self, labName:str(), ipAddress:str(), telnetPort:str(), nodeID:str(), nodeName:str()):
+        """
+        This function enable interface through a telnet session.
+        Use EXPECT library
+
+        Args:
+            param1 (str): Lab name
+            param2 (str): Address IP 
+            param3 (str): Telnet port
+            param4 (str): Node ID
+            param5 (str): Node name
+        """
+
+        with open("./commands/cisco/no_shut_commands.yml", 'r') as yamlFile:
+            try:
+                data = yaml.load(yamlFile)
+            except yaml.YAMLError as exc:
+                print(exc)
+        try:
+            telnet = pexpect.spawn("telnet {} {}".format(ipAddress, telnetPort))
+            telnet.expect("\r\n")
+            #print("0)", telnet.before)
+            telnet.sendline("\r\n")
+            telnet.expect("Connected")
+            #print("1)", telnet.before)
+            telnet.sendline("enable")
+            telnet.expect("{}".format(nodeName))
+            #print("2)", telnet.before)
+            telnet.sendline("conf t")
+            telnet.expect("(config)")
+            #print("3)", telnet.before)
+
+            for interface in self.get_node_interfaces(labName, nodeID):
+                 telnet.sendline("interface {}".format(interface))
+                 telnet.expect("(config)")
+                 #print(telnet.before)
+                 telnet.sendline("no shut")
+                 telnet.expect("(config)")
+                 #print(telnet.before)
+
+            telnet.sendline("end")
+            telnet.expect("#")
+            #print(telnet.before)
+            telnet.sendline("exit")
+        except pexpect.exceptions.TIMEOUT as e:
+            print(e)
+
 
     def stopLabNode(self, labName, nodeID):
         """
@@ -1052,6 +1225,7 @@ class PyEVENG:
 
         for nodeID in nodesID:
             self.stopLabNode(labName, nodeID)
+
     
     # ------------------------------------------------------------------------------------------
     # Authentification, Users and System
@@ -1167,7 +1341,7 @@ class PyEVENG:
         print("[PyEVENG - login] ...")
         
         response = requests.post(
-            self._url+"/api/auth/login", data='{"username":"'+self._username+'","password":"'+self._password+'"}', verify=False)
+            self._url+"/api/auth/login", data='{"username":"'+self._username+'","password":"'+self._password+'", "html5": "0"}', verify=False)
 
         self.requestsError(response.status_code)
         print(f"[PyEVENG - login] ({response.status_code}) logged !")

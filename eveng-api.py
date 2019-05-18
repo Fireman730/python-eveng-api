@@ -26,6 +26,12 @@ EXIT_FAILURE = 1
 #
 # Import Library
 #
+try:
+    import pexpect
+except ImportError as importError:
+    print("Error import [eveng-api] pexpect")
+    print(importError)
+    exit(EXIT_FAILURE)
 
 try:
     import tools.routing
@@ -141,7 +147,6 @@ def main(deploy, vm, force, start, backup, stop, remove, test, images, ports):
     # ymlF that contains lab to deploy informations
     #
     vmInfo = open_file(vm)
-
     #
     # Create the object that is connected with EVE-NG API
     #
@@ -154,7 +159,7 @@ def main(deploy, vm, force, start, backup, stop, remove, test, images, ports):
                             rmdp=vmInfo['ssh_pass'],
                             community=vmInfo['community']
     )
-
+    
     # ======================================================================================================
     if ports is not "null":
         PP.pprint(open_file("./devices/_port_device.yml")[ports])
@@ -287,7 +292,7 @@ def deploy_all (api: PyEVENG.PyEVENG, ymlF: dict(), vmInfo: dict(), force: bool(
         # 
         # Restart hosts when config files are pushed
         #
-        api.startLabAllNodes(ymlF['project']['name']+".unl")
+        api.startLabAllNodes(ymlF['project']['name']+".unl", enable=True)
 
     except EVENG_Exception as eve:
         print(eve._message)

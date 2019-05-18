@@ -1,0 +1,9 @@
+std:
+  - enable
+  - configure terminal
+  - #interface GigabitEthernet0/3
+  - no shutdown
+  - end
+  - write
+
+int: interface GigabitEthernet{}

@@ -194,7 +194,7 @@ links:
     dst: OOB-NETWORK
     # Enter a free address in the range
     # This ip addr will be assigned to EVE-NG VM
-    dport: 10.0.5.1/24
+    ip_eve: 10.0.5.1/24
 
 configs:
   - node: Spine01

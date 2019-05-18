@@ -38,4 +38,12 @@ labs:
     bck_type: verbose
     hostname: 
       - all
+       
+  - labname: arista.unl
+    pod: 0
+    folder: Users
+    bck_path: /Volumes/Data/gitlab/python-eveng-api/backup
+    bck_type: verbose
+    hostname: 
+      - all
     

@@ -8,3 +8,4 @@ click
 pprint
 ipaddress
 random
+pexpect
