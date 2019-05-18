@@ -107,6 +107,12 @@ def pjson(jsonPrint: dict()):
     print(json.dumps(jsonPrint, indent=4, sort_keys=True))
     print("---------------------------------------------------------------------------------")
 
+
+def exit_success():
+    print("\n\n[eveng-api - exit_success] - Did you love this tool ?")
+    print("Give a STAR https://gitlab.com/DylanHamel/python-eveng-api \n\n")
+    exit(EXIT_SUCCESS)
+
 ######################################################
 #
 # MAIN Functions
@@ -181,7 +187,7 @@ def main(deploy, vm, force, start, backup, stop, remove, test, images):
             deploy_all(api, ymlF, vmInfo, force)
             api.logout()
 
-            exit(EXIT_SUCCESS)
+            exit_success()
 
         except EVENG_Exception as eveError:
             print(eveError._message)
@@ -191,26 +197,26 @@ def main(deploy, vm, force, start, backup, stop, remove, test, images):
         ymlF = open_file(backup)
         api.getBackupNodesConfig(ymlF)
         api.logout()
-        exit(EXIT_SUCCESS)
+        exit_success()
 
     # ======================================================================================================
     if start != "#":
         api.startLabAllNodes(start)
         api.logout()
-        exit(EXIT_SUCCESS)
+        exit_success()
 
     if stop != "#":
         api.stopLabAllNodes(stop)
         api.logout()
-        exit(EXIT_SUCCESS)
+        exit_success()
 
     if remove != "#":
         api.deleteLab(remove)
         api.logout()
-        exit(EXIT_SUCCESS)
+        exit_success()
 
     
-    exit(EXIT_SUCCESS)    
+    exit_success()  
 
 # ----------------------------------------------------
 #
