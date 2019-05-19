@@ -1338,13 +1338,16 @@ class PyEVENG:
         # For avoid InsecureRequestWarning error
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         
-        print("[PyEVENG - login] ...")
+        if self._verbose:
+            print("[PyEVENG - login] ...") 
         
         response = requests.post(
             self._url+"/api/auth/login", data='{"username":"'+self._username+'","password":"'+self._password+'", "html5": "0"}', verify=False)
 
         self.requestsError(response.status_code)
-        print(f"[PyEVENG - login] ({response.status_code}) logged !")
+        
+        if self._verbose:
+            print(f"[PyEVENG - login] ({response.status_code}) logged !")
 
         self._cookies = response.cookies
 
@@ -1352,13 +1355,15 @@ class PyEVENG:
         """
         This function logout to EVE-NG        
         """
-        print("[PyEVENG - logout] ...")
+        if self._verbose:
+            print("[PyEVENG - logout] ...")
         response = requests.get(
             self._url+"/api/auth/logout", cookies=self._cookies, verify=False)
 
         self.requestsError(response.status_code)
 
-        print(f"[PyEVENG - logout] ({response.status_code}) EVE-NG says Byyye :) !")
+        if self._verbose:
+            print(f"[PyEVENG - logout] ({response.status_code}) EVE-NG says Byyye :) !")
         
 
     # --------------------------------------------------------------------------------------------------
@@ -1555,6 +1560,7 @@ class PyEVENG:
             param2 (str): Labname
         """
         ssh = self.sshConnect()
+        connexionInformations = dict()
 
         for link in interfaceToAdd:
             if link['dst'] == "OOB-NETWORK":
@@ -1577,6 +1583,14 @@ class PyEVENG:
 
 
                 for oobInterface in link['src']:
+
+                    connexionInformations[oobInterface['host']] = {
+                        "ip_address_eve": self._ipAddress,
+                        "ip_address_host": oobInterface['ip_mgmt'],
+                        "con_ext_port": oobInterface['nat'],
+                        "con_int_port": oobInterface['ssh'],
+                        "url": "ssh -p {} -l <username> {}".format(oobInterface['nat'], self._ipAddress)
+                        }
                     
                     if "ip_eve" in link.keys():
                         self.create_iptables_nat(
@@ -1592,7 +1606,45 @@ class PyEVENG:
                 self.addLinkToLab(link['id'], self.getNodeIDbyNodeName(labName, link['dst']),
                                   self.getNodeInterfaceID(labName, self.getNodeIDbyNodeName(labName, link['dst']), link['dport']), labName)
 
+
+        self.write_in_remote_file(ssh, connexionInformations, "/root/.eveng/connexion_{}".format(labName), mode='w')
         ssh.close()
+    
+    # =========
+    #
+    def write_in_remote_file(self, ssh:paramiko.SSHClient(), content, path:str(), *, mode="a"):
+        """
+        This function will write devices connection informations in a file on EVE-NG VM.
+
+        Args:
+            param1 (str): SSH Connexion to EVE-NG VM
+            param2 (str): Content to write in the file
+            param3 (str): Path where store informations
+        """
+        PP.pprint(content)
+        print("[PyEVENG - write_in_remote_file] - create new files {} ...".format(path))
+
+        sftp = ssh.open_sftp()
+        f = sftp.open(path, mode)
+        f.write(json.dumps(content))
+        f.close()
+        sftp.close()
+        print("[PyEVENG - write_in_remote_file] - create new files OK ! ")
+
+    def get_remote_connexion_file(self, labName) -> dict:
+
+        ssh = self.sshConnect()
+
+        sftp = ssh.open_sftp()
+        f = sftp.open("/root/.eveng/connexion_{}".format(labName), "rb")
+
+        data = json.loads(f.read())
+        
+        sftp.close()
+        ssh.close()
+
+        return data
+
     # =========
     #
     def create_iptables_nat(self, ssh:paramiko.SSHClient(), interface:str(), hostsIP:str(), sshMgmt:str(), eveIP:str(), eveSsh:str()):
@@ -1663,6 +1715,7 @@ class PyEVENG:
             f.write(command+"\n")
         
         f.close()
+        sftp.close()
 
     # =========
     #
@@ -1767,7 +1820,7 @@ class PyEVENG:
     
     # =========
     #
-    def __init__(self, username, password, ipAddress, port=99999, useHTTPS=False, userFolder="Users", pod="0", root="root", rmdp="eve", community=True):
+    def __init__(self, username, password, ipAddress, port=99999, useHTTPS=False, userFolder="Users", pod="0", root="root", rmdp="eve", community=True, verbose=True):
         """
         Constructor / Initializer of PyEVENG
 
@@ -1793,6 +1846,7 @@ class PyEVENG:
         self._rootPassword = rmdp
         self._community = community
         self._project = ""
+        self._verbose = verbose
 
         if useHTTPS:
             self._url = "https://" + ipAddress

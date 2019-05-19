@@ -6,7 +6,6 @@ Description ...
 
 """
 
-
 __author__     = "Dylan Hamel"
 __maintainer__ = "Dylan Hamel"
 __version__    = "1.0"
@@ -113,7 +112,6 @@ def pjson(jsonPrint: dict()):
     print(json.dumps(jsonPrint, indent=4, sort_keys=True))
     print("---------------------------------------------------------------------------------")
 
-
 def exit_success():
     print("\n\n[eveng-api - exit_success] - Did you love this tool ?")
     print("Give a STAR https://gitlab.com/DylanHamel/python-eveng-api \n\n")
@@ -134,7 +132,8 @@ def exit_success():
 @click.option('--test', default=False, help='This argument will test your VM parameter in --vm.')
 @click.option('--images', default=False, help='This argument will list images available on EVE-NG VM.')
 @click.option('--ports', default="null", help='This argument will print port name for you can create your architecture YAML.')
-def main(deploy, vm, force, start, backup, stop, remove, test, images, ports):
+@click.option('--connexion', default="null", help='This argument will return a dict with devices informations connexions <--connexion=mylab.unl>.')
+def main(deploy, vm, force, start, backup, stop, remove, test, images, ports, connexion):
     """
     This function is the main function of this project.
     It will retrieve arguments and run Functions
@@ -150,19 +149,29 @@ def main(deploy, vm, force, start, backup, stop, remove, test, images, ports):
     #
     # Create the object that is connected with EVE-NG API
     #
+    cliVerbose = connexion is "null"
     api = PyEVENG.PyEVENG(vmInfo['https_username'],
-                            vmInfo['https_password'],
-                            vmInfo['ip'],
-                            vmInfo['https_port'],
-                            vmInfo['https_ssl'],
-                            root=vmInfo['ssh_root'],
-                            rmdp=vmInfo['ssh_pass'],
-                            community=vmInfo['community']
+                        vmInfo['https_password'],
+                        vmInfo['ip'],
+                        vmInfo['https_port'],
+                        vmInfo['https_ssl'],
+                        root=vmInfo['ssh_root'],
+                        rmdp=vmInfo['ssh_pass'],
+                        community=vmInfo['community'],
+                        verbose=cliVerbose
     )
     
     # ======================================================================================================
+    if connexion is not "null":
+        
+        PP.pprint(api.get_remote_connexion_file(connexion))
+        api.logout()
+        exit(EXIT_SUCCESS)
+    
     if ports is not "null":
+        print("==================================================================")
         PP.pprint(open_file("./devices/_port_device.yml")[ports])
+        print("==================================================================")
 
     if test:
         PP.pprint(api.status())
@@ -333,5 +342,3 @@ def open_file(path: str()) -> dict():
 #
 if __name__ == "__main__":
     main()
-
-
