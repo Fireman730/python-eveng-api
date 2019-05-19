@@ -1401,16 +1401,37 @@ class PyEVENG:
         Args:
             param1 (str): Lab name to delete
         """
+       
+
+        ssh = self.sshConnect()
+        sftp = ssh.open_sftp()
         try:
 
-            ssh = self.sshConnect()
-            sftp = ssh.open_sftp()
-            f = sftp.remove("/root/.eveng/connexion_{}".format(labName))
-            sftp.close()
-            ssh.close()
-        
+            print(
+                "[PyEVENG - remove_remote_connexion_file] - remove root/.eveng/connexion_{} ...".format(labName))
+            sftp.remove("/root/.eveng/connexion_{}".format(labName))
+
+            print(
+                "[PyEVENG - remove_remote_connexion_file] - remove root/.eveng/connexion_{} OK !".format(labName))
         except FileNotFoundError:
-            pass
+            print(
+                "[PyEVENG - remove_remote_connexion_file] - remove root/.eveng/connexion_{} doesn't exist !".format(labName))
+
+
+        try: 
+            print(
+                "[PyEVENG - remove_remote_connexion_file] - remove root/.eveng/{} ...".format(labName))
+            sftp.remove("/root/.eveng/{}".format(labName))
+            
+            print(
+                "[PyEVENG - remove_remote_connexion_file] - remove root/.eveng/{} OK !".format(labName))
+        except FileNotFoundError:
+            print(
+                "[PyEVENG - remove_remote_connexion_file] - remove root/.eveng/{} doesn't exist !".format(labName))
+
+        ssh.close()
+        
+        
 
     # =========
     #
@@ -1421,17 +1442,23 @@ class PyEVENG:
         Args:
             param1 (str): Lab name to delete
         """
+        call = True
         print("[PyEVENG deleteLab] -",
               labName, "is deleting...")
-
-        self.stopLabAllNodes(labName)
+        try:
+            self.stopLabAllNodes(labName)
+            
+        except EVENG_Exception as e:
+            print("[PyEVENG - deleteLab] - lab doesn't exist ... check for remove files")
+            call = False
         
         self.remove_remote_connexion_file(labName)
 
-        response = requests.delete(
-            self._url+"/api/labs/"+str(self._userFolder)+"/"+str(labName), cookies=self._cookies, verify=False)
-
-        self.requestsError(response.status_code)
+        if call:
+            response = requests.delete(self._url+"/api/labs/"+str(
+                self._userFolder)+"/"+str(labName), cookies=self._cookies, verify=False)
+            self.requestsError(response.status_code)
+        
         print("[PyEVENG createLab] -",
               labName, "has been deleted...")
     # --------------------------------------------------------------------------------------------------
@@ -1789,8 +1816,8 @@ class PyEVENG:
         """
         if status_code == 400:
             raise "HTTP 400 : Bad Request"
-        if status_code == 400:
-            raise "HTTP 404 : Not Found"
+        if status_code == 404:
+            raise EVENG_Exception("HTTP 404 : Not Found", 708)
         elif status_code == 500:
             raise "HTTP 500 : Internal Server Error"
         elif status_code == 412:

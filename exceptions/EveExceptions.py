@@ -20,16 +20,25 @@ class EVENG_Exception(Exception):
     This class is used for EVENG Exception
 
     0XY   =   Erro with API call
+    
     1XY   =   Error in lab creation
       -> 11 Lab Already Exists
       -> 12 ...
+
     2XY   =   Error in devices creation
       -> 21 Not all nodes have been created
+
     3XY   =   Error in links creation
+
     4XY   =   Error in configs deployement
+    
+    7XY   =   Error with Call API
+        708   = Return code = 404
+
     8XY   =   Error with SSH command
       -> 801 UMOUNT
       -> 802 MOUNT
+
     9XY   = Error in YAML file
       -> 910 - Lab to backup not in Folder
 
