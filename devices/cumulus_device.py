@@ -102,7 +102,7 @@ class CumulusDevice(devices.abstract_device.DeviceQEMUAbstract):
 
             if "error adding partition 1" in output:
                 raise EVENG_Exception(
-                    "[CiscoDevice - mountNBD] - Error during partition sudo partx -a /dev/nbd0", 802)
+                    "[AristaDevice - mountNBD] - Error during partition sudo partx -a /dev/nbd0", 802)
     
     # ------------------------------------------------------------------------------------------------------------
     #

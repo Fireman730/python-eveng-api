@@ -115,7 +115,6 @@ class CiscoDevice(devices.abstract_device.DeviceQEMUAbstract):
         except Exception as e:
             print(e)
         
-        self.umountNBD(ssh)
         ftp_client.close()
         ssh.close()
     # ------------------------------------------------------------------------------------------------------------

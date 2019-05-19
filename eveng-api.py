@@ -133,7 +133,8 @@ def exit_success():
 @click.option('--images', default=False, help='This argument will list images available on EVE-NG VM.')
 @click.option('--ports', default="null", help='This argument will print port name for you can create your architecture YAML.')
 @click.option('--connexion', default="null", help='This argument will return a dict with devices informations connexions <--connexion=mylab.unl>.')
-def main(deploy, vm, force, start, backup, stop, remove, test, images, ports, connexion):
+@click.option('--telnet', default="null", help='This argument will return a dict with telnet informations connexions lab need LAB HAS TO BE STARTED.')
+def main(deploy, vm, force, start, backup, stop, remove, test, images, ports, connexion, telnet):
     """
     This function is the main function of this project.
     It will retrieve arguments and run Functions
@@ -149,7 +150,7 @@ def main(deploy, vm, force, start, backup, stop, remove, test, images, ports, co
     #
     # Create the object that is connected with EVE-NG API
     #
-    cliVerbose = connexion is "null"
+    cliVerbose = connexion is "null" and telnet is "null"
     api = PyEVENG.PyEVENG(vmInfo['https_username'],
                         vmInfo['https_password'],
                         vmInfo['ip'],
@@ -162,12 +163,27 @@ def main(deploy, vm, force, start, backup, stop, remove, test, images, ports, co
     )
     
     # ======================================================================================================
-    if connexion is not "null":
-        
-        PP.pprint(api.get_remote_connexion_file(connexion))
+    if telnet is not "null":
+        PP.pprint(api.get_nodes_url(telnet))
         api.logout()
         exit(EXIT_SUCCESS)
     
+    if connexion is not "null":
+        try:
+            PP.pprint(api.get_remote_connexion_file(connexion))
+            api.logout()
+            exit(EXIT_SUCCESS)
+        except FileNotFoundError as e:
+            print(
+                "[eveng-api - main] - Connection informations file not found !")
+            print(
+                "[eveng-api - main] - You probably don't use the right syntax of OOB links...")
+            print(
+                "eveng-api - main] - Please see https://gitlab.com/DylanHamel/python-eveng-api/wikis/Write-your-YAML-file-that-describes-your-netwrok-(part-4)")
+            
+            PP.pprint(open_file("./tools/oob_iptables_ex.yml"))
+            
+
     if ports is not "null":
         print("==================================================================")
         PP.pprint(open_file("./devices/_port_device.yml")[ports])

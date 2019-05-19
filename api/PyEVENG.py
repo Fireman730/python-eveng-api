@@ -859,7 +859,29 @@ class PyEVENG:
                 if node['name'] == nodeName:
                     nodeID = node['id']
         return nodeID
+
+    def get_nodes_url(self, labName: str()) -> dict():
+        """
+        This function will return telnet connection informations.
+
+        Args:
+            param1 (str): EVE-NG lab name
         
+        Returns:
+            dict: Telnet connection informations    hostname: url_connection
+        """
+
+        nodesID = self.getLabNodesID(labName)
+        result = dict()
+
+        if len(nodesID) is not 0:
+            for nodeID in nodesID:
+                result[self.getNodeNameByID(labName, nodeID)] = self.get_node_url(labName, nodeID)
+
+        return result
+
+
+
     def get_node_url(self, labName:str(), nodeID:str()) -> str():
         """
         This function will return telnet connection informations.
@@ -890,8 +912,7 @@ class PyEVENG:
             param1 (str): EVE-NG lab name
             param2 (str): EVE-NG node ID
 
-        Returns:
-            str: Telnet connection informations
+       §
 
         """
 
@@ -1636,15 +1657,16 @@ class PyEVENG:
 
                 for oobInterface in link['src']:
 
-                    connexionInformations[oobInterface['host']] = {
-                        "ip_address_eve": self._ipAddress,
-                        "ip_address_host": oobInterface['ip_mgmt'],
-                        "con_ext_port": oobInterface['nat'],
-                        "con_int_port": oobInterface['ssh'],
-                        "url": "ssh -p {} -l <username> {}".format(oobInterface['nat'], self._ipAddress)
-                        }
-                    
                     if "ip_eve" in link.keys():
+
+                        connexionInformations[oobInterface['host']] = {
+                            "ip_address_eve": self._ipAddress,
+                            "ip_address_host": oobInterface['ip_mgmt'],
+                            "con_ext_port": oobInterface['nat'],
+                            "con_int_port": oobInterface['ssh'],
+                            "url": "ssh -p {} -l <username> {}".format(oobInterface['nat'], self._ipAddress)
+                        }
+
                         self.create_iptables_nat(
                             ssh, link['network'], oobInterface['ip_mgmt'], oobInterface['ssh'], ipMgmtEve, oobInterface['nat'])
                     #

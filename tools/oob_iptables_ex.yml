@@ -1,0 +1,8 @@
+- id: 9
+    network: pnet5
+    src:
+      - host: Spine01
+        port: eth0
+        ip_mgmt: 10.0.5.101
+        ssh: 22
+        nat: 22101
