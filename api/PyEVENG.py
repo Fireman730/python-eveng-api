@@ -1427,6 +1427,10 @@ class PyEVENG:
         ssh = self.sshConnect()
         sftp = ssh.open_sftp()
         try:
+            
+            stdin, stdout, stderr = ssh.exec_command("sudo sh /root/.eveng/{}".format(labName))
+            o = "".join(stdout.readlines())
+            
 
             print(
                 "[PyEVENG - remove_remote_connexion_file] - remove root/.eveng/connexion_{} ...".format(labName))
