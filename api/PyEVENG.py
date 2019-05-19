@@ -790,8 +790,10 @@ class PyEVENG:
         content = json.loads(response.content)["data"]
 
         nodesID = list()
-        for key, val in content.items():
-            nodesID.append(key)
+
+        if len(content) is not 0:
+            for key, val in content.items():
+                nodesID.append(key)
 
         return nodesID
 
@@ -1223,8 +1225,9 @@ class PyEVENG:
 
         nodesID = self.getLabNodesID(labName)
 
-        for nodeID in nodesID:
-            self.stopLabNode(labName, nodeID)
+        if len(nodesID) is not 0:
+            for nodeID in nodesID:
+                self.stopLabNode(labName, nodeID)
 
     
     # ------------------------------------------------------------------------------------------
@@ -1391,6 +1394,24 @@ class PyEVENG:
         print("[PyEVENG createLab] -",
               labInformations['name'], "has been created...")
 
+    def remove_remote_connexion_file(self, labName):
+        """
+        This function will remove file on eve-ng vm
+
+        Args:
+            param1 (str): Lab name to delete
+        """
+        try:
+
+            ssh = self.sshConnect()
+            sftp = ssh.open_sftp()
+            f = sftp.remove("/root/.eveng/connexion_{}".format(labName))
+            sftp.close()
+            ssh.close()
+        
+        except FileNotFoundError:
+            pass
+
     # =========
     #
     def deleteLab(self, labName: dict()):
@@ -1403,8 +1424,12 @@ class PyEVENG:
         print("[PyEVENG deleteLab] -",
               labName, "is deleting...")
 
+        self.stopLabAllNodes(labName)
+        
+        self.remove_remote_connexion_file(labName)
+
         response = requests.delete(
-            self._url+"/api/labs/"+str(self._userFolder)+"/"+str(labName)+".unl", cookies=self._cookies, verify=False)
+            self._url+"/api/labs/"+str(self._userFolder)+"/"+str(labName), cookies=self._cookies, verify=False)
 
         self.requestsError(response.status_code)
         print("[PyEVENG createLab] -",
@@ -1621,7 +1646,6 @@ class PyEVENG:
             param2 (str): Content to write in the file
             param3 (str): Path where store informations
         """
-        PP.pprint(content)
         print("[PyEVENG - write_in_remote_file] - create new files {} ...".format(path))
 
         sftp = ssh.open_sftp()
@@ -1632,6 +1656,12 @@ class PyEVENG:
         print("[PyEVENG - write_in_remote_file] - create new files OK ! ")
 
     def get_remote_connexion_file(self, labName) -> dict:
+        """ 
+        This function will retrieve data from a connexion_labname file
+
+        Args:
+            param1 (str): Labname of which one you want retrieve data
+        """
 
         ssh = self.sshConnect()
 
