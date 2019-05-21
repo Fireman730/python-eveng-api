@@ -17,7 +17,7 @@ ssh_pass: eve
 # Community Version
 community: false
 ```
-If your VM infos are in this file ``./vm/vm_info.yml` it's not necessary to specify ``--vm=`` vaule.
+If your VM infos are in this file ``./vm/vm_info.yml`` it's not necessary to specify ``--vm=`` vaule.
 
 
 Test connection with your EVE-NG VM (username, password, IP, port, etc.)
