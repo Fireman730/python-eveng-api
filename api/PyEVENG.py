@@ -1428,7 +1428,8 @@ class PyEVENG:
         sftp = ssh.open_sftp()
         try:
             
-            stdin, stdout, stderr = ssh.exec_command("sudo sh /root/.eveng/{}".format(labName))
+            stdin, stdout, stderr = ssh.exec_command(
+                "sudo sh /root/.eveng/{}".format(labName))
             o = "".join(stdout.readlines())
             
 
@@ -1468,7 +1469,7 @@ class PyEVENG:
             param1 (str): Lab name to delete
         """
         call = True
-        print("[PyEVENG deleteLab] -",
+        print("[PyEVENG - deleteLab] -",
               labName, "is deleting...")
         try:
             self.stopLabAllNodes(labName)
@@ -1484,8 +1485,8 @@ class PyEVENG:
                 self._userFolder)+"/"+str(labName), cookies=self._cookies, verify=False)
             self.requestsError(response.status_code)
         
-        print("[PyEVENG createLab] -",
-              labName, "has been deleted...")
+            print("[PyEVENG createLab] -",
+                labName, "has been deleted...")
     # --------------------------------------------------------------------------------------------------
     #
     # EDIT (POST) functions
@@ -1690,6 +1691,7 @@ class PyEVENG:
     
     # =========
     #
+
     def write_in_remote_file(self, ssh:paramiko.SSHClient(), content, path:str(), *, mode="a"):
         """
         This function will write devices connection informations in a file on EVE-NG VM.

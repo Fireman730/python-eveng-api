@@ -134,7 +134,9 @@ def exit_success():
 @click.option('--ports', default="null", help='This argument will print port name for you can create your architecture YAML.')
 @click.option('--connexion', default="null", help='This argument will return a dict with devices informations connexions <--connexion=mylab.unl>.')
 @click.option('--telnet', default="null", help='This argument will return a dict with telnet informations connexions lab need LAB HAS TO BE STARTED.')
-def main(deploy, vm, force, start, backup, stop, remove, test, images, ports, connexion, telnet):
+@click.option('--pod', default="0", help='This argument defines a on which POD the is stored.')
+@click.option('--folder', default="Users", help='This argument defines a on which FOLDER lab is stored.')
+def main(deploy, vm, force, start, backup, stop, remove, test, images, ports, connexion, telnet, pod, folder):
     """
     This function is the main function of this project.
     It will retrieve arguments and run Functions
@@ -151,11 +153,14 @@ def main(deploy, vm, force, start, backup, stop, remove, test, images, ports, co
     # Create the object that is connected with EVE-NG API
     #
     cliVerbose = connexion is "null" and telnet is "null"
+
     api = PyEVENG.PyEVENG(vmInfo['https_username'],
                         vmInfo['https_password'],
                         vmInfo['ip'],
                         vmInfo['https_port'],
                         vmInfo['https_ssl'],
+                        pod=pod,
+                        userFolder=folder,
                         root=vmInfo['ssh_root'],
                         rmdp=vmInfo['ssh_pass'],
                         community=vmInfo['community'],
@@ -228,7 +233,22 @@ def main(deploy, vm, force, start, backup, stop, remove, test, images, ports, co
 
     # ======================================================================================================
     if backup != "#":
-        ymlF = open_file(backup)
+        try:
+            ymlF = open_file(backup)
+        except FileNotFoundError as e:
+            print(
+                "[eveng-api - main] - Check if labname exists ...")
+            
+            # api.check_if_lab_exists(labName)
+
+            ymlF['labname'] = backup
+            ymlF['folder'] = "Users"
+            ymlF['pod'] = 0
+            ymlF['bck_path'] = "./backup"
+            ymlF['bck_type'] = "verbose"
+            ymlF['hostname'] = "all"
+
+
         api.getBackupNodesConfig(ymlF)
         api.logout()
         exit_success()
