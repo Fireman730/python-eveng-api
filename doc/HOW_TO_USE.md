@@ -63,18 +63,27 @@ You can force the deploiement. The lab in EVE-NG will be remove and your new lab
 Shutdown your lab.
 ```shell
 ./eveng-api.py --vm=./vm/vm_info.yml --stop=4spines_12leaves.unl
+
+# If your lab is not in "Users" folder. Example lab is in "network/cisco/" folder
+./eveng-api.py --vm=./vm/vm_info.yml --stop=4spines_12leaves.unl --folder=network
 ```
 
 
 Start your lab.
 ```shell
 ./eveng-api.py --vm=./vm/vm_info.yml --start=4spines_12leaves.unl
+
+# If your lab is not in "Users" folder. Example lab is in "network/cisco/" folder
+./eveng-api.py --vm=./vm/vm_info.yml --start=4spines_12leaves.unl --folder=network
 ```
 
 Remove your lab. Will automatcally stop all nodes.
 You don't need stop first.
 ```shell
 ./eveng-api.py --vm=./vm/vm_info.yml --remove=4spines_12leaves.unl
+
+# If your lab is not in "Users" folder. Example lab is in "network/cisco/" folder
+./eveng-api.py --vm=./vm/vm_info.yml --remove=4spines_12leaves.unl --folder=network
 ```
 
 If you modify device configuraitosn in your EVE-NG lab you can backup device new configurations.
