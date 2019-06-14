@@ -16,7 +16,7 @@ Besoin :
 Inventory files
 Playbooks Ansible
 
-
+```yaml
 # Ansible will be installed on eve-ng
 ansible:
   
@@ -29,4 +29,5 @@ ansible:
     - ./ansible/deploy_oob_srv.yml
   
   cfg: ./ansible/ansible.cfg
-  
+
+```
