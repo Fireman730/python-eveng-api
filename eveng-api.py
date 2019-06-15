@@ -248,14 +248,6 @@ def main(deploy, vm, force, start, backup, stop, remove, test, images, ports, co
             
             # api.check_if_lab_exists(labName)
 
-            ymlF['labname'] = backup
-            ymlF['folder'] = "Users"
-            ymlF['pod'] = 0
-            ymlF['bck_path'] = "./backup"
-            ymlF['bck_type'] = "verbose"
-            ymlF['hostname'] = "all"
-
-
         api.getBackupNodesConfig(ymlF)
         api.logout()
         exit_success()
@@ -282,7 +274,7 @@ def main(deploy, vm, force, start, backup, stop, remove, test, images, ports, co
 #
 #
 #### Create a Topology (devices, links) based on a YAML File ####
-def deploy_all (api: PyEVENG.PyEVENG, ymlF: dict(), vmInfo: dict(), force: bool()):
+def deploy_all (api: PyEVENG.PyEVENG, ymlF: dict(), vmInfo: dict(), force: str()):
     """
     This function will create your network step by step.
 
@@ -303,8 +295,8 @@ def deploy_all (api: PyEVENG.PyEVENG, ymlF: dict(), vmInfo: dict(), force: bool(
         #
         # Remove the lab if option --force=True
         #
-        
-        if force is True:
+
+        if force == "True":
             api.deleteLab(ymlF['project']['name']+".unl")
             print("[eveng-api - deploy_all] - lab"+str(ymlF['project']['name'])+".unl has been removed !")
 
@@ -331,20 +323,21 @@ def deploy_all (api: PyEVENG.PyEVENG, ymlF: dict(), vmInfo: dict(), force: bool(
         #
         api.startLabAllNodes(ymlF['project']['name']+".unl")
 
-        #
-        # Stop hosts to push config with mount NBD
-        #
-        api.stopLabAllNodes(ymlF['project']['name']+".unl")
-        
         if "configs" in ymlF.keys():
+
+            #
+            # Stop hosts to push config with mount NBD
+            #
+            api.stopLabAllNodes(ymlF['project']['name']+".unl")
+
             print("[eveng-api - deploy_all] - push configs")
             api.addConfigToNodesLab(ymlF['configs'],
                                     ymlF['project']['name']+".unl")
         
-        # 
-        # Restart hosts when config files are pushed
-        #
-        api.startLabAllNodes(ymlF['project']['name']+".unl", enable=True)
+            # 
+            # Restart hosts when config files are pushed
+            #
+            api.startLabAllNodes(ymlF['project']['name']+".unl", enable=True)
 
     except EVENG_Exception as eve:
         print(eve._message)

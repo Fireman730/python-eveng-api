@@ -110,12 +110,14 @@ def validateYamlFileForPyEVENG(api: PyEVENG.PyEVENG, yamlContent: dict(), vmInfo
     assert checkDeviceElement(
         CONSOLE_TYPES, yamlContent, paramToVerify="console")
     # Check that configs type is in CONFIG_TYPES
-    assert checkDeviceElement(
-        CONFIG_TYPES, yamlContent, dictToVerify="configs", paramToVerify="type")
+    if "configs" in yamlContent.keys():
+        assert checkDeviceElement(
+            CONFIG_TYPES, yamlContent, dictToVerify="configs", paramToVerify="type")
     # Check that device image is available in the EVE-NG
     assert checkIfImageIsAvaiable(api, yamlContent)
     # Check that nodes in configs: node is in devices added
-    assert checkIfConfigsNodesExists(yamlContent)
+    if "configs" in yamlContent.keys():
+        assert checkIfConfigsNodesExists(yamlContent)
 
 
 ######################################################
@@ -204,7 +206,7 @@ def checkIfImageIsAvaiable(pyeveng, yamlContent: dict(), dictToVerify: str() = "
         
         if device[paramToVerify] not in images:
             raise EVENG_Exception(str("[EveYAMLValidate.py - checkIfImageIsAvaiable] - Image "+str(
-                device[paramToVerify])+" is not available on this EVE-NG."), 900)
+                device[paramToVerify])+" is not available on this EVE-NG \n\t\t=> Error can be in your YAML file [template: or image:]."), 900)
     return True
 
 #
