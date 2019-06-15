@@ -1,0 +1,25 @@
+! Startup-config last modified at  Fri May 17 20:36:14 2019 by admin
+! device: ARISTA123 (vEOS, EOS-4.21.1.1F)
+!
+! boot system flash:/vEOS-lab.swi
+!
+transceiver qsfp default-mode 4x10G
+!
+hostname MODIFIED123
+!
+spanning-tree mode mstp
+!
+no aaa root
+!
+interface Ethernet1
+!
+interface Ethernet2
+!
+interface Ethernet3
+!
+interface Management1
+   ip address 10.0.4.10/24
+!
+no ip routing
+!
+end

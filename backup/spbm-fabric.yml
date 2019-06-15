@@ -1,0 +1,9 @@
+---
+labs:
+  - labname: spbm-isis-vsp.unl
+    pod: 0
+    folder: Network
+    bck_path: /Volumes/Data/gitlab/python-eveng-api/backup
+    bck_type: verbose
+    hostname: 
+      - all

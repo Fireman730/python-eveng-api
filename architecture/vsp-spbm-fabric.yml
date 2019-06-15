@@ -1,0 +1,184 @@
+---
+project:
+  path: /Users/
+  name: cumulus-dc-extreme-campus
+  version: 1
+  author: DylanHamel
+  description: Campus and Data Center
+  body: My label
+
+devices:
+  - type: qemu
+    template: cumulus
+    config: Unconfigured
+    delay: 0
+    icon: router.png
+    image: cumulus-vx-3.7.5
+    name: Spine01
+    left: 45%
+    top: 20%
+    ram: 1024
+    console: telnet
+    cpu: 1
+    ethernet: 8
+    uuid: 641a4800-1b19-427c-ae87-5555590b7790
+
+  - type: qemu
+    template: cumulus
+    config: Unconfigured
+    delay: 0
+    icon: router.png
+    image: cumulus-vx-3.7.5
+    name: Spine02
+    left: 45%
+    top: 20%
+    ram: 1024
+    console: telnet
+    cpu: 1
+    ethernet: 8
+    uuid: 641a4800-1b19-427c-ae87-5555590b7791
+
+  - type: qemu
+    template: cumulus
+    config: Unconfigured
+    delay: 0
+    icon: router.png
+    image: cumulus-vx-3.7.5
+    name: Leaf01
+    left: 45%
+    top: 20%
+    ram: 1024
+    console: telnet
+    cpu: 1
+    ethernet: 8
+    uuid: 641a4800-1b19-427c-ae87-5555590b7792
+
+  - type: qemu
+    template: cumulus
+    config: Unconfigured
+    delay: 0
+    icon: router.png
+    image: cumulus-vx-3.7.5
+    name: Leaf02
+    left: 45%
+    top: 20%
+    ram: 1024
+    console: telnet
+    cpu: 1
+    ethernet: 8
+    uuid: 641a4800-1b19-427c-ae87-5555590b7793
+
+  - type: qemu
+    template: cumulus
+    config: Unconfigured
+    delay: 0
+    icon: router.png
+    image: cumulus-vx-3.7.5
+    name: Leaf03
+    left: 45%
+    top: 20%
+    ram: 1024
+    console: telnet
+    cpu: 1
+    ethernet: 8
+    uuid: 641a4800-1b19-427c-ae87-5555590b7794
+
+  - type: qemu
+    template: extremexos
+    config: Unconfigured
+    delay: 0
+    icon: "Switch L3.png"
+    image: extremexos-voss-7.1
+    name: Core01
+    left: 45%
+    top: 20%
+    ram: 2048
+    console: telnet
+    cpu: 1
+    ethernet: 8
+    uuid: 641a4800-1b19-427c-ae87-5555590b7795
+
+  - type: qemu
+    template: extremexos
+    config: Unconfigured
+    delay: 0
+    icon: "Switch L3.png"
+    image: extremexos-voss-7.1
+    name: Core02
+    left: 45%
+    top: 20%
+    ram: 2048
+    console: telnet
+    cpu: 1
+    ethernet: 8
+    uuid: 641a4800-1b19-427c-ae87-5555590b7796
+
+
+links:
+  - id: 1
+    type: ethernet
+    network: bridge
+    src: Spine01
+    sport: swp1
+    dst: Leaf01
+    dport: swp1
+
+  - id: 2
+    type: ethernet
+    network: bridge
+    src: Spine01
+    sport: swp2
+    dst: Leaf02
+    dport: swp1
+
+  - id: 3
+    type: ethernet
+    network: bridge
+    src: Spine01
+    sport: swp3
+    dst: Leaf03
+    dport: swp1
+
+  - id: 4
+    type: ethernet
+    network: bridge
+    src: Spine02
+    sport: swp1
+    dst: Leaf01
+    dport: swp2
+
+  - id: 5
+    type: ethernet
+    network: bridge
+    src: Spine02
+    sport: swp2
+    dst: Leaf02
+    dport: swp2
+
+  - id: 6
+    type: ethernet
+    network: bridge
+    src: Spine02
+    sport: swp3
+    dst: Leaf03
+    dport: swp2
+
+  - id: 7
+    type: ethernet
+    network: bridge
+    src: Spine01
+    sport: swp7
+    dst: Core01
+    dport: port7
+
+  - id: 8
+    type: ethernet
+    network: bridge
+    src: Spine02
+    sport: swp7
+    dst: Core02
+    dport: port7
+
+
+
+
