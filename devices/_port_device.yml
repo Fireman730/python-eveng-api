@@ -146,21 +146,21 @@ xrv9k:
 
 extremexos:
   - Mgmt
-  - Port1
-  - Port2
-  - Port3
-  - Port4
-  - Port5
-  - Port6
-  - Port7
-  - Port8
-  - Port9
-  - Port10
-  - Port11
-  - Port12
-  - Port13
-  - Port14
-  - Port15
+  - port1
+  - port2
+  - port3
+  - port4
+  - port5
+  - port6
+  - port7
+  - port8
+  - port9
+  - port10
+  - port11
+  - port12
+  - port13
+  - port14
+  - port15
 
 linux:
   - e1
