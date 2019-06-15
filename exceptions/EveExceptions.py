@@ -34,6 +34,7 @@ class EVENG_Exception(Exception):
     
     7XY   =   Error with Call API
         708   = Return code = 404
+        7081  = Return code = 404 Lab doesn't exist
 
     8XY   =   Error with SSH command
       -> 801 UMOUNT

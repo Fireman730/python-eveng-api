@@ -149,6 +149,7 @@ def main(deploy, vm, force, start, backup, stop, remove, test, images, ports, co
     # ymlF that contains lab to deploy informations
     #
     vmInfo = open_file(vm)
+
     #
     # Create the object that is connected with EVE-NG API
     #
@@ -169,8 +170,13 @@ def main(deploy, vm, force, start, backup, stop, remove, test, images, ports, co
     
     # ======================================================================================================
     if telnet is not "null":
-        PP.pprint(api.get_nodes_url(telnet))
-        api.logout()
+        try:
+            PP.pprint(api.get_nodes_url(telnet))
+        except EVENG_Exception as e:
+            print(e)
+        finally:
+            api.logout()
+        
         exit(EXIT_SUCCESS)
     
     if connexion is not "null":
@@ -185,8 +191,9 @@ def main(deploy, vm, force, start, backup, stop, remove, test, images, ports, co
                 "[eveng-api - main] - You probably don't use the right syntax of OOB links...")
             print(
                 "eveng-api - main] - Please see https://gitlab.com/DylanHamel/python-eveng-api/wikis/Write-your-YAML-file-that-describes-your-netwrok-(part-4)")
-            
+            print("\n==================================================================")
             PP.pprint(open_file("./tools/oob_iptables_ex.yml"))
+            print("==================================================================")
             
 
     if ports is not "null":

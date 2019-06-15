@@ -786,6 +786,11 @@ class PyEVENG:
 
         response = requests.get(
             self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes", cookies=self._cookies, verify=False)
+        
+        if response.status_code == 404:
+            raise EVENG_Exception(
+                "[PyEVENG - getLabNodesID] - Lab doesn't exist or devices are down", 7081)
+
         self.requestsError(response.status_code)
         content = json.loads(response.content)["data"]
 
@@ -870,7 +875,8 @@ class PyEVENG:
         Returns:
             dict: Telnet connection informations    hostname: url_connection
         """
-
+        
+        # Exception is lab doesn't exist is raise in the below function
         nodesID = self.getLabNodesID(labName)
         result = dict()
 
@@ -879,8 +885,6 @@ class PyEVENG:
                 result[self.getNodeNameByID(labName, nodeID)] = self.get_node_url(labName, nodeID)
 
         return result
-
-
 
     def get_node_url(self, labName:str(), nodeID:str()) -> str():
         """
