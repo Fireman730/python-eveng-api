@@ -9,3 +9,4 @@ pprint
 ipaddress
 random
 pexpect
+jinja2
