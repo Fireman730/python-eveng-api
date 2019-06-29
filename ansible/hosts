@@ -1,0 +1,31 @@
+
+
+
+[leaf]
+
+Leaf01 ansible_host=10.0.5.201 ansible_port=22201 
+
+Leaf02 ansible_host=10.0.5.202 ansible_port=22202 
+
+Leaf03 ansible_host=10.0.5.203 ansible_port=22203 
+
+Leaf04 ansible_host=10.0.5.204 ansible_port=22204 
+
+
+[spine]
+
+Spine01 ansible_host=10.0.5.101 ansible_port=22101 
+
+Spine02 ansible_host=10.0.5.102 ansible_port=22102 
+
+
+
+
+
+#
+# Static variables
+#
+[all:vars]
+ansible_user=cumulus
+ansible_ssh_pass=CumulusLinux!
+ansible_sudo_pass=CumulusLinux!

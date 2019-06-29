@@ -1,0 +1,18 @@
+{% if ansible is defined %}
+{% if ansible['groups'] is defined %}
+{% for groups_name, members in ansible['groups'].items() %}
+[{{ groups_name }}]
+{% for member in members %}
+{{ member }} {% if links is defined %}{% for link in links -%}{% if "OOB-NETWORK" in link['dst'] %}{% for host in link['src'] %}{% if host['host'] == member %}ansible_host={{ host['ip_mgmt']}} ansible_port={{ host['nat'] }} {% endif %}{% endfor %}{% endif %}{%- endfor %}{% endif %}
+{% endfor %}
+{% endfor %}
+{% endif %}
+{% endif %}
+
+#
+# Static variables
+#
+[all:vars]
+ansible_user=cumulus
+ansible_ssh_pass=CumulusLinux!
+ansible_sudo_pass=CumulusLinux!

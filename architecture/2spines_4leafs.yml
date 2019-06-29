@@ -215,3 +215,14 @@ configs:
   - node: Leaf04
     type: full
     config: /Volumes/Data/gitlab/python-eveng-api/backup/cumulus-spine-leaf.unl/Leaf04
+
+ansible:
+  groups:
+    leaf:
+      - Leaf01
+      - Leaf02
+      - Leaf03
+      - Leaf04
+    spine:
+      - Spine01
+      - Spine02
