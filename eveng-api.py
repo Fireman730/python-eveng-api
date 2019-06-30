@@ -33,6 +33,13 @@ except ImportError as importError:
     exit(EXIT_FAILURE)
 
 try:
+    import tools.ansible.generate_hosts
+except ImportError as importError:
+    print("Error import [eveng-api] tools.ansible.generate_hosts")
+    print(importError)
+    exit(EXIT_FAILURE)
+
+try:
     import tools.routing
 except ImportError as importError:
     print("Error import [eveng-api] tools.routing")
@@ -232,6 +239,10 @@ def main(deploy, vm, force, start, backup, stop, remove, test, images, ports, co
             #
             deploy_all(api, ymlF, vmInfo, force)
             api.logout()
+
+            if "ansible" in ymlF.keys():
+                tools.ansible.generate_hosts.generate(ymlF)
+
 
             exit_success()
 

@@ -50,7 +50,8 @@ except ImportError as importError:
 #
 # Constantes
 #
-HOSTS_FILE_TEMPLATE = "./templates/hosts.j2"
+HOSTS_FILE_DIRECTORY = "./tools/ansible/templates"
+HOSTS_FILE_TEMPLATE = "hosts.j2"
 ARCHITECTURE_TEST_FILE = "./../architecture/2spines_4leafs.yml"
 ANSIBLE_HOSTFILE = "./hosts"
 ######################################################
@@ -89,24 +90,21 @@ def write_string_in_file(data: str(), path=ANSIBLE_HOSTFILE, *, mode="w+"):
 # ----------------------------------------------------
 #
 #
-def main():
+def generate(data:dict()):
 
-    data = open_file(ARCHITECTURE_TEST_FILE)
-    
-    #PP.pprint(data)
-    #for link in data['links']:
-    #    if "OOB-NETWORK" in link['dst']:
-    #        for host in link['src']:
-    #            if host['host'] == "Spine01":
-    #                print(host)
-    
-    env = jinja2.Environment(loader=jinja2.FileSystemLoader('./templates'), trim_blocks=False, lstrip_blocks=True)
-    template = env.get_template('hosts.j2')
+    print(f"[generate_hosts - generate] Your dynamic hosts file is being created ...")
+
+    env = jinja2.Environment(loader=jinja2.FileSystemLoader(
+        HOSTS_FILE_DIRECTORY), trim_blocks=False, lstrip_blocks=True)
+    template = env.get_template(HOSTS_FILE_TEMPLATE)
                        
     result = template.render(data)
     write_string_in_file(data=result)
+
+    print(f"[generate_hosts - generate] Your dynamic hosts file has been created ...")
 # -----------------------------------------------------------------------------------------------------------------------------
 #
 #
 if __name__ == "__main__":
-    main()
+    data = open_file(ARCHITECTURE_TEST_FILE)
+    generate(data)

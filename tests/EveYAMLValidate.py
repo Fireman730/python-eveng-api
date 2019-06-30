@@ -75,7 +75,7 @@ except ImportError as importError:
 IMAGE_TYPES = ["iol", "dynamips", "qemu"]
 CONSOLE_TYPES = ["telnet", "vnc"]
 CONFIG_TYPES = ["full", "oob"]
-YAML_KEYS = ["project", "devices", "links", "configs"]
+YAML_KEYS = ["project", "devices", "links", "configs", "ansible"]
 MANDATORY_YAML_KEYS = ["project", "devices", "links"]
 ######################################################
 #
