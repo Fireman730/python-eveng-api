@@ -1087,6 +1087,23 @@ class PyEVENG:
         self.requestsError(response.status_code)
         return json.loads(response.content)
 
+
+    def get_vm_memory(self) -> str():
+        """
+        This function will return a str that contains vm memory (RAM)
+        Use SSH
+
+        Returns:
+            str: That contains vm mermory
+        """
+        GET_MEMORY_COMMAND = "free -m | grep -i mem | awk '{print $2}'"
+
+        ssh = self.sshConnect()
+            
+        stdin, stdout, stderr = ssh.exec_command(GET_MEMORY_COMMAND)
+        return ("".join(stdout.readlines()))
+        
+
     def startLabNode(self, labName, nodeID):
         """
         This function will start a node of a lab according to lab name and node id given in parameter
@@ -1427,7 +1444,6 @@ class PyEVENG:
             param1 (str): Lab name to delete
         """
        
-
         ssh = self.sshConnect()
         sftp = ssh.open_sftp()
         try:

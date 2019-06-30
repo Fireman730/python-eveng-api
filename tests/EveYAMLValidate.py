@@ -122,6 +122,8 @@ def validateYamlFileForPyEVENG(api: PyEVENG.PyEVENG, yamlContent: dict(), vmInfo
             CONFIG_TYPES, yamlContent, dictToVerify="configs", paramToVerify="type")
     # Check that device image is available in the EVE-NG
     assert checkIfImageIsAvaiable(api, yamlContent)
+    # Check memory available vs memery asked by devices
+    assert checkVMMemoryFreeVSDevicesMemoryAsked(api, yamlContent)
     # Check that nodes in configs: node is in devices added
     if "configs" in yamlContent.keys():
         assert checkIfConfigsNodesExists(yamlContent)
@@ -133,6 +135,25 @@ def validateYamlFileForPyEVENG(api: PyEVENG.PyEVENG, yamlContent: dict(), vmInfo
 #
 # Create test functions below ...
 #
+def checkVMMemoryFreeVSDevicesMemoryAskedWithPath(api: PyEVENG.PyEVENG, yamlContent: dict()) -> bool:
+    return checkVMMemoryFreeVSDevicesMemoryAsked(api, open_yaml_files(pathToYamlFile))
+
+# Check memory available vs memery asked by devices
+def checkVMMemoryFreeVSDevicesMemoryAsked(api: PyEVENG.PyEVENG, yamlContent: dict()) -> bool:
+    total_memory = 0
+    coefficient = 1.2
+
+    if "devices" in yamlContent.keys():
+        for device in yamlContent['devices']:
+            total_memory = total_memory + device['ram']
+
+        vm_memory = api.get_vm_memory()
+
+        if int(vm_memory) < int(total_memory / coefficient): 
+            return False
+
+    return True
+
 # Check that Ansible keys are allowd
 def checkAnsibleKeysWithPath(pathToYamlFile: str()) -> bool:
     return checkAnsibleKeys(open_yaml_files(pathToYamlFile))
@@ -140,11 +161,10 @@ def checkAnsibleKeysWithPath(pathToYamlFile: str()) -> bool:
 def checkAnsibleKeys(yamlContent: dict()) -> bool:
     if "ansible" in yamlContent.keys():
         for key in yamlContent['ansible'].keys():
-            if key['ram'] not in KEYS_IN_ANSIBLE:
+            if key not in KEYS_IN_ANSIBLE:
                 return False
-        return True
-    return False
-
+    
+    return True
 ## Cechk that ram of each node is correct
 def checkIfRamIsAllowedWithPath(pathToYamlFile: str()) -> bool:
     return checkIfRamIsAllowed(open_yaml_files(pathToYamlFile))
@@ -152,7 +172,7 @@ def checkIfRamIsAllowedWithPath(pathToYamlFile: str()) -> bool:
 def checkIfRamIsAllowed(yamlContent: dict()) -> bool:
     if "devices" in yamlContent.keys():
         for device in yamlContent['devices']:
-            if device['ram'] not in RAM_ALLOWED:
+            if str(device['ram']) not in RAM_ALLOWED:
                 return False
         return True
     return False
