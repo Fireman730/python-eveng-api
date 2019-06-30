@@ -105,6 +105,7 @@ def validateYamlFileForPyEVENG(api: PyEVENG.PyEVENG, yamlContent: dict(), vmInfo
     assert checkIfRamIsAllowed(yamlContent)
     # Check that ansible: keys are allowed
     assert checkAnsibleKeys(yamlContent)
+    assert checkAnsibleKeysGroupsExistIfPlaybooksExist(yamlContent)
     # Check that links is connected to existing devices
     # assert checkIfLinkConnectedToExistingDevice(yamlContent)
     # Check that each device ports are used only one time - not connected to many devices
@@ -155,17 +156,25 @@ def checkVMMemoryFreeVSDevicesMemoryAsked(api: PyEVENG.PyEVENG, yamlContent: dic
     return True
 
 # Check that Ansible keys are allowd
+def checkAnsibleKeysGroupsExistIfPlaybooksExist(yamlContent: dict()) -> bool:
+    if "ansible" in yamlContent.keys():
+        if "playbooks" in yamlContent['ansible'].keys() and "groups" not in yamlContent['ansible'].keys():
+                raise EVENG_Exception("[EveYAMLValidate.py - checkAnsibleKeysGroupsExistIfPlaybooksExist] - ansible: groups: is mandatory if you use ansible: playbooks:", 100)
+    return True
+
 def checkAnsibleKeysWithPath(pathToYamlFile: str()) -> bool:
     return checkAnsibleKeys(open_yaml_files(pathToYamlFile))
 
 def checkAnsibleKeys(yamlContent: dict()) -> bool:
     if "ansible" in yamlContent.keys():
         for key in yamlContent['ansible'].keys():
-            if key not in KEYS_IN_ANSIBLE:
-                return False
+            if str(key) not in KEYS_IN_ANSIBLE:
+                raise EVENG_Exception(
+                    f"[EveYAMLValidate.py - checkAnsibleKeys] - <{key}> is not a allowed keys for ansible:", 100)
     
     return True
-## Cechk that ram of each node is correct
+
+## Check that ram of each node is correct
 def checkIfRamIsAllowedWithPath(pathToYamlFile: str()) -> bool:
     return checkIfRamIsAllowed(open_yaml_files(pathToYamlFile))
 

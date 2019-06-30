@@ -26,6 +26,20 @@ EXIT_FAILURE = 1
 # Import Library
 #
 try:
+    import time
+except ImportError as importError:
+    print("Error import [eveng-api] time")
+    print(importError)
+    exit(EXIT_FAILURE)
+
+try:
+    from ansible.executor.playbook_executor import PlaybookExecutor
+except ImportError as importError:
+    print("Error import [eveng-api] ansible")
+    print(importError)
+    exit(EXIT_FAILURE)
+
+try:
     import pexpect
 except ImportError as importError:
     print("Error import [eveng-api] pexpect")
@@ -237,13 +251,23 @@ def main(deploy, vm, force, start, backup, stop, remove, test, images, ports, co
             #
             # Call function that will create Lab, deploy devices, deploy links and push config
             #
-            deploy_all(api, ymlF, vmInfo, force)
-            api.logout()
-
+            #deploy_all(api, ymlF, vmInfo, force)
+            #api.logout()
+        
             if "ansible" in ymlF.keys():
-                tools.ansible.generate_hosts.generate(ymlF)
+                
+                if "groups" in ymlF['ansible'].keys():
+                    tools.ansible.generate_hosts.generate(ymlF)
 
-
+                if "playbooks" in ymlF['ansible'].keys():
+                    print(
+                        f"[eveng-api - main] devices are starting... Ansible scripts will be run ...")
+                    #time.sleep(60)
+                    for playbook in ymlF['ansible']['playbooks']:
+                        pb = PlaybookExecutor(playbooks=playbook, inventory=str(
+                            tools.ansible.generate_hosts.ANSIBLE_HOSTFILE))
+                        pb.run()
+                            
             exit_success()
 
         except EVENG_Exception as eveError:
