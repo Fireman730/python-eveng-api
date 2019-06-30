@@ -77,6 +77,9 @@ CONSOLE_TYPES = ["telnet", "vnc"]
 CONFIG_TYPES = ["full", "oob"]
 YAML_KEYS = ["project", "devices", "links", "configs", "ansible"]
 MANDATORY_YAML_KEYS = ["project", "devices", "links"]
+RAM_ALLOWED = ["64", "128", "256", "512", "1024", "2048",
+              "3072", "4096", "5120", "6144", "8192", "16384"]
+KEYS_IN_ANSIBLE = ["playbooks", "groups"]
 ######################################################
 #
 # MAIN Functions
@@ -98,6 +101,10 @@ def validateYamlFileForPyEVENG(api: PyEVENG.PyEVENG, yamlContent: dict(), vmInfo
     assert checkIfDuplicateParam(yamlContent, "devices", "name")
     # Check that each devices have a different UUID
     assert checkIfDuplicateParam(yamlContent, "devices", "uuid")
+    # Check that RAM allowd to each device is allowd
+    assert checkIfRamIsAllowed(yamlContent)
+    # Check that ansible: keys are allowed
+    assert checkAnsibleKeys(yamlContent)
     # Check that links is connected to existing devices
     # assert checkIfLinkConnectedToExistingDevice(yamlContent)
     # Check that each device ports are used only one time - not connected to many devices
@@ -126,6 +133,30 @@ def validateYamlFileForPyEVENG(api: PyEVENG.PyEVENG, yamlContent: dict(), vmInfo
 #
 # Create test functions below ...
 #
+# Check that Ansible keys are allowd
+def checkAnsibleKeysWithPath(pathToYamlFile: str()) -> bool:
+    return checkAnsibleKeys(open_yaml_files(pathToYamlFile))
+
+def checkAnsibleKeys(yamlContent: dict()) -> bool:
+    if "ansible" in yamlContent.keys():
+        for key in yamlContent['ansible'].keys():
+            if key['ram'] not in KEYS_IN_ANSIBLE:
+                return False
+        return True
+    return False
+
+## Cechk that ram of each node is correct
+def checkIfRamIsAllowedWithPath(pathToYamlFile: str()) -> bool:
+    return checkIfRamIsAllowed(open_yaml_files(pathToYamlFile))
+
+def checkIfRamIsAllowed(yamlContent: dict()) -> bool:
+    if "devices" in yamlContent.keys():
+        for device in yamlContent['devices']:
+            if device['ram'] not in RAM_ALLOWED:
+                return False
+        return True
+    return False
+
 ## Check that nodes in configs: node is in devices added
 def checkIfConfigsNodesExistsWithPath(pathToYamlFile: str()) -> bool:
     return checkIfConfigsNodesExists(open_yaml_files(pathToYamlFile))
