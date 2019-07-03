@@ -1,0 +1,128 @@
+---
+project:
+  path: /Users/
+  name: lacp-cumulus-vsp
+  version: 1
+  author: DylanHamel
+  description: LACP between Cumulus and VSP with MLAG
+  body: Test Lab
+
+devices:
+  - type: qemu
+    template: cumulus
+    config: Unconfigured
+    delay: 0
+    icon: router.png
+    image: cumulus-vx-3.7.5
+    name: Core01
+    left: 45%
+    top: 20%
+    ram: 1024
+    console: telnet
+    cpu: 1
+    ethernet: 8
+    uuid: 641a4800-1b19-427c-ae87-5555590b7790
+
+  - type: qemu
+    template: cumulus
+    config: Unconfigured
+    delay: 0
+    icon: router.png
+    image: cumulus-vx-3.7.5
+    name: Core02
+    left: 45%
+    top: 20%
+    ram: 1024
+    console: telnet
+    cpu: 1
+    ethernet: 8
+    uuid: 641a4800-1b19-427c-ae87-5555590b7791
+
+  - type: qemu
+    template: extremexos
+    config: Unconfigured
+    delay: 0
+    icon: "Switch L3.png"
+    image: extremexos-voss-7.1
+    name: VSP01
+    left: 45%
+    top: 20%
+    ram: 2048
+    console: telnet
+    cpu: 1
+    ethernet: 8
+    uuid: 641a4800-1b19-427c-ae87-5555590b772
+  
+  - type: qemu
+    template: extremexos
+    config: Unconfigured
+    delay: 0
+    icon: "Switch L3.png"
+    image: extremexos-voss-7.1
+    name: VSP02
+    left: 45%
+    top: 20%
+    ram: 2048
+    console: telnet
+    cpu: 1
+    ethernet: 8
+    uuid: 641a4800-1b19-427c-ae87-5555590b773
+
+
+links:
+  - id: 1
+    type: ethernet
+    network: bridge
+    src: Core01
+    sport: swp1
+    dst: Core02
+    dport: swp1
+
+  - id: 2
+    type: ethernet
+    network: bridge
+    src: Core01
+    sport: swp2
+    dst: Core02
+    dport: swp2
+
+  - id: 3
+    type: ethernet
+    network: bridge
+    src: Core01
+    sport: swp3
+    dst: VSP01
+    dport: port3
+
+  - id: 4
+    type: ethernet
+    network: bridge
+    src: Core02
+    sport: swp3
+    dst: VSP02
+    dport: port3
+
+  - id: 5
+    type: ethernet
+    network: bridge
+    src: VSP01
+    sport: port1
+    dst: VSP02
+    dport: port1
+
+  - id: 6
+    type: ethernet
+    network: bridge
+    src: VSP01
+    sport: port2
+    dst: VSP02
+    dport: port2
+
+
+configs:
+  - node: VSP01
+    type: full
+    config: /Volumes/Data/gitlab/python-eveng-api/backup/spbm-isis-vsp.unl/core01a
+  - node: VSP02
+    type: full
+    config: /Volumes/Data/gitlab/python-eveng-api/backup/spbm-isis-vsp.unl/core01b
