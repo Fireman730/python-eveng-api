@@ -34,6 +34,9 @@ except ImportError as importError:
 
 try:
     from ansible.executor.playbook_executor import PlaybookExecutor
+    from ansible.parsing.dataloader import DataLoader
+    from ansible.vars.manager import VariableManager
+    from ansible.inventory.manager import InventoryManager
 except ImportError as importError:
     print("Error import [eveng-api] ansible")
     print(importError)
@@ -144,6 +147,7 @@ def exit_success():
 #
 @click.command()
 @click.option('--deploy', default="#", help='Path to yaml file that contains topology to deploy.')
+@click.option('--inventory', default="#", help='Generate Ansible virtual inventory hosts file.')
 @click.option('--vm', default="./vm/vm_info.yml", help='Path to yaml file that contains EVE-NG VM informations.')
 @click.option('--force', default=False, help='If --force=True, if a lab exists on the EVE-NG VM it will be remove.')
 @click.option('--start', default="#", help='Labname you want to start')
@@ -157,7 +161,7 @@ def exit_success():
 @click.option('--telnet', default="null", help='This argument will return a dict with telnet informations connexions lab need LAB HAS TO BE STARTED.')
 @click.option('--pod', default="0", help='This argument defines a on which POD the is stored.')
 @click.option('--folder', default="Users", help='This argument defines a on which FOLDER lab is stored.')
-def main(deploy, vm, force, start, backup, stop, remove, test, images, ports, connexion, telnet, pod, folder):
+def main(deploy, inventory, vm, force, start, backup, stop, remove, test, images, ports, connexion, telnet, pod, folder):
     """
     This function is the main function of this project.
     It will retrieve arguments and run Functions
@@ -188,7 +192,7 @@ def main(deploy, vm, force, start, backup, stop, remove, test, images, ports, co
                         community=vmInfo['community'],
                         verbose=cliVerbose
     )
-    
+
     # ======================================================================================================
     if telnet is not "null":
         try:
@@ -197,9 +201,9 @@ def main(deploy, vm, force, start, backup, stop, remove, test, images, ports, co
             print(e)
         finally:
             api.logout()
-        
+
         exit(EXIT_SUCCESS)
-    
+
     if connexion is not "null":
         try:
             PP.pprint(api.get_remote_connexion_file(connexion))
@@ -215,7 +219,7 @@ def main(deploy, vm, force, start, backup, stop, remove, test, images, ports, co
             print("\n==================================================================")
             PP.pprint(open_file("./tools/oob_iptables_ex.yml"))
             print("==================================================================")
-            
+
 
     if ports is not "null":
         print("==================================================================")
@@ -225,7 +229,7 @@ def main(deploy, vm, force, start, backup, stop, remove, test, images, ports, co
     if test:
         PP.pprint(api.status())
         api.logout()
-    
+
     if images:
         deviceTypes = api.getNodeInstall()
         result = dict()
@@ -233,41 +237,45 @@ def main(deploy, vm, force, start, backup, stop, remove, test, images, ports, co
             versions = api.getNodeVersionInstall(deviceType)
             if len(versions):
                 result[deviceType] = versions
-        
+
         print("==================================================================")
         PP.pprint(result)
         print("==================================================================")
         api.logout()
-    
+
+    if inventory!= "#":
+        ymlF = open_file(inventory)
+        if "ansible" in ymlF.keys():
+            if "groups" in ymlF['ansible'].keys():
+                tools.ansible.generate_hosts.generate(ymlF)
+
+            if "playbooks"in ymlF['ansible'].keys():
+                pass
+        exit_success()
+
+
     if deploy != "#":
         ymlF = open_file(deploy)
         try:
-        
+
             #
             # Validate your yaml file
             #
             validateYamlFileForPyEVENG(api, ymlF, vmInfo)
-            
+
             #
             # Call function that will create Lab, deploy devices, deploy links and push config
             #
-            #deploy_all(api, ymlF, vmInfo, force)
-            #api.logout()
-        
+            deploy_all(api, ymlF, vmInfo, force)
+            api.logout()
+
             if "ansible" in ymlF.keys():
-                
                 if "groups" in ymlF['ansible'].keys():
                     tools.ansible.generate_hosts.generate(ymlF)
 
-                if "playbooks" in ymlF['ansible'].keys():
-                    print(
-                        f"[eveng-api - main] devices are starting... Ansible scripts will be run ...")
-                    #time.sleep(60)
-                    for playbook in ymlF['ansible']['playbooks']:
-                        pb = PlaybookExecutor(playbooks=playbook, inventory=str(
-                            tools.ansible.generate_hosts.ANSIBLE_HOSTFILE))
-                        pb.run()
-                            
+                if "playbooks"in ymlF['ansible'].keys():
+                    pass
+
             exit_success()
 
         except EVENG_Exception as eveError:
@@ -280,7 +288,7 @@ def main(deploy, vm, force, start, backup, stop, remove, test, images, ports, co
         except FileNotFoundError as e:
             print(
                 "[eveng-api - main] - Check if labname exists ...")
-            
+
             # api.check_if_lab_exists(labName)
 
         api.getBackupNodesConfig(ymlF)
@@ -318,7 +326,7 @@ def deploy_all (api: PyEVENG.PyEVENG, ymlF: dict(), vmInfo: dict(), force: str()
     3th it will create links and networks with information contained in your YAML files ['links'] with REST API calls
 
     Then the devices will be started and stopped.
-    These actions is mandatory to create {/opt/unetlab/tmp/0/{LAB_ID}/{NODE_ID}/} directoies 
+    These actions is mandatory to create {/opt/unetlab/tmp/0/{LAB_ID}/{NODE_ID}/} directoies
 
     4th it will push the config files contains in your YAML files ['configs'] with SSH connexion and mount NBD.
 
@@ -335,23 +343,23 @@ def deploy_all (api: PyEVENG.PyEVENG, ymlF: dict(), vmInfo: dict(), force: str()
             api.deleteLab(ymlF['project']['name']+".unl")
             print("[eveng-api - deploy_all] - lab"+str(ymlF['project']['name'])+".unl has been removed !")
 
-        # 
+        #
         # Step to Create the lab
         #
         if "project" in ymlF.keys():
             print("[eveng-api - deploy_all] - deploy projects")
             api.createLab(ymlF['project'])
-        
+
         if "devices" in ymlF.keys():
             print("[eveng-api - deploy_all] - deploy devices")
             api.addNodesToLab(ymlF['devices'],
                     ymlF['project']['name']+".unl")
-        
+
         if "links" in ymlF.keys():
             print("[eveng-api - deploy_all] - deploy links")
             api.addNetworksLinksToLab(ymlF['links'],
                     ymlF['project']['name']+".unl")
-        
+
         #
         # Start hosts to create folders in
         # /opt/unetlab/tmp/0/{LAB_ID}/{NODE_ID}/*
@@ -368,8 +376,8 @@ def deploy_all (api: PyEVENG.PyEVENG, ymlF: dict(), vmInfo: dict(), force: str()
             print("[eveng-api - deploy_all] - push configs")
             api.addConfigToNodesLab(ymlF['configs'],
                                     ymlF['project']['name']+".unl")
-        
-            # 
+
+            #
             # Restart hosts when config files are pushed
             #
             api.startLabAllNodes(ymlF['project']['name']+".unl", enable=True)
@@ -405,7 +413,7 @@ def open_file(path: str()) -> dict():
             data = yaml.load(yamlFile)
         except yaml.YAMLError as exc:
             print(exc)
-    
+
     return data
 
 # -----------------------------------------------------------------------------------------------------------------------------
