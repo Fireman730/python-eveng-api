@@ -100,7 +100,8 @@ def validateYamlFileForPyEVENG(api: PyEVENG.PyEVENG, yamlContent: dict(), vmInfo
     # Check that each devices have an different name
     assert checkIfDuplicateParam(yamlContent, "devices", "name")
     # Check that each devices have a different UUID
-    assert checkIfDuplicateParam(yamlContent, "devices", "uuid")
+    if "uuid" in yamlContent['devices']:
+        assert checkIfDuplicateParam(yamlContent, "devices", "uuid")
     # Check that RAM allowd to each device is allowd
     assert checkIfRamIsAllowed(yamlContent)
     # Check that ansible: keys are allowed
@@ -110,6 +111,10 @@ def validateYamlFileForPyEVENG(api: PyEVENG.PyEVENG, yamlContent: dict(), vmInfo
     # assert checkIfLinkConnectedToExistingDevice(yamlContent)
     # Check that each device ports are used only one time - not connected to many devices
     assert checkIfPortUseManyTime(yamlContent)
+    # Check that each EVENG port used to NAT is unique
+    assert checkNatPort(yamlContent)
+    # Check that each device has a unique IP address in OOB NETWORK
+    assert checkDeviceIPAddressInOOB(yamlContent)
     # Check that links:node is in devices:name
     assert checkIfLinksHostIsExisting(yamlContent)
     # Check that devices type is in IMAGE_TYPES
@@ -150,7 +155,7 @@ def checkVMMemoryFreeVSDevicesMemoryAsked(api: PyEVENG.PyEVENG, yamlContent: dic
 
         vm_memory = api.get_vm_memory()
 
-        if int(vm_memory) < int(total_memory / coefficient): 
+        if int(vm_memory) < int(total_memory / coefficient):
             return False
 
     return True
@@ -171,7 +176,7 @@ def checkAnsibleKeys(yamlContent: dict()) -> bool:
             if str(key) not in KEYS_IN_ANSIBLE:
                 raise EVENG_Exception(
                     f"[EveYAMLValidate.py - checkAnsibleKeys] - <{key}> is not a allowed keys for ansible:", 100)
-    
+
     return True
 
 ## Check that ram of each node is correct
@@ -260,10 +265,10 @@ def checkIfImageIsAvaiableWithPath(availableImages: dict(), pathToYamlFile: str(
 
 
 def checkIfImageIsAvaiable(pyeveng, yamlContent: dict(), dictToVerify: str() = "devices", paramToVerify: str() = "image") -> bool:
-    
+
     for device in yamlContent['devices']:
         images = pyeveng.getImageVersionByModel(device['template'])
-        
+
         if device[paramToVerify] not in images:
             raise EVENG_Exception(str("[EveYAMLValidate.py - checkIfImageIsAvaiable] - Image "+str(
                 device[paramToVerify])+" is not available on this EVE-NG \n\t\t=> Error can be in your YAML file [template: or image:]."), 900)
@@ -361,7 +366,7 @@ def checkIfPortUseManyTime(yamlContent: dict(), dictToVerify: str() = "links", p
             else:
                 allHostInLinks[link[paramToVerify[2]]].append(
                     link[paramToVerify[3]])
-        
+
         else:
             for oobConnection in link['src']:
                 if oobConnection['port'] in allHostInLinks[oobConnection['host']]:
@@ -373,7 +378,39 @@ def checkIfPortUseManyTime(yamlContent: dict(), dictToVerify: str() = "links", p
                         oobConnection['port'])
 
     return True
+#
+#### Check that each EVENG port used to NAT is unique ####
+#
+def checkNatPort(yamlContent: dict()):
 
+    list_nat_port = list()
+
+    for link in yamlContent['links']:
+        if "OOB-NETWORK" in link['dst']:
+            for oob_link in link['src']:
+                if oob_link['nat'] in list_nat_port:
+                    raise EVENG_Exception(
+                        str("[EveYAMLValidate.py - checkNatPort] - Two devices have the same external NAT port : "+str(oob_link['nat'])), 900)
+                else:
+                    list_nat_port.append(oob_link['nat'])
+    return True
+
+#
+#### Check that each device has a unique IP address in OOB NETWORK ####
+#
+def checkDeviceIPAddressInOOB(yamlContent: dict()):
+
+    list_nat_port = list()
+
+    for link in yamlContent['links']:
+        if "OOB-NETWORK" in link['dst']:
+            for oob_link in link['src']:
+                if oob_link['ip_mgmt'] in list_nat_port:
+                    raise EVENG_Exception(
+                        str("[EveYAMLValidate.py - checkDeviceIPAddressInOOB] - Two devices have the same OOB IP address : "+str(oob_link['ip_mgmt'])), 900)
+                else:
+                    list_nat_port.append(oob_link['ip_mgmt'])
+    return True
 
 #
 #### Check If Hostname are duplicate (Spine01, Core01, Leaf01, ...) ####
