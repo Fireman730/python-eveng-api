@@ -1511,6 +1511,24 @@ class PyEVENG:
     #
     # EDIT (POST) functions
     #
+
+    ADD_NODE_DATA = {"type": "{}",
+        "template": "cumulus",
+        "config": "Unconfigured",
+        "delay": '0',
+        "icon": "router.png",
+        "image": "cumulus-vx-3.7.5",
+        "name": "Spine01",
+        "left": "45%",
+        "top": "20%", 
+        "ram": 512, 
+        "console": "telnet", 
+        "cpu": 1, 
+        "ethernet": 8, 
+        "uuid": "641a4800-1b19-427c-ae87-5555590b7790"
+    }
+
+    
     def addNodeToLab(self, nodesToAdd: dict(), labName: str()):
         """
         This function add a node to a Lab
@@ -1529,6 +1547,7 @@ class PyEVENG:
 
         else:
             self.lock_lab()
+            PP.pprint(json.dumps(nodesToAdd))
             response = requests.post(
                 self._url+"/api/labs/"+str(self._userFolder)+"/"+str(labName)+"/nodes", data=json.dumps(nodesToAdd), cookies=self._cookies, verify=False)
 
@@ -1693,7 +1712,7 @@ class PyEVENG:
                         }
 
                         self.create_iptables_nat(
-                            ssh, link['network'], oobInterface['ip_mgmt'], oobInterface['ssh'], ipMgmtEve, oobInterface['nat'])
+                            ssh, link['ip_pub'], link['network'], oobInterface['ip_mgmt'], oobInterface['ssh'], ipMgmtEve, oobInterface['nat'])
                     #
 
                     self.addLinkToLab(link['id'], self.getNodeIDbyNodeName(labName, oobInterface['host']), self.getNodeInterfaceID(
@@ -1752,7 +1771,7 @@ class PyEVENG:
 
     # =========
     #
-    def create_iptables_nat(self, ssh:paramiko.SSHClient(), interface:str(), hostsIP:str(), sshMgmt:str(), eveIP:str(), eveSsh:str()):
+    def create_iptables_nat(self, ssh: paramiko.SSHClient(), evengIP: str(), interface: str(), hostsIP: str(), sshMgmt: str(), eveIP: str(), eveSsh: str()):
         """
         This function will create iptables on the EVE-NG VM
             * SNAT
@@ -1785,23 +1804,23 @@ class PyEVENG:
         # DNAT
         #
         print("[PyEVENG - create_iptables_nat] -",
-              tools.routing.IPTABLES_DNAT.format("A", eveSsh, hostsIP, sshMgmt))
+              tools.routing.IPTABLES_DNAT.format("A", evengIP, eveSsh, hostsIP, sshMgmt))
         stdin, stdout, stderr = ssh.exec_command(
-            tools.routing.IPTABLES_DNAT.format("A", eveSsh, hostsIP, sshMgmt))
+            tools.routing.IPTABLES_DNAT.format("A", evengIP, eveSsh, hostsIP, sshMgmt))
         o = "".join(stdout.readlines())
        
-        commands.append(tools.routing.IPTABLES_DNAT.format("D", eveSsh, hostsIP, sshMgmt))
+        commands.append(tools.routing.IPTABLES_DNAT.format("D", evengIP, eveSsh, hostsIP, sshMgmt))
         
         #
         # FIREWALL
         #
         print("[PyEVENG - create_iptables_nat] -",
-              tools.routing.IPTABLES_ALLOWED.format("A", eveSsh))
+              tools.routing.IPTABLES_ALLOWED.format("A", evengIP, eveSsh))
         stdin, stdout, stderr = ssh.exec_command(
-            tools.routing.IPTABLES_ALLOWED.format("A", eveSsh))
+            tools.routing.IPTABLES_ALLOWED.format("A", evengIP, eveSsh))
         o = "".join(stdout.readlines())
 
-        commands.append(tools.routing.IPTABLES_ALLOWED.format("D", eveSsh))
+        commands.append(tools.routing.IPTABLES_ALLOWED.format("D", evengIP, eveSsh))
 
         #
         # SNAT

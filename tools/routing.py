@@ -20,8 +20,8 @@ __license__ = "MIT"
 #
 IPTABLES_INSTALL = "sudo apt-get install - y iptables"
 
-IPTABLES_DNAT = "iptables -{} PREROUTING -t nat -i $(ip route show | grep $(hostname -I | awk '{{print $1}}') | awk '{{print $3}}') -p tcp --dport {} -j DNAT --to {}:{}"
-IPTABLES_ALLOWED = "iptables -{} FORWARD -p tcp -d $(hostname -I | awk '{{print $1}}') --dport {} -j ACCEPT"
+IPTABLES_DNAT = "iptables -{} PREROUTING -t nat -i $(ip route show | grep {} | awk '{{print $3}}') -p tcp --dport {} -j DNAT --to {}:{}"
+IPTABLES_ALLOWED = "iptables -{} FORWARD -p tcp -d {} --dport {} -j ACCEPT"
 IPTABLES_SNAT = "iptables -{} POSTROUTING -t nat -o {} -p tcp --dport 22 -j SNAT --to {}"
 
 

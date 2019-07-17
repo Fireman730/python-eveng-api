@@ -339,7 +339,7 @@ def deploy_all (api: PyEVENG.PyEVENG, ymlF: dict(), vmInfo: dict(), force: str()
         # Remove the lab if option --force=True
         #
 
-        if force == "True":
+        if force.upper() == "TRUE":
             api.deleteLab(ymlF['project']['name']+".unl")
             print("[eveng-api - deploy_all] - lab"+str(ymlF['project']['name'])+".unl has been removed !")
 
