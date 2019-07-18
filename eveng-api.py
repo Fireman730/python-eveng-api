@@ -291,7 +291,7 @@ def main(deploy, inventory, vm, force, start, backup, stop, remove, test, images
 
             # api.check_if_lab_exists(labName)
 
-        api.getBackupNodesConfig(ymlF)
+        api.get_backup_nodes_config(ymlF)
         api.logout()
         exit_success()
 
@@ -307,7 +307,7 @@ def main(deploy, inventory, vm, force, start, backup, stop, remove, test, images
         exit_success()
 
     if remove != "#":
-        api.deleteLab(remove)
+        api.delete_lab(remove)
         api.logout()
         exit_success()
 
@@ -340,7 +340,7 @@ def deploy_all (api: PyEVENG.PyEVENG, ymlF: dict(), vmInfo: dict(), force: str()
         #
 
         if force.upper() == "TRUE":
-            api.deleteLab(ymlF['project']['name']+".unl")
+            api.delete_lab(ymlF['project']['name']+".unl")
             print("[eveng-api - deploy_all] - lab"+str(ymlF['project']['name'])+".unl has been removed !")
 
         #
@@ -348,16 +348,16 @@ def deploy_all (api: PyEVENG.PyEVENG, ymlF: dict(), vmInfo: dict(), force: str()
         #
         if "project" in ymlF.keys():
             print("[eveng-api - deploy_all] - deploy projects")
-            api.createLab(ymlF['project'])
+            api.create_lab(ymlF['project'])
 
         if "devices" in ymlF.keys():
             print("[eveng-api - deploy_all] - deploy devices")
-            api.addNodesToLab(ymlF['devices'],
+            api._add_nodes_to_lab(ymlF['devices'],
                     ymlF['project']['name']+".unl")
 
         if "links" in ymlF.keys():
             print("[eveng-api - deploy_all] - deploy links")
-            api.addNetworksLinksToLab(ymlF['links'],
+            api._add_networks_and_links_to_lab(ymlF['links'],
                     ymlF['project']['name']+".unl")
 
         #
@@ -371,10 +371,10 @@ def deploy_all (api: PyEVENG.PyEVENG, ymlF: dict(), vmInfo: dict(), force: str()
             #
             # Stop hosts to push config with mount NBD
             #
-            api.stopLabAllNodes(ymlF['project']['name']+".unl")
+            api.stop_lab_all_nodes(ymlF['project']['name']+".unl")
 
             print("[eveng-api - deploy_all] - push configs")
-            api.addConfigToNodesLab(ymlF['configs'],
+            api.add_config_to_nodes_lab(ymlF['configs'],
                                     ymlF['project']['name']+".unl")
 
             #
@@ -385,13 +385,13 @@ def deploy_all (api: PyEVENG.PyEVENG, ymlF: dict(), vmInfo: dict(), force: str()
     except EVENG_Exception as eve:
         print(eve._message)
         if eve._error != 12:
-            api.deleteLab(ymlF['project']['name']+".unl")
+            api.delete_lab(ymlF['project']['name']+".unl")
 
 
     except Exception as e:
         print(e)
         print("[eveng-api - deploy_all] - error during la creation !")
-        api.deleteLab(ymlF['project']['name']+".unl")
+        api.delete_lab(ymlF['project']['name']+".unl")
 
 # ----------------------------------------------------
 #

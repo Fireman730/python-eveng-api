@@ -141,7 +141,7 @@ def validateYamlFileForPyEVENG(api: PyEVENG.PyEVENG, yamlContent: dict(), vmInfo
 #
 # Create test functions below ...
 #
-def checkVMMemoryFreeVSDevicesMemoryAskedWithPath(api: PyEVENG.PyEVENG, yamlContent: dict()) -> bool:
+def checkVMMemoryFreeVSDevicesMemoryAskedWithPath(api: PyEVENG.PyEVENG, pathToYamlFile: str()) -> bool:
     return checkVMMemoryFreeVSDevicesMemoryAsked(api, open_yaml_files(pathToYamlFile))
 
 # Check memory available vs memery asked by devices

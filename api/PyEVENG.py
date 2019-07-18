@@ -173,10 +173,11 @@ class PyEVENG:
     
     """
     
+
     # ----------------------------------------------------------
     #
     #
-    def getBackupNodesConfig(self, yamlFiles: dict()):
+    def get_backup_nodes_config(self, yamlFiles: dict()):
         """
         This function will recover all devices that need to be backed up.
         
@@ -204,19 +205,20 @@ class PyEVENG:
 
             if lab['labname'] not in self.get_labs_in_folder():
                 raise EVENG_Exception(
-                    "[PyEVENG - getBackupNodesConfig]"+str(lab['labname'])+" doesn't exist in "+str(lab['folder']), 910)
+                    "[PyEVENG - get_backup_nodes_config]"+str(lab['labname'])+" doesn't exist in "+str(lab['folder']), 910)
 
             if "all" in lab['hostname']:
                 for hostname in self.get_lab_nodes_name(lab['labname']):
-                    self.getBackupConfig(lab['bck_path'], lab['labname'], hostname)
+                    self.get_backup_config(lab['bck_path'], lab['labname'], hostname)
             else:
                 for hostname in lab['hostname']:
-                    self.getBackupConfig(lab['bck_path'], lab['labname'], hostname)
+                    self.get_backup_config(lab['bck_path'], lab['labname'], hostname)
+
 
     # ----------------------------------------------------------
     #
     #
-    def getBackupConfig(self, path:str(), project_name: str(), nodeName: str()):
+    def get_backup_config(self, path:str(), project_name: str(), nodeName: str()):
         """
         This function will find the node image.
         According to the image. this function will call the function for backup the device.
@@ -250,39 +252,40 @@ class PyEVENG:
         try:
             mkdir(path+"/"+project_name)
         except OSError as e:
-            print("[PyEVENG - getBackupConfig] create project folder", e)
+            print("[PyEVENG - get_backup_config] create project folder", e)
 
         try:
             mkdir(path+"/"+project_name+"/"+nodeName)
         except OSError as e:
-            print("[PyEVENG - getBackupConfig] create node folder", e)
+            print("[PyEVENG - get_backup_config] create node folder", e)
 
         path = path+"/"+project_name+"/"+nodeName
 
         print("*************",nodeImage, "***************")
         # CUMULUS LINUX
         if "CUMULUS" in nodeImage :
-            self.getCumulusBackup(path, project_name, nodeName, nodeID)
+            self._get_cumulus_backup(path, project_name, nodeName, nodeID)
         # EXTREME NETWORK
         elif "EXTREME" in nodeImage:
-            self.getExtremeBackup(path, project_name, nodeName, nodeID)
+            self._get_extreme_backup(path, project_name, nodeName, nodeID)
         # CISCO
         elif "VIOS" in nodeImage:
-            self.getCiscoBackup(path, project_name, nodeName, nodeID)
+            self._get_cisco_backup(path, project_name, nodeName, nodeID)
         # CISCO NEXUS
         elif "NXOS" in nodeImage:
-            self.getNexusBackup(path, project_name, nodeName, nodeID)
+            self._get_nexus_backup(path, project_name, nodeName, nodeID)
         # VYOS VYATTA
         elif "VYOS" in nodeImage:
-            self.getVyosBackup(path, project_name, nodeName, nodeID)
+            self._get_vyos_backup(path, project_name, nodeName, nodeID)
         # VEOS ARISTA
         elif "VEOS" in nodeImage:
-            self.getAristaBackup(path, project_name, nodeName, nodeID)
+            self._get_arista_backup(path, project_name, nodeName, nodeID)
+
 
     # ----------------------------------------------------------
     #
     #
-    def getAristaBackup(self, path, projectName, nodeName, nodeID):
+    def _get_arista_backup(self, path, projectName, nodeName, nodeID):
         """
         This function backup Arista configuration files in path  given in parameter
         Files will be retrieve with paramiko SFTP
@@ -299,10 +302,12 @@ class PyEVENG:
             self._pod, projectName, self.get_lab_id(projectName), nodeName, nodeID)
 
         arista.getConfigVerbose()
+
+
     # ----------------------------------------------------------
     #
     #
-    def getVyosBackup(self, path, projectName, nodeName, nodeID):
+    def _get_vyos_backup(self, path, projectName, nodeName, nodeID):
         """
         This function backup VyOS configuration files in path  given in parameter
         Files will be retrieve with paramiko SFTP
@@ -320,10 +325,11 @@ class PyEVENG:
 
         vyos.getConfigVerbose()
 
+
     # ----------------------------------------------------------
     #
     #
-    def getNexusBackup(self, path, projectName, nodeName, nodeID):
+    def _get_nexus_backup(self, path, projectName, nodeName, nodeID):
         """
         This function backup Cisco Nexus configuration files in path given in parameter
         Files will be retrieve with paramiko SFTP
@@ -341,10 +347,11 @@ class PyEVENG:
 
         nexus.getConfigVerbose()
 
+
     # ----------------------------------------------------------
     #
     #
-    def getCiscoBackup(self, path, projectName, nodeName, nodeID):
+    def _get_cisco_backup(self, path, projectName, nodeName, nodeID):
         """
         This function backup Cisco configuration files in path given in parameter
         Files will be retrieve with paramiko SFTP
@@ -362,10 +369,11 @@ class PyEVENG:
 
         cisco.getConfigVerbose()
 
+
     # ----------------------------------------------------------
     #
     #
-    def getExtremeBackup(self, path, projectName, nodeName, nodeID):
+    def _get_extreme_backup(self, path, projectName, nodeName, nodeID):
         """
         This function backup Extreme Network configuration files in path given in parameter
         Files will be retrieve with paramiko SFTP
@@ -383,10 +391,11 @@ class PyEVENG:
 
         extreme.getConfigVerbose()
 
+
     # ----------------------------------------------------------
     #
     #
-    def getCumulusBackup(self, path, projectName, nodeName, nodeID):
+    def _get_cumulus_backup(self, path, projectName, nodeName, nodeID):
         """
         This function backup Cumulus Network configuration files in path given in parameter
         Files will be retrieve with paramiko SFTP
@@ -404,49 +413,55 @@ class PyEVENG:
 
         cumulus.getConfigVerbose()
 
+
     # ------------------------------------------------------------------------------------------
     #
     #
     #
-    def addConfigToNodesLab(self, configToDeploy:dict(), labName:str()):
+    def add_config_to_nodes_lab(self, configToDeploy:dict(), labName:str()):
         for config in configToDeploy:
             nodeImage = self.get_node_image_and_node_id(labName, config['node'])
             if config['type'] == "full":
                 if "CUMULUS" in nodeImage[0]:
-                    self.pushCumulusFullConfig(config, labName)
+                    self._push_cumulus_full_config(config, labName)
                 # CISCO
                 elif "VIOS" in nodeImage[0]:
-                    self.pushCiscoConfig(config, labName)
+                    self._push_cisco_config(config, labName)
                 # CISCO NEXUS
                 elif "NXOS" in nodeImage[0]:
-                    self.pushNexusConfig(config, labName)
+                    self._push_nexus_config(config, labName)
                 # EXTREME NETWORK
                 elif "EXTREME" in nodeImage[0]:
-                    self.pushExtremeConfig(config, labName)
+                    self._push_extreme_config(config, labName)
                 # ARISTA VEOS
                 elif "VEOS" in nodeImage[0]:
-                    self.pushAristaConfig(config, labName)
+                    self._push_arista_config(config, labName)
                 # Others ELIF
                 #
 
             elif config['type'] == "oob":
                 if "CUMULUS" in nodeImage[0]:
-                    self.pushCumulusOOBConfig(config, labName)
+                    self._push_cumulus_oob_config(config, labName)
                 elif "NXOS" in nodeImage[0]:
-                    self.pushNexusConfig(config, labName)
+                    self._push_nexus_config(config, labName)
                 elif "VIOS" in nodeImage[0]:
-                    self.pushCiscoConfig(config, labName)
+                    self._push_cisco_config(config, labName)
                 elif "EXTREME" in nodeImage[0]:
-                    self.pushExtremeConfig(config, labName)
+                    self._push_extreme_config(config, labName)
                 # ARISTA VEOS
                 elif "VEOS" in nodeImage[0]:
-                    self.pushAristaConfig(config, labName)
+                    self._push_arista_config(config, labName)
                         
                 # Others ELIF
                 # elif "EXTREME in nodeImage "
                 #
 
-    def pushAristaConfig(self, configToDeploy: dict(), labName: str()):
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def _push_arista_config(self, configToDeploy: dict(), labName: str()):
         """
         This function will call arista_device.py for push Full configuration
 
@@ -461,7 +476,11 @@ class PyEVENG:
         arista.pushConfig()
 
 
-    def pushExtremeConfig(self, configToDeploy: dict(), labName: str()):
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def _push_extreme_config(self, configToDeploy: dict(), labName: str()):
         """
         This function will call extreme_device.py for push Full configuration
 
@@ -475,7 +494,12 @@ class PyEVENG:
 
         extreme.pushConfig()
 
-    def pushNexusConfig(self, configToDeploy: dict(), labName: str()):
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def _push_nexus_config(self, configToDeploy: dict(), labName: str()):
         """
         This function will call nexus_device.py for push Full configuration
 
@@ -489,7 +513,12 @@ class PyEVENG:
 
         nexus.pushConfig()
 
-    def pushCiscoConfig(self, configToDeploy: dict(), labName: str()):
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def _push_cisco_config(self, configToDeploy: dict(), labName: str()):
         """
         This function will call cisco_device.py for push Full configuration
 
@@ -503,7 +532,12 @@ class PyEVENG:
                 
         cisco.pushConfig()
 
-    def pushCumulusFullConfig(self, configToDeploy: dict(), labName: str()):
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def _push_cumulus_full_config(self, configToDeploy: dict(), labName: str()):
         """
         This function will call cumulus_device.py for push Full configuration
 
@@ -517,7 +551,12 @@ class PyEVENG:
                 
         cumulus.pushConfig()
 
-    def pushCumulusOOBConfig(self, configToDeploy: dict(), labName: str()):
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def _push_cumulus_oob_config(self, configToDeploy: dict(), labName: str()):
         """
         This function will call xxx_device.py for push OOB configuration
 
@@ -531,9 +570,14 @@ class PyEVENG:
 
         cumulus.pushOOB()
 
-    def pushCumulusOOB(self, pathToConfigFileOOB, labName, nodeName, nodeID):
 
-        print("[PyEVENG - pushCumulusOOB]")
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def _push_cumulus_oob(self, pathToConfigFileOOB, labName, nodeName, nodeID):
+
+        print("[PyEVENG - _push_cumulus_oob]")
         cumulus = cumulus_device.CumulusDevice(
             self._ipAddress, self._root, self._password, pathToConfigFileOOB,
             self._pod, labName, self.get_lab_id(labName), nodeName, nodeID)
