@@ -172,24 +172,6 @@ class PyEVENG:
     The main aim is provided an Python script for automate an deploy your network un EVE-NG    
     
     """
-    # ------------------------------------------------------------------------------------------
-    #
-    # Class CONST
-    # 
-    
-    # ------------------------------------------------------------------------------------------
-    #
-    # Other commands
-    # Using SSH
-    
-
-
-    # ==========================================================================================
-    # ==========================================================================================
-    # 
-    # Following functions are used to backup device configuration
-    # They use SFTP - Paramiko and call xyz_device.py classes that implement xyz_abstract.py class
-    # 
     
     # ----------------------------------------------------------
     #
@@ -220,12 +202,12 @@ class PyEVENG:
         for lab in yamlFiles['labs']:
             self._userFolder = lab['folder']
 
-            if lab['labname'] not in self.getLabsInFolder():
+            if lab['labname'] not in self.get_labs_in_folder():
                 raise EVENG_Exception(
                     "[PyEVENG - getBackupNodesConfig]"+str(lab['labname'])+" doesn't exist in "+str(lab['folder']), 910)
 
             if "all" in lab['hostname']:
-                for hostname in self.getLabNodesName(lab['labname']):
+                for hostname in self.get_lab_nodes_name(lab['labname']):
                     self.getBackupConfig(lab['bck_path'], lab['labname'], hostname)
             else:
                 for hostname in lab['hostname']:
@@ -256,8 +238,8 @@ class PyEVENG:
         Returns:
             str: Device image
         """
-        allNodesID = self.getLabNodesID(project_name)
-        allNodes = self.getLabNodes(project_name)
+        allNodesID = self.get_lab_nodes_id(project_name)
+        allNodes = self.get_lab_nodes(project_name)
         for node in allNodes['data'].values():
             if node['name'] == nodeName:
                 nodeImage = node['image']
@@ -314,7 +296,7 @@ class PyEVENG:
         """
         arista = arista_device.AristaDevice(
             self._ipAddress, self._root, self._password, path,
-            self._pod, projectName, self.getLabID(projectName), nodeName, nodeID)
+            self._pod, projectName, self.get_lab_id(projectName), nodeName, nodeID)
 
         arista.getConfigVerbose()
     # ----------------------------------------------------------
@@ -334,7 +316,7 @@ class PyEVENG:
         """
         vyos = vyos_device.VyosDevice(
             self._ipAddress, self._root, self._password, path,
-            self._pod, projectName, self.getLabID(projectName), nodeName, nodeID)
+            self._pod, projectName, self.get_lab_id(projectName), nodeName, nodeID)
 
         vyos.getConfigVerbose()
 
@@ -355,7 +337,7 @@ class PyEVENG:
         """
         nexus = nexus_device.NexusDevice(
             self._ipAddress, self._root, self._password, path,
-            self._pod, projectName, self.getLabID(projectName), nodeName, nodeID)
+            self._pod, projectName, self.get_lab_id(projectName), nodeName, nodeID)
 
         nexus.getConfigVerbose()
 
@@ -376,7 +358,7 @@ class PyEVENG:
         """
         cisco = cisco_device.CiscoDevice(
             self._ipAddress, self._root, self._password, path,
-            self._pod, projectName, self.getLabID(projectName), nodeName, nodeID)
+            self._pod, projectName, self.get_lab_id(projectName), nodeName, nodeID)
 
         cisco.getConfigVerbose()
 
@@ -397,7 +379,7 @@ class PyEVENG:
         """
         extreme = extreme_device.ExtremeDevice(
             self._ipAddress, self._root, self._password, path,
-            self._pod, projectName, self.getLabID(projectName), nodeName, nodeID)
+            self._pod, projectName, self.get_lab_id(projectName), nodeName, nodeID)
 
         extreme.getConfigVerbose()
 
@@ -418,7 +400,7 @@ class PyEVENG:
         """
         cumulus = cumulus_device.CumulusDevice(
             self._ipAddress, self._root, self._password, path, 
-            self._pod, projectName, self.getLabID(projectName), nodeName, nodeID)
+            self._pod, projectName, self.get_lab_id(projectName), nodeName, nodeID)
 
         cumulus.getConfigVerbose()
 
@@ -428,7 +410,7 @@ class PyEVENG:
     #
     def addConfigToNodesLab(self, configToDeploy:dict(), labName:str()):
         for config in configToDeploy:
-            nodeImage = self.getNodeImageAndNodeID(labName, config['node'])
+            nodeImage = self.get_node_image_and_node_id(labName, config['node'])
             if config['type'] == "full":
                 if "CUMULUS" in nodeImage[0]:
                     self.pushCumulusFullConfig(config, labName)
@@ -474,7 +456,7 @@ class PyEVENG:
         """
         arista = arista_device.AristaDevice(
             self._ipAddress, self._root, self._password, configToDeploy['config'],
-            self._pod, labName, self.getLabID(labName), configToDeploy['node'], self.getNodeIDbyNodeName(labName, configToDeploy['node']))
+            self._pod, labName, self.get_lab_id(labName), configToDeploy['node'], self.get_node_id_by_node_name(labName, configToDeploy['node']))
 
         arista.pushConfig()
 
@@ -489,7 +471,7 @@ class PyEVENG:
         """
         extreme = extreme_device.ExtremeDevice(
             self._ipAddress, self._root, self._password, configToDeploy['config'],
-            self._pod, labName, self.getLabID(labName), configToDeploy['node'], self.getNodeIDbyNodeName(labName, configToDeploy['node']))
+            self._pod, labName, self.get_lab_id(labName), configToDeploy['node'], self.get_node_id_by_node_name(labName, configToDeploy['node']))
 
         extreme.pushConfig()
 
@@ -503,7 +485,7 @@ class PyEVENG:
         """
         nexus = nexus_device.NexusDevice(
             self._ipAddress, self._root, self._password, configToDeploy['config'],
-            self._pod, labName, self.getLabID(labName), configToDeploy['node'], self.getNodeIDbyNodeName(labName, configToDeploy['node']))
+            self._pod, labName, self.get_lab_id(labName), configToDeploy['node'], self.get_node_id_by_node_name(labName, configToDeploy['node']))
 
         nexus.pushConfig()
 
@@ -517,7 +499,7 @@ class PyEVENG:
         """
         cisco = cisco_device.CiscoDevice(
             self._ipAddress, self._root, self._password, configToDeploy['config'],
-            self._pod, labName, self.getLabID(labName), configToDeploy['node'], self.getNodeIDbyNodeName(labName, configToDeploy['node']))
+            self._pod, labName, self.get_lab_id(labName), configToDeploy['node'], self.get_node_id_by_node_name(labName, configToDeploy['node']))
                 
         cisco.pushConfig()
 
@@ -531,7 +513,7 @@ class PyEVENG:
         """
         cumulus = cumulus_device.CumulusDevice(
             self._ipAddress, self._root, self._password, configToDeploy['config'],
-            self._pod, labName, self.getLabID(labName), configToDeploy['node'], self.getNodeIDbyNodeName(labName, configToDeploy['node']))
+            self._pod, labName, self.get_lab_id(labName), configToDeploy['node'], self.get_node_id_by_node_name(labName, configToDeploy['node']))
                 
         cumulus.pushConfig()
 
@@ -545,7 +527,7 @@ class PyEVENG:
         """
         cumulus = cumulus_device.CumulusDevice(
             self._ipAddress, self._root, self._password, configToDeploy['config'],
-            self._pod, labName, self.getLabID(labName), configToDeploy['node'], self.getNodeIDbyNodeName(labName, configToDeploy['node']))
+            self._pod, labName, self.get_lab_id(labName), configToDeploy['node'], self.get_node_id_by_node_name(labName, configToDeploy['node']))
 
         cumulus.pushOOB()
 
@@ -554,607 +536,22 @@ class PyEVENG:
         print("[PyEVENG - pushCumulusOOB]")
         cumulus = cumulus_device.CumulusDevice(
             self._ipAddress, self._root, self._password, pathToConfigFileOOB,
-            self._pod, labName, self.getLabID(labName), nodeName, nodeID)
+            self._pod, labName, self.get_lab_id(labName), nodeName, nodeID)
 
         cumulus.pushOOB()
 
-    # ------------------------------------------------------------------------------------------
-    # Getters (project, labs, node, config, ...)
-    # Using REST API only
-    def getNodeNameByID(self, labName: str(), nodeID: str()) -> str():
-        """
-        This function will return a string that contains node name regarding node ID and labname given in parameter
 
-        Args:
-            param1 (str): EVE-NG lab name
-            param1 (str): Node ID
-
-        Returns:
-            str: Node name
-        """
-        return self.getLabNode(labName, nodeID)['data']['name']
-
-
-
-    def getNodeImageAndNodeID(self,labName:str(), nodeName:str()) -> str():
-        """
-        This function will return a string that contains image type of nodes given in parameter
-
-        Args:
-            param1 (str): EVE-NG lab name
-            param1 (str): Node name
-
-        Returns:
-            str: Node image type
-        """
-        allNodesID = self.getLabNodesID(labName)
-        allNodes = self.getLabNodes(labName)
-
-        for node in allNodes['data'].values():
-            if node['name'] == nodeName:
-                return node['image'].upper(), node['id']
-
-
-    def getLabTopology(self, labName):
-        """
-        This function will return a JSON that contains informations about labs topology
-
-        Args:
-            param1 (str): EVE-NG lab name
-
-        Returns:
-            json: That contains topology informations
-        """
-        response = requests.get(
-            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/topology", cookies=self._cookies, verify=False)
-        self.requestsError(response.status_code)
-        return json.loads(response.content)
-
-    def getLabLinks(self, labName):
-        """
-        This function will return a JSON that contains informations about labs links
-
-        Args:
-            param1 (str): EVE-NG lab name
-
-        Returns:
-            json: That contains links informations
-        """
-        response = requests.get(
-            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/links", cookies=self._cookies, verify=False)
-        self.requestsError(response.status_code)
-        return json.loads(response.content)
-
-    def getNodeStatus(self, labName:str(), nodeID:str()) -> str():
-        """
-        This function will return a string that contains nodes status according to node ID and the lab name given in parameter
-
-        Args:
-            param1 (str): EVE-NG lab name
-            param2 (str): EVE-NG node ID
-
-        Returns:
-            str: That contains node status
-        """
-        return str(self.getLabNode(labName, nodeID)['data']['status'])
-
-
-    def getNodeImage(self, labName: str(), nodeID: str()) -> str():
-        """
-        This function will return a string that contains nodes image according to node ID and the lab name given in parameter
-
-        Args:
-            param1 (str): EVE-NG lab name
-            param2 (str): EVE-NG node ID
-
-        Returns:
-            str: That contains node image
-        """
-        response = requests.get(
-            self._url+"/api/labs/"+str(self._userFolder)+"/"+str(labName)+"/nodes/"+str(nodeID), cookies=self._cookies, verify=False)
-        self.requestsError(response.status_code)
-        return json.loads(response.content)["data"]["image"]
-
-    def getNodeInterfaceID(self, labName:str(), nodeID:str(), interfaceName:str()) -> str():
-        """
-        This function will return a str that contains node interface ID
-
-        Args:
-            param1 (str): EVE-NG lab name
-            param2 (str): EVE-NG node ID
-            param3 (str): Node interface name
-
-        Returns:
-            string: Node Interface ID
-        """
-        data = self.getLabNodeInterfaces(labName, nodeID)
-        for index, value in enumerate(data['data']['ethernet']):
-            if value['name'] == interfaceName:
-                return index
-
-    def get_node_interfaces(self, labName: str(), nodeID: str()) -> list():
-        """
-        This function will return a list that contains all ethernet interface names
-
-        Args:
-            param1 (str): EVE-NG lab name
-            param2 (str): EVE-NG node ID
-
-        Returns:
-            list: That contains nodes interface names
-        """
-        data = self.getLabNodeInterfaces(labName, nodeID)
-        result = list()
-        for interface in data['data']['ethernet']:
-            result.append(interface['name'])
-
-        return result
-
-    def getLabNodeInterfaces(self, labName:str(), nodeID:str()) -> dict():
-        """
-        This function will return a JSON that contains informations about labs interfaces
-
-        Args:
-            param1 (str): EVE-NG lab name
-            param2 (str): EVE-NG node ID
-
-        Returns:
-            json: That contains interfaces informations
-        """
-        ##self.check_param_type_str(labName)
-        ##self.check_param_type_str(nodeID)
-
-        response = requests.get(
-            self._url+"/api/labs/"+self._userFolder+"/"+str(labName)+"/nodes/"+str(nodeID)+"/interfaces", cookies=self._cookies, verify=False)
-        self.requestsError(response.status_code)
-        return json.loads(response.content)
-
-    def getLabNetworks(self, labName:str()) -> dict():
-        """
-        This function will return a JSON that contains informations about labs networks
-
-        Args:
-            param1 (str): EVE-NG lab name
-
-        Returns:
-            json: That contains networks informations
-        """
-        response = requests.get(
-            self._url+"/api/labs/"+self._userFolder+"/"+str(labName)+"/networks", cookies=self._cookies, verify=False)
-        self.requestsError(response.status_code)
-        return json.loads(response.content)
-
-
-    def getLabNetworksName(self, labName:str()) -> list():
-        """
-        This function will return a LIST that contains all network name in lab given in parameter
-
-        Args:
-            param1 (str): EVE-NG lab name
-
-        Returns:
-            list: That contains networks name
-        """
-        data = self.getLabNetworks(labName)
-
-        networkName = list()
-
-        for network in data['data']:
-            networkName.append(data['data'][network]['name'])
-
-        return networkName
-
-    def getLabNodesAccessMethod(self, labName:str()) -> dict():
-        """
-        This function will return a dictionnary that contains informations access method
-        
-        Example :
-            - {"Spine01": "telnet", "Linux", "vnc"}
-            
-        Args:
-            param1 (str): EVE-NG lab name
-
-        Returns:
-            dict: That contains key = hostname, value = access method
-        """
-
-        #self.check_param_type_str(labName)
-
-        response = requests.get(
-            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes", cookies=self._cookies, verify=False)
-        self.requestsError(response.status_code)
-        content = json.loads(response.content)["data"]
-
-        nodesAccessMethod = dict()
-        for key, val in content.items():
-            nodesAccessMethod[val["name"]] = val["console"]
-
-        return nodesAccessMethod
-
-    def getLabNodesID(self, labName:str()) -> list():
-        """
-        This function will return a list that contains all nodes ID according to the lab name given in parameter
-
-        Args:
-            param1 (str): EVE-NG lab name
-
-        Returns:
-            list: That contains all node ID
-        """
-
-        #self.check_param_type_str(labName)
-
-        response = requests.get(
-            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes", cookies=self._cookies, verify=False)
-        
-        if response.status_code == 404:
-            raise EVENG_Exception(
-                "[PyEVENG - getLabNodesID] - Lab doesn't exist or devices are down", 7081)
-
-        self.requestsError(response.status_code)
-        content = json.loads(response.content)["data"]
-
-        nodesID = list()
-
-        if len(content) is not 0:
-            for key, val in content.items():
-                nodesID.append(key)
-
-        return nodesID
-
-    def getLabNodesName(self, labName:str()) -> list():
-        """
-        This function will return a list that contains all nodes name according to the lab name given in parameter
-
-        Args:
-            param1 (str): EVE-NG lab name
-
-        Returns:
-            list: That contains all node name
-        """
-
-        #self.check_param_type_str(labName)
-
-        response = requests.get(
-            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes", cookies=self._cookies, verify=False)
-        self.requestsError(response.status_code)
-        content = json.loads(response.content)["data"]
-
-        nodesName = list()
-        if content.__len__() == 0:
-            return nodesName
-        for key, val in content.items():
-            nodesName.append(val["name"])
-            
-        return nodesName
-
-    def getLabNodes(self, labName:str()) -> dict():
-        """
-        This function will return a JSON that contains informations about all nodes according to the lab name given in parameter
-
-        Args:
-            param1 (str): EVE-NG lab name
-
-        Returns:
-            json: That contains nodes informations
-        """
-
-        #self.check_param_type_str(labName)
-
-        response = requests.get(
-            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes", cookies=self._cookies, verify=False)
-        self.requestsError(response.status_code)
-        return json.loads(response.content)
-    
-    def getNodeIDbyNodeName(self, labName:str(), nodeName:str()) -> str():
-        """
-        This function will nodeID regarding to the nodeName given in parameter
-
-        Args:
-            param1 (str): EVE-NG lab name
-            param2 (str): Node name
-
-        Returns:
-            str: nodeID
-        """
-        nodeID = str()
-        allNodesID = self.getLabNodesID(labName)
-        allNodes = self.getLabNodes(labName)
-        for node in allNodes['data'].values():
-                if node['name'] == nodeName:
-                    nodeID = node['id']
-        return nodeID
-
-    def get_nodes_url(self, labName: str()) -> dict():
-        """
-        This function will return telnet connection informations.
-
-        Args:
-            param1 (str): EVE-NG lab name
-        
-        Returns:
-            dict: Telnet connection informations    hostname: url_connection
-        """
-        
-        # Exception is lab doesn't exist is raise in the below function
-        nodesID = self.getLabNodesID(labName)
-        result = dict()
-
-        if len(nodesID) is not 0:
-            for nodeID in nodesID:
-                result[self.getNodeNameByID(labName, nodeID)] = self.get_node_url(labName, nodeID)
-
-        return result
-
-    def get_node_url(self, labName:str(), nodeID:str()) -> str():
-        """
-        This function will return telnet connection informations.
-
-        "1": {
-            "console": "telnet",
-            "delay": 0,
-            "id": 1,
-            "left": 177,
-            "icon": "Switch L3.png",
-            "image": "viosl2-adventerprisek9-m.03.2017",
-            "name": "GVA10",
-            "ram": 1024,
-            "status": 0,
-            "template": "viosl2",
-            "type": "qemu",
-            "top": 288,
-            "url": "telnet://172.16.194.239:0",             <<<======
-            "config_list": [],
-            "config": "0",
-            "cpu": 1,
-            "ethernet": 8,
-            "uuid": "0c5f57ad-fcff-47b1-b43b-4ba39b8545dd",
-            "firstmac": "50:00:00:01:00:00"
-        },
-
-        Args:
-            param1 (str): EVE-NG lab name
-            param2 (str): EVE-NG node ID
-
-       §
-
-        """
-
-        data = self.getLabNode(labName, nodeID)
-        return data['data']['url']
-
-    def get_node_telnet_port(self, labName: str(), nodeID: str()) -> str():
-        """
-        This function will return telnet port
-
-        Args:
-            param1 (str): EVE-NG lab name
-            param2 (str): EVE-NG node ID
-
-        Returns:
-            str: Telnet port
-        """
-
-        telnetInfo =  self.get_node_url(labName, nodeID)
-        index = telnetInfo.rfind(":")
-        return telnetInfo[index+1:]
-
-    def get_node_telnet_ip(self, labName: str(), nodeID: str()) -> str():
-        """
-        This function will return telnet port
-
-        Args:
-            param1 (str): EVE-NG lab name
-            param2 (str): EVE-NG node ID
-
-        Returns:
-            str: Telnet port
-        """
-
-        telnetInfo = self.get_node_url(labName, nodeID)
-        indexEnd = telnetInfo.rfind(":")
-        indexStart = telnetInfo.rfind("/")
-        return telnetInfo[indexStart+1:indexEnd]
-
-
-    def getLabNode(self, labName:str(), nodeID:str()) -> dict():
-        """
-        This function will return a JSON that contains informations about all nodes according to the lab name given in parameter
-
-        Args:
-            param1 (str): EVE-NG lab name
-            param1 (str): EVE-NG node ID
-
-        Returns:
-            json: That contains nodes informations
-        """
-
-        #self.check_param_type_str(labName)
-        #self.check_param_type_str(nodeID)
-
-        response = requests.get(
-            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes/"+nodeID, cookies=self._cookies, verify=False)
-        self.requestsError(response.status_code)
-        return json.loads(response.content)
-
-    def getLabDescription(self, labName:str()) -> str():
-        """
-        This function will return a string that contains lab descriptions
-
-        Args:
-            param1 (str): EVE-NG lab name
-
-        Returns:
-            str: That contains lab description
-        """
-
-        #self.check_param_type_str(labName)
-
-        response = self.getLab(labName)
-        return response["data"]["description"]
-
-    def getLabAuthor(self, labName:str()) -> str():
-        """
-        This function will return a string that contains lab author
-
-        Args:
-            param1 (str): EVE-NG lab name
-
-        Returns:
-            str: That contains lab author
-        """
-
-        #self.check_param_type_str(labName)
-
-        response = self.getLab(labName)
-        return response["data"]["author"]
-
-    def getLabID(self, labName:str()) -> str():
-        """
-        This function will return a string that contains lab ID
-
-        Args:
-            param1 (str): EVE-NG lab name
-
-        Returns:
-            str: That contains lab ID
-        """
-
-        #self.check_param_type_str(labName)
-
-        response = self.getLab(labName)
-        return response["data"]["id"]
-    
-    def getLab(self, labName:str()) -> dict():
-        """
-        This function will return a JSON that contains lab informations
-
-        Args:
-            param1 (str): EVE-NG lab name
-
-        Returns:
-            json: That contains lab informations
-        """            
-        #self.check_param_type_str(labName)
-
-        response = requests.get(
-            self._url+"/api/labs/"+self._userFolder+"/"+labName, cookies=self._cookies, verify=False)
-        self.requestsError(response.status_code)
-        return json.loads(response.content)
-
-
-    def getLabsInFolder(self) -> list():
-        """
-        This function will return a list that contains all lab name in the folder
-
-        Returns:
-            list: That contains all lab name
-        """
-        response = requests.get(self._url+"/api/folders/"+str(self._userFolder),
-                                cookies=self._cookies, verify=False)
-
-        self.requestsError(response.status_code)
-        data = json.loads(response.content)
-
-        labsInFolder = list()
-        for lab in data['data']['labs']:
-            labsInFolder.append(lab['file'])
-
-        return labsInFolder
-
-
-    def getUsers(self):
-        """
-        This function will return a JSON that contains user informations
-
-        Returns:
-            json: That contains user informations
-        """
-        response = requests.get(self._url+"/api/users/",
-                                cookies=self._cookies, verify=False)
-        self.requestsError(response.status_code)
-        return json.loads(response.content)
-
-    def status(self) -> dict:
-        """
-        This function will return a JSON that contains vm infromations
-
-        Returns:
-            json: That contains vm informations
-        """
-        response = requests.get(self._url+"/api/status",
-                                cookies=self._cookies, verify=False)
-        self.requestsError(response.status_code)
-        return json.loads(response.content)
-
-
-    def get_vm_memory(self) -> str():
-        """
-        This function will return a str that contains vm memory (RAM)
-        Use SSH
-
-        Returns:
-            str: That contains vm mermory
-        """
-        GET_MEMORY_COMMAND = "free -m | grep -i mem | awk '{print $2}'"
-
-        ssh = self.sshConnect()
-            
-        stdin, stdout, stderr = ssh.exec_command(GET_MEMORY_COMMAND)
-        return ("".join(stdout.readlines()))
-        
-
-    def startLabNode(self, labName, nodeID):
-        """
-        This function will start a node of a lab according to lab name and node id given in parameter
-
-        Args:
-            param1 (str): EVE-NG lab name
-            param1 (str): EVE-NG node ID
-        """
-        if self.getNodeStatus(labName, nodeID) != "2":
-            print("[PyEVENG startLabNode] -",
-                  labName, self.getNodeNameByID(labName, nodeID), "is starting...")
-
-            response = requests.get(
-                self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes/"+nodeID+"/start", cookies=self._cookies, verify=False)
-            self.requestsError(response.status_code)
-
-            if self.getNodeStatus(labName, nodeID) == "2":
-                print("[PyEVENG startLabNode] -", labName, self.getNodeNameByID(labName, nodeID), "is started !")
-
-    def startLabAllNodes(self, labName: str(), *, enable=False):
-        """
-        This function will start all node of a lab
-
-        Args:
-            param1 (str): EVE-NG lab name
-        """
-
-        #self.check_param_type_str(labName)
-
-        nodesID = self.getLabNodesID(labName)
-
-        # First Start Device
-        for nodeID in nodesID:
-          self.startLabNode(labName, nodeID)
-
-        if enable:
-            first = True
-            print("[PyEVENG startLabAllNodes] - no shutdown interfaces ...")
-            for nodeID in nodesID:
-                nodeName = self.getNodeNameByID(labName, nodeID)
-                nodeImage = self.getNodeImageAndNodeID(labName, nodeName)
-                if "VIOS" in nodeImage[0]:
-                    telnetPort = self.get_node_telnet_port(labName, nodeID)
-                    telnetIP = self.get_node_telnet_ip(labName, nodeID)
-                    if first:
-                        time.sleep(60)
-                        first = False
-                    self.enable_port(labName, telnetIP, telnetPort, nodeID, nodeName)
-            print("[PyEVENG startLabAllNodes] - no shutdown interfaces done !")
-
-    def enable_port(self, labName:str(), ipAddress:str(), telnetPort:str(), nodeID:str(), nodeName:str()):
+    # ##################################################################################################
+    #
+    #   Call via SSH or Telnet directly to EVE-NG VM or devices via telnet port (console)
+    #
+    # ##################################################################################################
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def enable_port(self, labName: str(), ipAddress: str(), telnetPort: str(), nodeID: str(), nodeName: str()):
         """
         This function enable interface through a telnet session.
         Use EXPECT library
@@ -1201,241 +598,10 @@ class PyEVENG:
         except pexpect.exceptions.TIMEOUT as e:
             print(e)
 
-
-    def stopLabNode(self, labName, nodeID):
-        """
-        This function will stop a node of a lab according to lab name and node id given in parameter
-
-        for EVE-NG PRO
-        https://127.0.0.1/api/labs/Users/spine-leaf.unl/nodes/2/stop/stopmode=3
-
-        for EVE-NG Community
-        https://127.0.0.1/api/labs/Users/spine-leaf.unl/nodes/2/stop
-
-        Args:
-            param1 (str): EVE-NG lab name
-            param1 (str): EVE-NG node ID
-
-        """
-
-        print("[PyEVENG stopLabNode] -",
-              labName, self.getNodeNameByID(labName, nodeID), "is stopping...")
-        
-        if self.getNodeStatus(labName, nodeID) != "0":
-            
-            if self._community is False:
-                print(self._url+"/api/labs/"+self._userFolder+"/" +
-                      labName+"/nodes/"+nodeID+"/stop/stopmode=3")
-
-                response = requests.get(
-                    self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes/"+nodeID+"/stop/stopmode=3", cookies=self._cookies, verify=False)
-        
-            else:
-                print(self._url+"/api/labs/"+self._userFolder+"/" +
-                      labName+"/nodes/"+nodeID+"/stop")
-                response = requests.get(
-                    self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes/"+nodeID+"/stop", cookies=self._cookies, verify=False)
-
-            self.requestsError(response.status_code)
-
-            if self.getNodeStatus(labName, nodeID) == "0":
-                print("[PyEVENG stopLabNode] -",
-                      labName, self.getNodeNameByID(labName, nodeID), "is stopped !")
-
-    def stopLabAllNodes1(self, labName):
-        """
-        This function will stop all node of a lab
-
-        Args:
-            param1 (str): EVE-NG lab name
-
-        """
-        response = requests.get(
-            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes/stop/stopmode=3", cookies=self._cookies, verify=False)
-
-
-    def stopLabAllNodes(self, labName):
-        """
-        This function will stop all node of a lab
-
-        Args:
-            param1 (str): EVE-NG lab name
-
-        """
-
-        #self.check_param_type_str(labName)
-
-        nodesID = self.getLabNodesID(labName)
-
-        if len(nodesID) is not 0:
-            for nodeID in nodesID:
-                self.stopLabNode(labName, nodeID)
-
-    
-    # ------------------------------------------------------------------------------------------
-    # Authentification, Users and System
-    def getTemplateByModel(self, deviceType):
-        """
-        This function will return a list that contains all installed nodes
-
-        Args:
-            param1 (str): Device type - Example "cumulus"
-
-        Returns:
-            list: Information about device type
-        """
-        response = requests.get(
-            self._url+"/api/list/templates/"+str(deviceType), cookies=self._cookies, verify=False)
-        self.requestsError(response.status_code)
-
-        return json.loads(response.content)
-
-    def getImageVersionByModel(self, deviceType):
-        """
-        This
-         function will return a list that contains all installed nodes
-
-        Args:
-            param1 (str): Device type - Example "cumulus"
-
-        Returns:
-            list: Information about device type
-        """
-        response = requests.get(
-            self._url+"/api/list/templates/"+str(deviceType), cookies=self._cookies, verify=False)
-        self.requestsError(response.status_code)
-
-        content = json.loads(response.content)
-
-        listResult = list()
-        if "image" in content['data']['options'].keys():
-            if len(content['data']['options']['image']['list']) != 0:
-                for value in content['data']['options']['image']['list'].values():
-                    listResult.append(value)
-
-        return listResult
-    
-
-    def getNodeVersionInstall(self, deviceType:str()):
-        """
-        This function will return a list that contains all installed nodes
-
-
-        Returns:
-            list: That contains all installed nodes
-        """
-        data = self.getImageVersionByModel(deviceType)
-        return data
-
-
-    def getNodeInstall(self) -> dict():
-        """
-        This function will return a list that contains all installed nodes
-
-        Returns:
-            list: That contains all installed nodes
-        """
-        response = requests.get(
-            self._url+"/api/list/templates/", cookies=self._cookies, verify=False)
-        self.requestsError(response.status_code)
-        data = json.loads(response.content)["data"]
-
-        toRemove = list()
-        for key, val in data.items():
-            if ("missing" in val):
-                toRemove.append(key)
-
-        for key in toRemove:
-            del data[key]
-
-        return data
-
-    def getNodeAvailable(self):
-        """
-        This function will return a list that contains all available nodes
-
-        Returns:
-            list: That contains all available nodes
-        """
-        response = requests.get(
-            self._url+"/api/list/templates/", cookies=self._cookies, verify=False)
-        self.requestsError(response.status_code)
-        return json.loads(response.content)
-
-    def getUserInfo(self):
-        """
-        This function will return a JSON that contains user informations
-
-        Returns:
-            json: That contains user informations
-        """
-        response = requests.get(self._url+"/api/auth",
-                                cookies=self._cookies, verify=False)
-        self.requestsError(response.status_code)
-        return json.loads(response.content)
-
-    def login(self):
-        """
-        This function login to EVE-NG
-        Store Cookie
-
-        """
-        # For avoid InsecureRequestWarning error
-        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-        
-        if self._verbose:
-            print("[PyEVENG - login] ...") 
-        
-        response = requests.post(
-            self._url+"/api/auth/login", data='{"username":"'+self._username+'","password":"'+self._password+'", "html5": "0"}', verify=False)
-
-        self.requestsError(response.status_code)
-        
-        if self._verbose:
-            print(f"[PyEVENG - login] ({response.status_code}) logged !")
-
-        self._cookies = response.cookies
-
-    def logout(self):
-        """
-        This function logout to EVE-NG        
-        """
-        if self._verbose:
-            print("[PyEVENG - logout] ...")
-        response = requests.get(
-            self._url+"/api/auth/logout", cookies=self._cookies, verify=False)
-
-        self.requestsError(response.status_code)
-
-        if self._verbose:
-            print(f"[PyEVENG - logout] ({response.status_code}) EVE-NG says Byyye :) !")
-        
-
     # --------------------------------------------------------------------------------------------------
     #
-    # CREATE / DELETE functions
     #
-    def createLab(self, labInformations:dict()):
-        """
-        This function will create a Lab
-
-        Args:
-            param1 (dict): All lab informations
-        """
-        if str(labInformations['name']+".unl") in self.getLabsInFolder():
-            raise EVENG_Exception(str("[EXCEPTION][PyEVENG - createLab] - Lab ("+labInformations['name']+") already exists in this folder"), 12)
-        
-        self._project = labInformations['name']+".unl"
-        print("[PyEVENG createLab] -",
-              labInformations['name'], "is creating...")
-        
-        response = requests.post(
-            self._url+"/api/labs", data=json.dumps(labInformations), cookies=self._cookies, verify=False)
-
-        self.requestsError(response.status_code)
-        print("[PyEVENG createLab] -",
-              labInformations['name'], "has been created...")
-
+    #
     def remove_remote_connexion_file(self, labName):
         """
         This function will remove file on eve-ng vm
@@ -1444,7 +610,7 @@ class PyEVENG:
             param1 (str): Lab name to delete
         """
        
-        ssh = self.sshConnect()
+        ssh = self._ssh_connect()
         sftp = ssh.open_sftp()
         try:
             
@@ -1476,261 +642,13 @@ class PyEVENG:
                 "[PyEVENG - remove_remote_connexion_file] - remove root/.eveng/{} doesn't exist !".format(labName))
 
         ssh.close()
-        
-        
+    
 
-    # =========
-    #
-    def deleteLab(self, labName: dict()):
-        """
-        This function will delete a Lab
 
-        Args:
-            param1 (str): Lab name to delete
-        """
-        call = True
-        print("[PyEVENG - deleteLab] -",
-              labName, "is deleting...")
-        try:
-            self.stopLabAllNodes(labName)
-            
-        except EVENG_Exception as e:
-            print("[PyEVENG - deleteLab] - lab doesn't exist ... check for remove files")
-            call = False
-        
-        self.remove_remote_connexion_file(labName)
-
-        if call:
-            response = requests.delete(self._url+"/api/labs/"+str(
-                self._userFolder)+"/"+str(labName), cookies=self._cookies, verify=False)
-            self.requestsError(response.status_code)
-        
-            print("[PyEVENG createLab] -",
-                labName, "has been deleted...")
     # --------------------------------------------------------------------------------------------------
     #
-    # EDIT (POST) functions
     #
-
-    ADD_NODE_DATA = {"type": "{}",
-        "template": "cumulus",
-        "config": "Unconfigured",
-        "delay": '0',
-        "icon": "router.png",
-        "image": "cumulus-vx-3.7.5",
-        "name": "Spine01",
-        "left": "45%",
-        "top": "20%", 
-        "ram": 512, 
-        "console": "telnet", 
-        "cpu": 1, 
-        "ethernet": 8, 
-        "uuid": "641a4800-1b19-427c-ae87-5555590b7790"
-    }
-
-    
-    def addNodeToLab(self, nodesToAdd: dict(), labName: str()):
-        """
-        This function add a node to a Lab
-
-        Args:
-            param1 (dict): Node Informamations
-            param2 (str): Labname to add nodes
-        """
-        print("[PyEVENG addNodeToLab] -", nodesToAdd['name'], "is deploying...")
-
-        nodeNameAlreadyInLab = self.getLabNodesName(labName)
-    
-        if nodesToAdd['name'] in nodeNameAlreadyInLab:
-            print("[PyEVENG addNodeToLab] - a node with the name \"",
-                  nodesToAdd['name'], "\" is already deployed!")
-
-        else:
-            self.lock_lab()
-            PP.pprint(json.dumps(nodesToAdd))
-            response = requests.post(
-                self._url+"/api/labs/"+str(self._userFolder)+"/"+str(labName)+"/nodes", data=json.dumps(nodesToAdd), cookies=self._cookies, verify=False)
-
-            self.requestsError(response.status_code)
-            print("[PyEVENG addNodeToLab] -", nodesToAdd['name'], "has been deployed!")
-    
-    # =========
     #
-    def addNodesToLab(self, nodesToAdd: dict(), labName:str()):
-        """
-        This function add some nodes to a Lab
-        It uses addNodeToLab
-
-        Args:
-            param1 (dict): Nodes Informamations
-            param2 (str): Labname
-        """
-        for node in nodesToAdd:
-            self.addNodeToLab(node, labName)
-
-        if nodesToAdd.__len__() == self.getLabNodesName(labName).__len__():
-            print("[PyEVENG addNodesToLab] - all nodes have been deployed!")
-        else:
-            print("[PyEVENG addNodesToLab] - some nodes haven't been deployed!")
-            raise EVENG_Exception(str("[PyEVENG addNodesToLab] - Nodes deployment error !"), 21)
-        
-    # =========
-    #
-    def setNetworkVisibilityTo0(self, network: dict(), labName: str()):
-        """
-        This function will set network visibility to 0
-        The network will not be show in GUI
-
-        curl -s -c /tmp/cookie -b /tmp/cookie -X PUT -d '{"visibility":0}' 
-        -H 'Content-type: application/json' http://127.0.0.1/api/labs/User1/Folder 2/Different Lab.unl/networks/1
-
-        Args:
-            param1 (str): Labname
-            param2 (str): NetworkID
-        """
-        for networkID in network:
-            response = requests.put(
-                self._url+"/api/labs/"+self._userFolder+"/"+str(labName)+"/networks/"+str(networkID['id']), data="{\"visibility\":0}", cookies=self._cookies, verify=False)
-            self.requestsError(response.status_code)
-
-    # =========
-    #
-    def addNetworksToLab(self, networksToAdd: dict(), labName:str()):
-        """
-        This function add some network to a Lab
-
-        curl -s -c /tmp/cookie -b /tmp/cookie -X POST -d '{"count":1,"name":"Net-R1iface_0","type":"bridge","left":441,"top":658,"visibility":1,"postfix":0}' 
-        -H 'Content-type: application/json' http://127.0.0.1/api/labs/User1/Folder 2/Different Lab.unl/networks
-
-        Args:
-            param1 (dict): Nodes Informamations
-            param2 (str): Labname
-        """
-        data = dict()
-        networkName = self.getLabNetworksName(labName)
-
-        for link in networksToAdd:
-            if link['dst'] == "OOB-NETWORK":
-                data['name'] = str("OOB-NETWORK")
-            else:
-                data['name'] = str(link['src']+"("+link['sport']+")--"+link['dst']+"("+link['dport'] + ")")
-
-            if data['name'] not in networkName:
-                data['type'] = str(link['network'])
-                data['visibility'] = 1
-                self.addNetworkToLab(data, labName)
-            else:
-                print("[PyEVENG addNetworkToLab] -",
-                      data['name'], " is already deployed!")
-
-    # =========
-    #
-    def addNetworkToLab(self, networkToAdd: dict(), labName: str()) -> str():
-        """
-        This function add some links to a Lab
-
-        Args:
-            param1 (dict): Nodes Informamations
-            param2 (str): Labname
-        """
-        print("[PyEVENG addNetworkToLab] -",
-              networkToAdd['name'], "is deploying...")
-
-        self.lock_lab()
-        response = requests.post(
-            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/networks", data=json.dumps(networkToAdd), cookies=self._cookies, verify=False)
-        self.requestsError(response.status_code)
-
-        print("[PyEVENG addNetworkToLab] -",
-              networkToAdd['name'], "(",str(response.status_code),") has been deployed!")
-        
-        return (json.loads(response.content)['data']['id'])
-
-    # =========
-    #
-    def addNetworksLinksToLab(self, interfacesToAdd: dict(), labName: str()):
-        """
-        This function will connect a node to a Network.
-        Firstly they will create Network.
-        2 nodes have to be connected on the same netwrok for communicate
-
-        -X PUT - d '{"0":1}'127.0.0.1/api/labs/Users/Lab.unl/nodes/1/interfaces'
-
-        Args:
-            param1 (str): Lab Names
-            param1 (str): Nodes Names
-            param2 (str): Node interface ID
-            param3 (str): Network ID
-        """
-        self.addNetworksToLab(interfacesToAdd, labName)
-        self.addLinksToLab(interfacesToAdd, labName)
-        self.setNetworkVisibilityTo0(interfacesToAdd, labName)
-
-    # =========
-    #
-    def addLinksToLab(self, interfaceToAdd: dict(), labName: str()):
-        """
-        This function add some links to a Lab
-
-        Args:
-            param1 (dict): Nodes Informamations
-            param2 (str): Labname
-        """
-        ssh = self.sshConnect()
-        connexionInformations = dict()
-
-        for link in interfaceToAdd:
-            if link['dst'] == "OOB-NETWORK":
-                #
-                # Create The new interface
-                # 
-                
-                if "ip_eve" in link.keys():
-                    index = link['ip_eve'].find("/")
-                    ipMgmtEve = link['ip_eve'][:index]
-                    ipMaskEveCidr = link['ip_eve'][index+1:]
-                    ipMaskEve = tools.ip.convertCIDRtoNetmask(
-                        ipMaskEveCidr)
-
-                    print(
-                        "[PyEVENG - addLinksToLab] - sudo ifconfig {} up && sudo ifconfig {} {} netmask {}".format(link['network'], link['network'], ipMgmtEve, ipMaskEve))
-                    stdin, stdout, stderr = ssh.exec_command(
-                        "sudo ifconfig {} up && sudo ifconfig {} {} netmask {}".format(link['network'], link['network'], ipMgmtEve, ipMaskEve))
-                    o = "".join(stdout.readlines())
-
-
-                for oobInterface in link['src']:
-
-                    if "ip_eve" in link.keys():
-
-                        connexionInformations[oobInterface['host']] = {
-                            "ip_address_eve": self._ipAddress,
-                            "ip_address_host": oobInterface['ip_mgmt'],
-                            "con_ext_port": oobInterface['nat'],
-                            "con_int_port": oobInterface['ssh'],
-                            "url": "ssh -p {} -l <username> {}".format(oobInterface['nat'], self._ipAddress)
-                        }
-
-                        self.create_iptables_nat(
-                            ssh, link['ip_pub'], link['network'], oobInterface['ip_mgmt'], oobInterface['ssh'], ipMgmtEve, oobInterface['nat'])
-                    #
-
-                    self.addLinkToLab(link['id'], self.getNodeIDbyNodeName(labName, oobInterface['host']), self.getNodeInterfaceID(
-                        labName, self.getNodeIDbyNodeName(labName, oobInterface['host']), oobInterface['port']), labName)
-
-            else:
-                self.addLinkToLab(link['id'], self.getNodeIDbyNodeName(labName, link['src']),
-                                  self.getNodeInterfaceID(labName, self.getNodeIDbyNodeName(labName, link['src']), link['sport']), labName)
-                self.addLinkToLab(link['id'], self.getNodeIDbyNodeName(labName, link['dst']),
-                                  self.getNodeInterfaceID(labName, self.getNodeIDbyNodeName(labName, link['dst']), link['dport']), labName)
-
-
-        self.write_in_remote_file(ssh, connexionInformations, "/root/.eveng/connexion_{}".format(labName), mode='w')
-        ssh.close()
-    
-    # =========
-    #
-
     def write_in_remote_file(self, ssh:paramiko.SSHClient(), content, path:str(), *, mode="a"):
         """
         This function will write devices connection informations in a file on EVE-NG VM.
@@ -1749,6 +667,11 @@ class PyEVENG:
         sftp.close()
         print("[PyEVENG - write_in_remote_file] - create new files OK ! ")
 
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
     def get_remote_connexion_file(self, labName) -> dict:
         """ 
         This function will retrieve data from a connexion_labname file
@@ -1757,7 +680,7 @@ class PyEVENG:
             param1 (str): Labname of which one you want retrieve data
         """
 
-        ssh = self.sshConnect()
+        ssh = self._ssh_connect()
 
         sftp = ssh.open_sftp()
         f = sftp.open("/root/.eveng/connexion_{}".format(labName), "rb")
@@ -1769,7 +692,9 @@ class PyEVENG:
 
         return data
 
-    # =========
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
     #
     def create_iptables_nat(self, ssh: paramiko.SSHClient(), evengIP: str(), interface: str(), hostsIP: str(), sshMgmt: str(), eveIP: str(), eveSsh: str()):
         """
@@ -1841,9 +766,708 @@ class PyEVENG:
         f.close()
         sftp.close()
 
-    # =========
+
+
+    # ##################################################################################################
     #
-    def addLinkToLab(self, networkID: str(), nodeID:str(), interfaceID:str(), labName: str()):
+    #   Call to get informations as nodes, networks, ... from labs !!
+    #
+    # ##################################################################################################
+
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def get_lab_nodes_id(self, labName: str()) -> list():
+        """
+        This function will return a list that contains all nodes ID according to the lab name given in parameter
+
+        Args:
+            param1 (str): EVE-NG lab name
+
+        Returns:
+            list: That contains all node ID
+        """
+
+        #self.check_param_type_str(labName)
+
+        response = requests.get(
+            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes", cookies=self._cookies, verify=False)
+
+        if response.status_code == 404:
+            raise EVENG_Exception(
+                "[PyEVENG - get_lab_nodes_id] - Lab doesn't exist or devices are down", 7081)
+
+        self._requests_error(response.status_code)
+        content = json.loads(response.content)["data"]
+
+        nodesID = list()
+
+        if len(content) is not 0:
+            for key, val in content.items():
+                nodesID.append(key)
+
+        return nodesID
+
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def get_lab_nodes_name(self, labName: str()) -> list():
+        """
+        This function will return a list that contains all nodes name according to the lab name given in parameter
+
+        Args:
+            param1 (str): EVE-NG lab name
+
+        Returns:
+            list: That contains all node name
+        """
+
+        #self.check_param_type_str(labName)
+
+        response = requests.get(
+            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes", cookies=self._cookies, verify=False)
+        self._requests_error(response.status_code)
+        content = json.loads(response.content)["data"]
+
+        nodesName = list()
+        if content.__len__() == 0:
+            return nodesName
+        for key, val in content.items():
+            nodesName.append(val["name"])
+
+        return nodesName
+
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def get_lab_nodes(self, labName: str()) -> dict():
+        """
+        This function will return a JSON that contains informations about all nodes according to the lab name given in parameter
+
+        Args:
+            param1 (str): EVE-NG lab name
+
+        Returns:
+            json: That contains nodes informations
+        """
+
+        #self.check_param_type_str(labName)
+
+        response = requests.get(
+            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes", cookies=self._cookies, verify=False)
+        self._requests_error(response.status_code)
+        return json.loads(response.content)
+
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def get_lab_node(self, labName: str(), nodeID: str()) -> dict():
+        """
+        This function will return a JSON that contains informations about all nodes according to the lab name given in parameter
+
+        Args:
+            param1 (str): EVE-NG lab name
+            param1 (str): EVE-NG node ID
+
+        Returns:
+            json: That contains nodes informations
+        """
+
+        #self.check_param_type_str(labName)
+        #self.check_param_type_str(nodeID)
+
+        response = requests.get(
+            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes/"+nodeID, cookies=self._cookies, verify=False)
+        self._requests_error(response.status_code)
+        return json.loads(response.content)
+
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def get_node_id_by_node_name(self, labName: str(), nodeName: str()) -> str():
+        """
+        This function will nodeID regarding to the nodeName given in parameter
+
+        Args:
+            param1 (str): EVE-NG lab name
+            param2 (str): Node name
+
+        Returns:
+            str: nodeID
+        """
+        nodeID = str()
+        allNodesID = self.get_lab_nodes_id(labName)
+        allNodes = self.get_lab_nodes(labName)
+        for node in allNodes['data'].values():
+                if node['name'] == nodeName:
+                    nodeID = node['id']
+        return nodeID
+
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def get_node_interface_id(self, labName: str(), nodeID: str(), interfaceName: str()) -> str():
+        """
+        This function will return a str that contains node interface ID
+
+        Args:
+            param1 (str): EVE-NG lab name
+            param2 (str): EVE-NG node ID
+            param3 (str): Node interface name
+
+        Returns:
+            string: Node Interface ID
+        """
+        data = self.get_lab_node_interfaces(labName, nodeID)
+        for index, value in enumerate(data['data']['ethernet']):
+            if value['name'] == interfaceName:
+                return index
+
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def get_node_interfaces(self, labName: str(), nodeID: str()) -> list():
+        """
+        This function will return a list that contains all ethernet interface names
+
+        Args:
+            param1 (str): EVE-NG lab name
+            param2 (str): EVE-NG node ID
+
+        Returns:
+            list: That contains nodes interface names
+        """
+        data = self.get_lab_node_interfaces(labName, nodeID)
+        result = list()
+        for interface in data['data']['ethernet']:
+            result.append(interface['name'])
+
+        return result
+
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def get_lab_node_interfaces(self, labName: str(), nodeID: str()) -> dict():
+        """
+        This function will return a JSON that contains informations about labs interfaces
+
+        Args:
+            param1 (str): EVE-NG lab name
+            param2 (str): EVE-NG node ID
+
+        Returns:
+            json: That contains interfaces informations
+        """
+        ##self.check_param_type_str(labName)
+        ##self.check_param_type_str(nodeID)
+
+        response = requests.get(
+            self._url+"/api/labs/"+self._userFolder+"/"+str(labName)+"/nodes/"+str(nodeID)+"/interfaces", cookies=self._cookies, verify=False)
+        self._requests_error(response.status_code)
+        return json.loads(response.content)
+
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def get_node_status(self, labName: str(), nodeID: str()) -> str():
+        """
+        This function will return a string that contains nodes status according to node ID and the lab name given in parameter
+
+        Args:
+            param1 (str): EVE-NG lab name
+            param2 (str): EVE-NG node ID
+
+        Returns:
+            str: That contains node status
+        """
+        return str(self.get_lab_node(labName, nodeID)['data']['status'])
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def get_node_image(self, labName: str(), nodeID: str()) -> str():
+        """
+        This function will return a string that contains nodes image according to node ID and the lab name given in parameter
+
+        Args:
+            param1 (str): EVE-NG lab name
+            param2 (str): EVE-NG node ID
+
+        Returns:
+            str: That contains node image
+        """
+        response = requests.get(
+            self._url+"/api/labs/"+str(self._userFolder)+"/"+str(labName)+"/nodes/"+str(nodeID), cookies=self._cookies, verify=False)
+        self._requests_error(response.status_code)
+        return json.loads(response.content)["data"]["image"]
+
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def get_node_telnet_port(self, labName: str(), nodeID: str()) -> str():
+        """
+        This function will return telnet port
+
+        Args:
+            param1 (str): EVE-NG lab name
+            param2 (str): EVE-NG node ID
+
+        Returns:
+            str: Telnet port
+        """
+
+        telnetInfo = self.get_node_url(labName, nodeID)
+        index = telnetInfo.rfind(":")
+        return telnetInfo[index+1:]
+
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def get_node_telnet_ip(self, labName: str(), nodeID: str()) -> str():
+        """
+        This function will return telnet port
+
+        Args:
+            param1 (str): EVE-NG lab name
+            param2 (str): EVE-NG node ID
+
+        Returns:
+            str: Telnet port
+        """
+
+        telnetInfo = self.get_node_url(labName, nodeID)
+        indexEnd = telnetInfo.rfind(":")
+        indexStart = telnetInfo.rfind("/")
+        return telnetInfo[indexStart+1:indexEnd]
+
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def get_nodes_url(self, labName: str()) -> dict():
+        """
+        This function will return telnet connection informations.
+
+        Args:
+            param1 (str): EVE-NG lab name
+        
+        Returns:
+            dict: Telnet connection informations    hostname: url_connection
+        """
+
+        # Exception is lab doesn't exist is raise in the below function
+        nodesID = self.get_lab_nodes_id(labName)
+        result = dict()
+
+        if len(nodesID) is not 0:
+            for nodeID in nodesID:
+                result[self.get_node_name_by_id(labName, nodeID)] = self.get_node_url(
+                    labName, nodeID)
+
+        return result
+
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def get_node_url(self, labName: str(), nodeID: str()) -> str():
+        """
+        This function will return telnet connection informations.
+
+        "1": {
+            "console": "telnet",
+            "delay": 0,
+            "id": 1,
+            "left": 177,
+            "icon": "Switch L3.png",
+            "image": "viosl2-adventerprisek9-m.03.2017",
+            "name": "GVA10",
+            "ram": 1024,
+            "status": 0,
+            "template": "viosl2",
+            "type": "qemu",
+            "top": 288,
+            "url": "telnet://172.16.194.239:0",             <<<======
+            "config_list": [],
+            "config": "0",
+            "cpu": 1,
+            "ethernet": 8,
+            "uuid": "0c5f57ad-fcff-47b1-b43b-4ba39b8545dd",
+            "firstmac": "50:00:00:01:00:00"
+        },
+
+        Args:
+            param1 (str): EVE-NG lab name
+            param2 (str): EVE-NG node ID
+
+        """
+
+        data = self.get_lab_node(labName, nodeID)
+        return data['data']['url']
+
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def get_lab_networks_name(self, labName: str()) -> list():
+        """
+        This function will return a LIST that contains all network name in lab given in parameter
+
+        Args:
+            param1 (str): EVE-NG lab name
+
+        Returns:
+            list: That contains networks name
+        """
+        data = self.get_lab_networks(labName)
+
+        networkName = list()
+
+        for network in data['data']:
+            networkName.append(data['data'][network]['name'])
+
+        return networkName
+
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def get_lab_networks(self, labName: str()) -> dict():
+        """
+        This function will return a JSON that contains informations about labs networks
+
+        Args:
+            param1 (str): EVE-NG lab name
+
+        Returns:
+            json: That contains networks informations
+        """
+        response = requests.get(
+            self._url+"/api/labs/"+self._userFolder+"/"+str(labName)+"/networks", cookies=self._cookies, verify=False)
+        self._requests_error(response.status_code)
+        return json.loads(response.content)
+
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def get_lab_nodes_access_method(self, labName: str()) -> dict():
+        """
+        This function will return a dictionnary that contains informations access method
+        
+        Example :
+            - {"Spine01": "telnet", "Linux", "vnc"}
+            
+        Args:
+            param1 (str): EVE-NG lab name
+
+        Returns:
+            dict: That contains key = hostname, value = access method
+        """
+
+        #self.check_param_type_str(labName)
+
+        response = requests.get(
+            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes", cookies=self._cookies, verify=False)
+        self._requests_error(response.status_code)
+        content = json.loads(response.content)["data"]
+
+        nodesAccessMethod = dict()
+        for key, val in content.items():
+            nodesAccessMethod[val["name"]] = val["console"]
+
+        return nodesAccessMethod
+
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def get_lab_topology(self, labName):
+        """
+        This function will return a JSON that contains informations about labs topology
+
+        Args:
+            param1 (str): EVE-NG lab name
+
+        Returns:
+            json: That contains topology informations
+        """
+        response = requests.get(
+            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/topology", cookies=self._cookies, verify=False)
+        self._requests_error(response.status_code)
+        return json.loads(response.content)
+
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def get_lab_links(self, labName):
+        """
+        This function will return a JSON that contains informations about labs links
+
+        Args:
+            param1 (str): EVE-NG lab name
+
+        Returns:
+            json: That contains links informations
+        """
+        response = requests.get(
+            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/links", cookies=self._cookies, verify=False)
+        self._requests_error(response.status_code)
+        return json.loads(response.content)
+
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def get_node_name_by_id(self, labName: str(), nodeID: str()) -> str():
+        """
+        This function will return a string that contains node name regarding node ID and labname given in parameter
+
+        Args:
+            param1 (str): EVE-NG lab name
+            param1 (str): Node ID
+
+        Returns:
+            str: Node name
+        """
+        return self.get_lab_node(labName, nodeID)['data']['name']
+
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def get_node_image_and_node_id(self,labName:str(), nodeName:str()) -> str():
+        """
+        This function will return a string that contains image type of nodes given in parameter
+
+        Args:
+            param1 (str): EVE-NG lab name
+            param1 (str): Node name
+
+        Returns:
+            str: Node image type
+        """
+        allNodesID = self.get_lab_nodes_id(labName)
+        allNodes = self.get_lab_nodes(labName)
+
+        for node in allNodes['data'].values():
+            if node['name'] == nodeName:
+                return node['image'].upper(), node['id']
+
+
+    # ##################################################################################################
+    #
+    #   Call to add links, nodes, networks, ... to labs !!
+    #
+    # ##################################################################################################
+
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def _add_networks_and_links_to_lab(self, interfacesToAdd: dict(), labName: str()):
+        """
+        This function will connect a node to a Network.
+        Firstly they will create Network.
+        2 nodes have to be connected on the same netwrok for communicate
+
+        -X PUT - d '{"0":1}'127.0.0.1/api/labs/Users/Lab.unl/nodes/1/interfaces'
+
+        Args:
+            param1 (str): Lab Names
+            param1 (str): Nodes Names
+            param2 (str): Node interface ID
+            param3 (str): Network ID
+        """
+        self._add_networks_to_lab(interfacesToAdd, labName)
+        self._add_links_to_lab(interfacesToAdd, labName)
+        self._set_network_visibility_to_0(interfacesToAdd, labName)
+
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def _add_networks_to_lab(self, networksToAdd: dict(), labName:str()):
+        """
+        This function add some network to a Lab
+
+        curl -s -c /tmp/cookie -b /tmp/cookie -X POST -d '{"count":1,"name":"Net-R1iface_0","type":"bridge","left":441,"top":658,"visibility":1,"postfix":0}' 
+        -H 'Content-type: application/json' http://127.0.0.1/api/labs/User1/Folder 2/Different Lab.unl/networks
+
+        Args:
+            param1 (dict): Nodes Informamations
+            param2 (str): Labname
+        """
+        data = dict()
+        networkName = self.get_lab_networks_name(labName)
+
+        for link in networksToAdd:
+            if link['dst'] == "OOB-NETWORK":
+                data['name'] = str("OOB-NETWORK")
+            else:
+                data['name'] = str(link['src']+"("+link['sport']+")--"+link['dst']+"("+link['dport'] + ")")
+
+            if data['name'] not in networkName:
+                data['type'] = str(link['network'])
+                data['visibility'] = 1
+                self._add_network_to_lab(data, labName)
+            else:
+                print("[PyEVENG _add_networks_to_lab] -",
+                      data['name'], " is already deployed!")
+
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def _set_network_visibility_to_0(self, network: dict(), labName: str()):
+        """
+        This function will set network visibility to 0
+        The network will not be show in GUI
+
+        curl -s -c /tmp/cookie -b /tmp/cookie -X PUT -d '{"visibility":0}' 
+        -H 'Content-type: application/json' http://127.0.0.1/api/labs/User1/Folder 2/Different Lab.unl/networks/1
+
+        Args:
+            param1 (str): Labname
+            param2 (str): NetworkID
+        """
+        for networkID in network:
+            response = requests.put(
+                self._url+"/api/labs/"+self._userFolder+"/"+str(labName)+"/networks/"+str(networkID['id']), data="{\"visibility\":0}", cookies=self._cookies, verify=False)
+            self._requests_error(response.status_code)
+
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def _add_network_to_lab(self, networkToAdd: dict(), labName: str()) -> str():
+        """
+        This function add some links to a Lab
+
+        Args:
+            param1 (dict): Nodes Informamations
+            param2 (str): Labname
+        """
+        print("[PyEVENG _add_network_to_lab] -",
+              networkToAdd['name'], "is deploying...")
+
+        self.lock_lab()
+        response = requests.post(
+            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/networks", data=json.dumps(networkToAdd), cookies=self._cookies, verify=False)
+        self._requests_error(response.status_code)
+
+        print("[PyEVENG _add_network_to_lab] -",
+              networkToAdd['name'], "(", str(response.status_code), ") has been deployed!")
+
+        return (json.loads(response.content)['data']['id'])
+        
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def _add_links_to_lab(self, interfaceToAdd: dict(), labName: str()):
+        """
+        This function add some links to a Lab
+
+        Args:
+            param1 (dict): Nodes Informamations
+            param2 (str): Labname
+        """
+        ssh = self._ssh_connect()
+        connexionInformations = dict()
+
+        for link in interfaceToAdd:
+            if link['dst'] == "OOB-NETWORK":
+                #
+                # Create The new interface
+                #
+
+                if "ip_eve" in link.keys():
+                    index = link['ip_eve'].find("/")
+                    ipMgmtEve = link['ip_eve'][:index]
+                    ipMaskEveCidr = link['ip_eve'][index+1:]
+                    ipMaskEve = tools.ip.convertCIDRtoNetmask(
+                        ipMaskEveCidr)
+
+                    print(
+                        "[PyEVENG - _add_links_to_lab] - sudo ifconfig {} up && sudo ifconfig {} {} netmask {}".format(link['network'], link['network'], ipMgmtEve, ipMaskEve))
+                    stdin, stdout, stderr = ssh.exec_command(
+                        "sudo ifconfig {} up && sudo ifconfig {} {} netmask {}".format(link['network'], link['network'], ipMgmtEve, ipMaskEve))
+                    o = "".join(stdout.readlines())
+
+                for oobInterface in link['src']:
+
+                    if "ip_eve" in link.keys():
+
+                        connexionInformations[oobInterface['host']] = {
+                            "ip_address_eve": self._ipAddress,
+                            "ip_address_host": oobInterface['ip_mgmt'],
+                            "con_ext_port": oobInterface['nat'],
+                            "con_int_port": oobInterface['ssh'],
+                            "url": "ssh -p {} -l <username> {}".format(oobInterface['nat'], self._ipAddress)
+                        }
+
+                        self.create_iptables_nat(
+                            ssh, link['ip_pub'], link['network'], oobInterface['ip_mgmt'], oobInterface['ssh'], ipMgmtEve, oobInterface['nat'])
+                    #
+
+                    self._add_link_to_lab(link['id'], self.getNodeIDby_node_name(labName, oobInterface['host']), self.get_node_interface_id(
+                        labName, self.get_node_id_by_node_name(labName, oobInterface['host']), oobInterface['port']), labName)
+
+            else:
+                self._add_link_to_lab(link['id'], self.get_node_id_by_node_name(labName, link['src']),
+                                      self.get_node_interface_id(labName, self.get_node_id_by_node_name(labName, link['src']), link['sport']), labName)
+                self._add_link_to_lab(link['id'], self.get_node_id_by_node_name(labName, link['dst']),
+                                      self.get_node_interface_id(labName, self.get_node_id_by_node_name(labName, link['dst']), link['dport']), labName)
+
+        self.write_in_remote_file(
+            ssh, connexionInformations, "/root/.eveng/connexion_{}".format(labName), mode='w')
+        ssh.close()
+
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def _add_link_to_lab(self, networkID: str(), nodeID: str(), interfaceID: str(), labName: str()):
         """
         This function will connect a node to a Network.
         2 nodes have to be connected on the same netwrok for communicate
@@ -1856,7 +1480,7 @@ class PyEVENG:
             param3 (str): Node interface ID
             param4 (str): Network ID
         """
-        print("[PyEVENG addLinkToLab] -",
+        print("[PyEVENG _add_link_to_lab] -",
               nodeID, interfaceID, "is deploying...")
 
         print(self._url+"/api/labs/"+self._userFolder+"/" +
@@ -1865,14 +1489,628 @@ class PyEVENG:
         response = requests.put(
             self._url+"/api/labs/"+self._userFolder+"/"+str(labName)+"/nodes/"+str(nodeID)+"/interfaces", data="{\""+str(interfaceID)+"\":\""+str(networkID)+"\"}", cookies=self._cookies, verify=False)
         
-        self.requestsError(response.status_code)
+        self._requests_error(response.status_code)
 
 
     # --------------------------------------------------------------------------------------------------
     #
     #
     #
-    def requestsError(self, status_code):
+    def _add_nodes_to_lab(self, nodesToAdd: dict(), labName: str()):
+        """
+        This function add some nodes to a Lab
+        It uses _add_node_to_lab
+
+        Args:
+            param1 (dict): Nodes Informamations
+            param2 (str): Labname
+        """
+        for node in nodesToAdd:
+            self._add_node_to_lab(node, labName)
+
+        if nodesToAdd.__len__() == self.get_lab_nodes_name(labName).__len__():
+            print("[PyEVENG _add_nodes_to_lab] - all nodes have been deployed!")
+        else:
+            print("[PyEVENG _add_nodes_to_lab] - some nodes haven't been deployed!")
+            raise EVENG_Exception(
+                str("[PyEVENG _add_nodes_to_lab] - Nodes deployment error !"), 21)
+
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    # 
+    #
+    def _add_node_to_lab(self, nodesToAdd: dict(), labName: str()):
+        """
+        This function add a node to a Lab
+
+        Args:
+            param1 (dict): Node Informamations
+            param2 (str): Labname to add nodes
+        """
+        print("[PyEVENG _add_node_to_lab] -",
+              nodesToAdd['name'], "is deploying...")
+
+        nodeNameAlreadyInLab = self.get_lab_nodes_name(labName)
+
+        if nodesToAdd['name'] in nodeNameAlreadyInLab:
+            print("[PyEVENG _add_node_to_lab] - a node with the name \"",
+                  nodesToAdd['name'], "\" is already deployed!")
+
+        else:
+            self.lock_lab()
+            PP.pprint(json.dumps(nodesToAdd))
+            response = requests.post(
+                self._url+"/api/labs/"+str(self._userFolder)+"/"+str(labName)+"/nodes", data=json.dumps(nodesToAdd), cookies=self._cookies, verify=False)
+
+            self._requests_error(response.status_code)
+            print("[PyEVENG _add_node_to_lab] -",
+                  nodesToAdd['name'], "has been deployed!")
+
+
+
+
+    # ##################################################################################################
+    #
+    #   Call to make general action on lab (start, stop, remove, create)
+    #
+    # ##################################################################################################
+    
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def start_lab_node(self, labName, nodeID):
+        """
+        This function will start a node of a lab according to lab name and node id given in parameter
+
+        Args:
+            param1 (str): EVE-NG lab name
+            param1 (str): EVE-NG node ID
+        """
+        if self.get_node_status(labName, nodeID) != "2":
+            print("[PyEVENG start_lab_node] -",
+                  labName, self.get_node_name_by_id(labName, nodeID), "is starting...")
+
+            response = requests.get(
+                self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes/"+nodeID+"/start", cookies=self._cookies, verify=False)
+            self._requests_error(response.status_code)
+
+            if self.get_node_status(labName, nodeID) == "2":
+                print("[PyEVENG start_lab_node] -", labName,
+                      self.get_node_name_by_id(labName, nodeID), "is started !")
+
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def start_lab_all_nodes(self, labName: str(), *, enable=False):
+        """
+        This function will start all node of a lab
+
+        Args:
+            param1 (str): EVE-NG lab name
+        """
+
+        #self.check_param_type_str(labName)
+
+        nodesID = self.get_lab_nodes_id(labName)
+
+        # First Start Device
+        for nodeID in nodesID:
+          self.start_lab_node(labName, nodeID)
+
+        if enable:
+            first = True
+            print("[PyEVENG start_lab_all_nodes] - no shutdown interfaces ...")
+            for nodeID in nodesID:
+                nodeName = self.get_node_name_by_id(labName, nodeID)
+                nodeImage = self.get_node_image_and_node_id(labName, nodeName)
+                if "VIOS" in nodeImage[0]:
+                    telnetPort = self.get_node_telnet_port(labName, nodeID)
+                    telnetIP = self.get_node_telnet_ip(labName, nodeID)
+                    if first:
+                        time.sleep(60)
+                        first = False
+                    self.enable_port(labName, telnetIP,
+                                     telnetPort, nodeID, nodeName)
+            print("[PyEVENG start_lab_all_nodes] - no shutdown interfaces done !")
+
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def stop_lab_node(self, labName, nodeID):
+        """
+        This function will stop a node of a lab according to lab name and node id given in parameter
+
+        for EVE-NG PRO
+        https://127.0.0.1/api/labs/Users/spine-leaf.unl/nodes/2/stop/stopmode=3
+
+        for EVE-NG Community
+        https://127.0.0.1/api/labs/Users/spine-leaf.unl/nodes/2/stop
+
+        Args:
+            param1 (str): EVE-NG lab name
+            param1 (str): EVE-NG node ID
+
+        """
+
+        print("[PyEVENG stop_lab_node] -",
+              labName, self.get_node_name_by_id(labName, nodeID), "is stopping...")
+
+        if self.get_node_status(labName, nodeID) != "0":
+
+            if self._community is False:
+                print(self._url+"/api/labs/"+self._userFolder+"/" +
+                      labName+"/nodes/"+nodeID+"/stop/stopmode=3")
+
+                response = requests.get(
+                    self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes/"+nodeID+"/stop/stopmode=3", cookies=self._cookies, verify=False)
+
+            else:
+                print(self._url+"/api/labs/"+self._userFolder+"/" +
+                      labName+"/nodes/"+nodeID+"/stop")
+                response = requests.get(
+                    self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes/"+nodeID+"/stop", cookies=self._cookies, verify=False)
+
+            self._requests_error(response.status_code)
+
+            if self.get_node_status(labName, nodeID) == "0":
+                print("[PyEVENG stop_lab_node] -",
+                      labName, self.get_node_name_by_id(labName, nodeID), "is stopped !")
+
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def stop_lab_all_nodes_1(self, labName):
+        """
+        This function will stop all node of a lab
+
+        Args:
+            param1 (str): EVE-NG lab name
+
+        """
+        response = requests.get(
+            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes/stop/stopmode=3", cookies=self._cookies, verify=False)
+
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def stop_lab_all_nodes(self, labName):
+        """
+        This function will stop all node of a lab
+
+        Args:
+            param1 (str): EVE-NG lab name
+
+        """
+
+        #self.check_param_type_str(labName)
+
+        nodesID = self.get_lab_nodes_id(labName)
+
+        if len(nodesID) is not 0:
+            for nodeID in nodesID:
+                self.stop_lab_node(labName, nodeID)
+
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    # 
+    #
+    def create_lab(self, labInformations:dict()):
+        """
+        This function will create a Lab
+
+        Args:
+            param1 (dict): All lab informations
+        """
+        if str(labInformations['name']+".unl") in self.get_labs_in_folder():
+            raise EVENG_Exception(str("[EXCEPTION][PyEVENG - create_lab] - Lab ("+labInformations['name']+") already exists in this folder"), 12)
+        
+        self._project = labInformations['name']+".unl"
+        print("[PyEVENG create_lab] -",
+              labInformations['name'], "is creating...")
+        
+        response = requests.post(
+            self._url+"/api/labs", data=json.dumps(labInformations), cookies=self._cookies, verify=False)
+
+        self._requests_error(response.status_code)
+        print("[PyEVENG create_lab] -",
+              labInformations['name'], "has been created...")
+
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def delete_lab(self, labName: dict()):
+        """
+        This function will delete a Lab
+
+        Args:
+            param1 (str): Lab name to delete
+        """
+        call = True
+        print("[PyEVENG - delete_lab] -",
+              labName, "is deleting...")
+        try:
+            self.stop_lab_all_nodes(labName)
+
+        except EVENG_Exception as e:
+            print(
+                "[PyEVENG - delete_lab] - lab doesn't exist ... check for remove files")
+            call = False
+
+        self.remove_remote_connexion_file(labName)
+
+        if call:
+            response = requests.delete(self._url+"/api/labs/"+str(
+                self._userFolder)+"/"+str(labName), cookies=self._cookies, verify=False)
+            self._requests_error(response.status_code)
+
+            print("[PyEVENG delete_lab] -",
+                  labName, "has been deleted...")
+
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def get_lab_description(self, labName: str()) -> str():
+        """
+        This function will return a string that contains lab descriptions
+
+        Args:
+            param1 (str): EVE-NG lab name
+
+        Returns:
+            str: That contains lab description
+        """
+
+        #self.check_param_type_str(labName)
+
+        response = self.get_lab(labName)
+        return response["data"]["description"]
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def get_lab_author(self, labName: str()) -> str():
+        """
+        This function will return a string that contains lab author
+
+        Args:
+            param1 (str): EVE-NG lab name
+
+        Returns:
+            str: That contains lab author
+        """
+
+        #self.check_param_type_str(labName)
+
+        response = self.get_lab(labName)
+        return response["data"]["author"]
+
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def get_lab_id(self, labName: str()) -> str():
+        """
+        This function will return a string that contains lab ID
+
+        Args:
+            param1 (str): EVE-NG lab name
+
+        Returns:
+            str: That contains lab ID
+        """
+
+        #self.check_param_type_str(labName)
+
+        response = self.get_lab(labName)
+        return response["data"]["id"]
+
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def get_lab(self, labName: str()) -> dict():
+        """
+        This function will return a JSON that contains lab informations
+
+        Args:
+            param1 (str): EVE-NG lab name
+
+        Returns:
+            json: That contains lab informations
+        """
+        #self.check_param_type_str(labName)
+
+        response = requests.get(
+            self._url+"/api/labs/"+self._userFolder+"/"+labName, cookies=self._cookies, verify=False)
+        self._requests_error(response.status_code)
+        return json.loads(response.content)
+
+
+
+    # ##################################################################################################
+    #
+    #   Call to make general action on EVE-NG VM
+    #
+    # ##################################################################################################
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def get_labs_in_folder(self) -> list():
+        """
+        This function will return a list that contains all lab name in the folder
+
+        Returns:
+            list: That contains all lab name
+        """
+        response = requests.get(self._url+"/api/folders/"+str(self._userFolder),
+                                cookies=self._cookies, verify=False)
+
+        self._requests_error(response.status_code)
+        data = json.loads(response.content)
+
+        labsInFolder = list()
+        for lab in data['data']['labs']:
+            labsInFolder.append(lab['file'])
+
+        return labsInFolder
+
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def get_users(self):
+        """
+        This function will return a JSON that contains user informations
+
+        Returns:
+            json: That contains user informations
+        """
+        response = requests.get(self._url+"/api/users/",
+                                cookies=self._cookies, verify=False)
+        self._requests_error(response.status_code)
+        return json.loads(response.content)
+
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def get_template_by_model(self, deviceType):
+        """
+        This function will return a list that contains all installed nodes
+
+        Args:
+            param1 (str): Device type - Example "cumulus"
+
+        Returns:
+            list: Information about device type
+        """
+        response = requests.get(
+            self._url+"/api/list/templates/"+str(deviceType), cookies=self._cookies, verify=False)
+        self._requests_error(response.status_code)
+
+        return json.loads(response.content)
+
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def get_image_version_by_model(self, deviceType):
+        """
+        This
+         function will return a list that contains all installed nodes
+
+        Args:
+            param1 (str): Device type - Example "cumulus"
+
+        Returns:
+            list: Information about device type
+        """
+        response = requests.get(
+            self._url+"/api/list/templates/"+str(deviceType), cookies=self._cookies, verify=False)
+        self._requests_error(response.status_code)
+
+        content = json.loads(response.content)
+
+        listResult = list()
+        if "image" in content['data']['options'].keys():
+            if len(content['data']['options']['image']['list']) != 0:
+                for value in content['data']['options']['image']['list'].values():
+                    listResult.append(value)
+
+        return listResult
+
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def get_node_available(self):
+        """
+        This function will return a list that contains all available nodes
+
+        Returns:
+            list: That contains all available nodes
+        """
+        response = requests.get(
+            self._url+"/api/list/templates/", cookies=self._cookies, verify=False)
+        self._requests_error(response.status_code)
+        return json.loads(response.content)
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def get_user_info(self):
+        """
+        This function will return a JSON that contains user informations
+
+        Returns:
+            json: That contains user informations
+        """
+        response = requests.get(self._url+"/api/auth",
+                                cookies=self._cookies, verify=False)
+        self._requests_error(response.status_code)
+        return json.loads(response.content)
+
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def get_node_version_install(self, deviceType: str()):
+        """
+        This function will return a list that contains all installed nodes
+
+
+        Returns:
+            list: That contains all installed nodes
+        """
+        data = self.get_image_version_by_model(deviceType)
+        return data
+
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def get_node_install(self) -> dict():
+        """
+        This function will return a list that contains all installed nodes
+
+        Returns:
+            list: That contains all installed nodes
+        """
+        response = requests.get(
+            self._url+"/api/list/templates/", cookies=self._cookies, verify=False)
+        self._requests_error(response.status_code)
+        data = json.loads(response.content)["data"]
+
+        toRemove = list()
+        for key, val in data.items():
+            if ("missing" in val):
+                toRemove.append(key)
+
+        for key in toRemove:
+            del data[key]
+
+        return data
+
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def status(self) -> dict:
+        """
+        This function will return a JSON that contains vm infromations
+
+        Returns:
+            json: That contains vm informations
+        """
+        response = requests.get(self._url+"/api/status",
+                                cookies=self._cookies, verify=False)
+        self._requests_error(response.status_code)
+        return json.loads(response.content)
+
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def get_vm_memory(self) -> str():
+        """
+        This function will return a str that contains vm memory (RAM)
+        Use SSH
+
+        Returns:
+            str: That contains vm mermory
+        """
+        GET_MEMORY_COMMAND = "free -m | grep -i mem | awk '{print $2}'"
+
+        ssh = self._ssh_connect()
+
+        stdin, stdout, stderr = ssh.exec_command(GET_MEMORY_COMMAND)
+        return ("".join(stdout.readlines()))
+
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def login(self):
+        """
+        This function login to EVE-NG
+        Store Cookie
+
+        """
+        # For avoid InsecureRequestWarning error
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+        if self._verbose:
+            print("[PyEVENG - login] ...")
+
+        response = requests.post(
+            self._url+"/api/auth/login", data='{"username":"'+self._username+'","password":"'+self._password+'", "html5": "0"}', verify=False)
+
+        self._requests_error(response.status_code)
+
+        if self._verbose:
+            print(f"[PyEVENG - login] ({response.status_code}) logged !")
+
+        self._cookies = response.cookies
+
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def logout(self):
+        """
+        This function logout to EVE-NG        
+        """
+        if self._verbose:
+            print("[PyEVENG - logout] ...")
+        response = requests.get(
+            self._url+"/api/auth/logout", cookies=self._cookies, verify=False)
+
+        self._requests_error(response.status_code)
+
+        if self._verbose:
+            print(
+                f"[PyEVENG - logout] ({response.status_code}) EVE-NG says Byyye :) !")
+
+
+
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def _requests_error(self, status_code):
         """
         This function will check if there is an error in the status code
         In progress
@@ -1890,9 +2128,12 @@ class PyEVENG:
         elif status_code == 412:
             raise "HTTP 412 : please login before to make requests \n" + \
                 "api= PyEVENG.PyEVENG(login, mdp, ip, port, ssl, user, pod) \n" + \
-                    "api.login() \n api.getLabNodes"
+                    "api.login() \n api.get_lab_nodes"
 
-    # =========
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
     #
     def check_param_type_str(self, param:str()):
         """
@@ -1912,7 +2153,7 @@ class PyEVENG:
     #
     #
     def lock_lab(self):
-        ssh = self.sshConnect()
+        ssh = self._ssh_connect()
         stdin, stdout, stderr = ssh.exec_command(
             "find /opt/unetlab/labs/ -name '*.lock' -exec rm {} \; && echo 'LOCK LAB!'")
         o = "".join(stdout.readlines())
@@ -1921,9 +2162,12 @@ class PyEVENG:
             raise Exception("Error during lock_lab")
         ssh.close
         
-    # =========
+
+    # --------------------------------------------------------------------------------------------------
     #
-    def sshConnect(self) -> paramiko.SSHClient():
+    #
+    #
+    def _ssh_connect(self) -> paramiko.SSHClient():
         try:
             sshClient = paramiko.SSHClient()
             sshClient.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -1932,17 +2176,21 @@ class PyEVENG:
 
             return sshClient
         except paramiko.AuthenticationException as e:
-            print("[PyEVENG - sshConnect] - Authentication issue during the SSH connection to EVE-NG VM")
+            print("[PyEVENG - _ssh_connect] - Authentication issue during the SSH connection to EVE-NG VM")
         except paramiko.BadHostKeyException as e:
-            print("[PyEVENG - sshConnect] - Bad Host Key issue during the SSH connection to EVE-NG VM")
+            print("[PyEVENG - _ssh_connect] - Bad Host Key issue during the SSH connection to EVE-NG VM")
         except paramiko.ChannelException as e:
-            print("[PyEVENG - sshConnect] - Channel issue during the SSH connection to EVE-NG VM")
+            print("[PyEVENG - _ssh_connect] - Channel issue during the SSH connection to EVE-NG VM")
         except paramiko.SSHException as e:
-            print("[PyEVENG - sshConnect] - SSH issue during the SSH connection to EVE-NG VM : {str(e)}")
+            print("[PyEVENG - _ssh_connect] - SSH issue during the SSH connection to EVE-NG VM : {str(e)}")
         except TimeoutError as e:
-            print("[PyEVENG - sshConnect] - Timeout during the SSH conenction to EVE-NG VM")
+            print(
+                "[PyEVENG - _ssh_connect] - Timeout during the SSH conenction to EVE-NG VM")
     
-    # =========
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
     #
     def __init__(self, username, password, ipAddress, port=99999, useHTTPS=False, userFolder="Users", pod="0", root="root", rmdp="eve", community=True, verbose=True):
         """
@@ -1957,6 +2205,8 @@ class PyEVENG:
         :param pod:             EVE-NG project POD number
         :param root:            EVE-NG user with root privilege
         :param rmdp:            EVE-NG user with root privilege password
+        :param community:       True is you use EVE-NG community version
+        :param verbose:         If True logout and login message will be printed
         """
 
         self._ipAddress = ipAddress

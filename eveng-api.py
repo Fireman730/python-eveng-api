@@ -231,10 +231,10 @@ def main(deploy, inventory, vm, force, start, backup, stop, remove, test, images
         api.logout()
 
     if images:
-        deviceTypes = api.getNodeInstall()
+        deviceTypes = api._get_node_install()
         result = dict()
         for deviceType in deviceTypes.keys():
-            versions = api.getNodeVersionInstall(deviceType)
+            versions = api.get_node_version_install(deviceType)
             if len(versions):
                 result[deviceType] = versions
 
@@ -297,12 +297,12 @@ def main(deploy, inventory, vm, force, start, backup, stop, remove, test, images
 
     # ======================================================================================================
     if start != "#":
-        api.startLabAllNodes(start)
+        api.start_lab_all_nodes(start)
         api.logout()
         exit_success()
 
     if stop != "#":
-        api.stopLabAllNodes(stop)
+        api.stop_lab_all_nodes(stop)
         api.logout()
         exit_success()
 
@@ -364,7 +364,7 @@ def deploy_all (api: PyEVENG.PyEVENG, ymlF: dict(), vmInfo: dict(), force: str()
         # Start hosts to create folders in
         # /opt/unetlab/tmp/0/{LAB_ID}/{NODE_ID}/*
         #
-        api.startLabAllNodes(ymlF['project']['name']+".unl")
+        api.start_lab_all_nodes(ymlF['project']['name']+".unl")
 
         if "configs" in ymlF.keys():
 
@@ -380,7 +380,7 @@ def deploy_all (api: PyEVENG.PyEVENG, ymlF: dict(), vmInfo: dict(), force: str()
             #
             # Restart hosts when config files are pushed
             #
-            api.startLabAllNodes(ymlF['project']['name']+".unl", enable=True)
+            api.start_lab_all_nodes(ymlF['project']['name']+".unl", enable=True)
 
     except EVENG_Exception as eve:
         print(eve._message)
