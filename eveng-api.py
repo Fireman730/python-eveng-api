@@ -112,15 +112,62 @@ except ImportError as importError:
     print("Error import [eveng-api] pprint")
     print(importError)
     exit(EXIT_FAILURE)
+
+
+try:
+    import logging
+    logging.basicConfig(filename='./logs/eveng-api.log',
+                        filemode='w+',
+                        level=logging.DEBUG,
+                        format='%(asctime)s - [%(filename)s:%(lineno)s - %(funcName)s()] - %(levelname)s - %(message)s'
+    )
+except ImportError as importError:
+    print("Error import [eveng-api] logging")
+    print(importError)
+    exit(EXIT_FAILURE)
+
+
 ######################################################
 #
-# Constantes
+# Variables
 #
+exit_status = {
+    "is_working": True
+}
 
 ######################################################
 #
 # Functions
 #
+
+
+# ----------------------------------------------------
+#
+#
+def exit_status_to_false():
+    exit_status["is_working"] = False
+
+
+# ----------------------------------------------------
+#
+#
+def exit_status_to_true():
+    exit_status["is_working"] = True
+
+
+# ----------------------------------------------------
+#
+#
+def run_logs(deploy, inventory, vm, force, start, backup, stop,
+             remove, test, images, ports, connexion, telnet, pod, folder):
+    logging.debug(f"=========================================")
+    logging.debug(f"NEW RUN !!!!")
+    logging.debug(f"=========================================")
+    logging.debug(
+        f"Arguments receive \ndeploy=={deploy} \ninventory=={inventory} \nvm=={vm} \nforce=={force} \nstart=={start}\
+            \nbackup=={backup} \nstop=={stop} \nremove=={remove} \ntest=={test} \nimages=={images} \nports=={ports}\
+            \nconnexion=={connexion} \ntelnet=={telnet} \npod=={pod} \nfolder=={folder}")
+
 
 # ----------------------------------------------------
 #
@@ -136,10 +183,15 @@ def pjson(jsonPrint: dict()):
     print(json.dumps(jsonPrint, indent=4, sort_keys=True))
     print("---------------------------------------------------------------------------------")
 
+
+# ----------------------------------------------------
+#
+#
 def exit_success():
     print("\n\n[eveng-api - exit_success] - Did you love this tool ?")
     print("Give a STAR https://gitlab.com/DylanHamel/python-eveng-api \n\n")
     exit(EXIT_SUCCESS)
+
 
 ######################################################
 #
@@ -167,6 +219,8 @@ def main(deploy, inventory, vm, force, start, backup, stop, remove, test, images
     It will retrieve arguments and run Functions
 
     """
+    run_logs(deploy, inventory, vm, force, start, backup, stop,
+             remove, test, images, ports, connexion, telnet, pod, folder)
 
     # Open files and retrieve informations
     # VM IP, username, password, etc.
@@ -178,7 +232,7 @@ def main(deploy, inventory, vm, force, start, backup, stop, remove, test, images
     #
     # Create the object that is connected with EVE-NG API
     #
-    cliVerbose = connexion is "null" and telnet is "null"
+    verbose = connexion is "null" and telnet is "null"
 
     api = PyEVENG.PyEVENG(vmInfo['https_username'],
                         vmInfo['https_password'],
@@ -186,15 +240,19 @@ def main(deploy, inventory, vm, force, start, backup, stop, remove, test, images
                         vmInfo['https_port'],
                         vmInfo['https_ssl'],
                         pod=pod,
-                        userFolder=folder,
+                        folder=folder,
                         root=vmInfo['ssh_root'],
                         rmdp=vmInfo['ssh_pass'],
                         community=vmInfo['community'],
-                        verbose=cliVerbose
+                        verbose=verbose
     )
+
+    logging.debug(api)
+    exit_success()
 
     # ======================================================================================================
     if telnet is not "null":
+        logging.debug("Enter in telnet conditions")
         try:
             PP.pprint(api.get_nodes_url(telnet))
         except EVENG_Exception as e:
@@ -205,6 +263,7 @@ def main(deploy, inventory, vm, force, start, backup, stop, remove, test, images
         exit(EXIT_SUCCESS)
 
     if connexion is not "null":
+        logging.debug("Enter in connexion conditions")
         try:
             PP.pprint(api.get_remote_connexion_file(connexion))
             api.logout()
@@ -222,15 +281,18 @@ def main(deploy, inventory, vm, force, start, backup, stop, remove, test, images
 
 
     if ports is not "null":
+        logging.debug("Enter in connexion conditions")
         print("==================================================================")
         PP.pprint(open_file("./devices/_port_device.yml")[ports])
         print("==================================================================")
 
     if test:
+        logging.debug("Enter in connexion conditions")
         PP.pprint(api.status())
         api.logout()
 
     if images:
+        logging.debug("Enter in connexion conditions")
         deviceTypes = api._get_node_install()
         result = dict()
         for deviceType in deviceTypes.keys():
@@ -244,6 +306,7 @@ def main(deploy, inventory, vm, force, start, backup, stop, remove, test, images
         api.logout()
 
     if inventory!= "#":
+        logging.debug("Enter in connexion conditions")
         ymlF = open_file(inventory)
         if "ansible" in ymlF.keys():
             if "groups" in ymlF['ansible'].keys():
@@ -407,13 +470,24 @@ def open_file(path: str()) -> dict():
     Returns:
         str: Node name
     """
+    data = dict()
 
-    with open(path, 'r') as yamlFile:
-        try:
-            data = yaml.load(yamlFile)
-        except yaml.YAMLError as exc:
-            print(exc)
+    logging.debug(f"Open YAML file {path}")
 
+    try:
+        with open(path, 'r') as yamlFile:
+            try:
+                data = yaml.load(yamlFile)
+                logging.debug(f"YAML file open (return data)")
+            except yaml.YAMLError as exc:
+                logging.critical(f"Error syntax in YAML file ({path}) !")
+                exit_status_to_false()
+
+    except FileNotFoundError as filenf:
+            logging.critical(
+                f"YAML file the file could not be opened {type(filenf)}!")
+            exit_status_to_false()
+    
     return data
 
 # -----------------------------------------------------------------------------------------------------------------------------

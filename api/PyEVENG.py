@@ -201,7 +201,7 @@ class PyEVENG:
         
         """
         for lab in yamlFiles['labs']:
-            self._userFolder = lab['folder']
+            self._folder = lab['folder']
 
             if lab['labname'] not in self.get_labs_in_folder():
                 raise EVENG_Exception(
@@ -298,7 +298,7 @@ class PyEVENG:
         
         """
         arista = arista_device.AristaDevice(
-            self._ipAddress, self._root, self._password, path,
+            self._ip, self._root, self._pwd, path,
             self._pod, projectName, self.get_lab_id(projectName), nodeName, nodeID)
 
         arista.getConfigVerbose()
@@ -320,7 +320,7 @@ class PyEVENG:
         
         """
         vyos = vyos_device.VyosDevice(
-            self._ipAddress, self._root, self._password, path,
+            self._ip, self._root, self._pwd, path,
             self._pod, projectName, self.get_lab_id(projectName), nodeName, nodeID)
 
         vyos.getConfigVerbose()
@@ -342,7 +342,7 @@ class PyEVENG:
         
         """
         nexus = nexus_device.NexusDevice(
-            self._ipAddress, self._root, self._password, path,
+            self._ip, self._root, self._pwd, path,
             self._pod, projectName, self.get_lab_id(projectName), nodeName, nodeID)
 
         nexus.getConfigVerbose()
@@ -364,7 +364,7 @@ class PyEVENG:
         
         """
         cisco = cisco_device.CiscoDevice(
-            self._ipAddress, self._root, self._password, path,
+            self._ip, self._root, self._pwd, path,
             self._pod, projectName, self.get_lab_id(projectName), nodeName, nodeID)
 
         cisco.getConfigVerbose()
@@ -386,7 +386,7 @@ class PyEVENG:
         
         """
         extreme = extreme_device.ExtremeDevice(
-            self._ipAddress, self._root, self._password, path,
+            self._ip, self._root, self._pwd, path,
             self._pod, projectName, self.get_lab_id(projectName), nodeName, nodeID)
 
         extreme.getConfigVerbose()
@@ -408,7 +408,7 @@ class PyEVENG:
         
         """
         cumulus = cumulus_device.CumulusDevice(
-            self._ipAddress, self._root, self._password, path, 
+            self._ip, self._root, self._pwd, path, 
             self._pod, projectName, self.get_lab_id(projectName), nodeName, nodeID)
 
         cumulus.getConfigVerbose()
@@ -470,7 +470,7 @@ class PyEVENG:
             param2 (str): Lab name
         """
         arista = arista_device.AristaDevice(
-            self._ipAddress, self._root, self._password, configToDeploy['config'],
+            self._ip, self._root, self._pwd, configToDeploy['config'],
             self._pod, labName, self.get_lab_id(labName), configToDeploy['node'], self.get_node_id_by_node_name(labName, configToDeploy['node']))
 
         arista.pushConfig()
@@ -489,7 +489,7 @@ class PyEVENG:
             param2 (str): Lab name
         """
         extreme = extreme_device.ExtremeDevice(
-            self._ipAddress, self._root, self._password, configToDeploy['config'],
+            self._ip, self._root, self._pwd, configToDeploy['config'],
             self._pod, labName, self.get_lab_id(labName), configToDeploy['node'], self.get_node_id_by_node_name(labName, configToDeploy['node']))
 
         extreme.pushConfig()
@@ -508,7 +508,7 @@ class PyEVENG:
             param2 (str): Lab name
         """
         nexus = nexus_device.NexusDevice(
-            self._ipAddress, self._root, self._password, configToDeploy['config'],
+            self._ip, self._root, self._pwd, configToDeploy['config'],
             self._pod, labName, self.get_lab_id(labName), configToDeploy['node'], self.get_node_id_by_node_name(labName, configToDeploy['node']))
 
         nexus.pushConfig()
@@ -527,7 +527,7 @@ class PyEVENG:
             param2 (str): Lab name
         """
         cisco = cisco_device.CiscoDevice(
-            self._ipAddress, self._root, self._password, configToDeploy['config'],
+            self._ip, self._root, self._pwd, configToDeploy['config'],
             self._pod, labName, self.get_lab_id(labName), configToDeploy['node'], self.get_node_id_by_node_name(labName, configToDeploy['node']))
                 
         cisco.pushConfig()
@@ -546,7 +546,7 @@ class PyEVENG:
             param2 (str): Lab name
         """
         cumulus = cumulus_device.CumulusDevice(
-            self._ipAddress, self._root, self._password, configToDeploy['config'],
+            self._ip, self._root, self._pwd, configToDeploy['config'],
             self._pod, labName, self.get_lab_id(labName), configToDeploy['node'], self.get_node_id_by_node_name(labName, configToDeploy['node']))
                 
         cumulus.pushConfig()
@@ -565,7 +565,7 @@ class PyEVENG:
             param2 (str): Lab name
         """
         cumulus = cumulus_device.CumulusDevice(
-            self._ipAddress, self._root, self._password, configToDeploy['config'],
+            self._ip, self._root, self._pwd, configToDeploy['config'],
             self._pod, labName, self.get_lab_id(labName), configToDeploy['node'], self.get_node_id_by_node_name(labName, configToDeploy['node']))
 
         cumulus.pushOOB()
@@ -579,7 +579,7 @@ class PyEVENG:
 
         print("[PyEVENG - _push_cumulus_oob]")
         cumulus = cumulus_device.CumulusDevice(
-            self._ipAddress, self._root, self._password, pathToConfigFileOOB,
+            self._ip, self._root, self._pwd, pathToConfigFileOOB,
             self._pod, labName, self.get_lab_id(labName), nodeName, nodeID)
 
         cumulus.pushOOB()
@@ -837,7 +837,7 @@ class PyEVENG:
         #self.check_param_type_str(labName)
 
         response = requests.get(
-            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes", cookies=self._cookies, verify=False)
+            self._url+"/api/labs/"+self._folder+"/"+labName+"/nodes", cookies=self._cookies, verify=False)
 
         if response.status_code == 404:
             raise EVENG_Exception(
@@ -873,7 +873,7 @@ class PyEVENG:
         #self.check_param_type_str(labName)
 
         response = requests.get(
-            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes", cookies=self._cookies, verify=False)
+            self._url+"/api/labs/"+self._folder+"/"+labName+"/nodes", cookies=self._cookies, verify=False)
         self._requests_error(response.status_code)
         content = json.loads(response.content)["data"]
 
@@ -904,7 +904,7 @@ class PyEVENG:
         #self.check_param_type_str(labName)
 
         response = requests.get(
-            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes", cookies=self._cookies, verify=False)
+            self._url+"/api/labs/"+self._folder+"/"+labName+"/nodes", cookies=self._cookies, verify=False)
         self._requests_error(response.status_code)
         return json.loads(response.content)
 
@@ -929,7 +929,7 @@ class PyEVENG:
         #self.check_param_type_str(nodeID)
 
         response = requests.get(
-            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes/"+nodeID, cookies=self._cookies, verify=False)
+            self._url+"/api/labs/"+self._folder+"/"+labName+"/nodes/"+nodeID, cookies=self._cookies, verify=False)
         self._requests_error(response.status_code)
         return json.loads(response.content)
 
@@ -1022,7 +1022,7 @@ class PyEVENG:
         ##self.check_param_type_str(nodeID)
 
         response = requests.get(
-            self._url+"/api/labs/"+self._userFolder+"/"+str(labName)+"/nodes/"+str(nodeID)+"/interfaces", cookies=self._cookies, verify=False)
+            self._url+"/api/labs/"+self._folder+"/"+str(labName)+"/nodes/"+str(nodeID)+"/interfaces", cookies=self._cookies, verify=False)
         self._requests_error(response.status_code)
         return json.loads(response.content)
 
@@ -1060,7 +1060,7 @@ class PyEVENG:
             str: That contains node image
         """
         response = requests.get(
-            self._url+"/api/labs/"+str(self._userFolder)+"/"+str(labName)+"/nodes/"+str(nodeID), cookies=self._cookies, verify=False)
+            self._url+"/api/labs/"+str(self._folder)+"/"+str(labName)+"/nodes/"+str(nodeID), cookies=self._cookies, verify=False)
         self._requests_error(response.status_code)
         return json.loads(response.content)["data"]["image"]
 
@@ -1214,7 +1214,7 @@ class PyEVENG:
             json: That contains networks informations
         """
         response = requests.get(
-            self._url+"/api/labs/"+self._userFolder+"/"+str(labName)+"/networks", cookies=self._cookies, verify=False)
+            self._url+"/api/labs/"+self._folder+"/"+str(labName)+"/networks", cookies=self._cookies, verify=False)
         self._requests_error(response.status_code)
         return json.loads(response.content)
 
@@ -1240,7 +1240,7 @@ class PyEVENG:
         #self.check_param_type_str(labName)
 
         response = requests.get(
-            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes", cookies=self._cookies, verify=False)
+            self._url+"/api/labs/"+self._folder+"/"+labName+"/nodes", cookies=self._cookies, verify=False)
         self._requests_error(response.status_code)
         content = json.loads(response.content)["data"]
 
@@ -1266,7 +1266,7 @@ class PyEVENG:
             json: That contains topology informations
         """
         response = requests.get(
-            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/topology", cookies=self._cookies, verify=False)
+            self._url+"/api/labs/"+self._folder+"/"+labName+"/topology", cookies=self._cookies, verify=False)
         self._requests_error(response.status_code)
         return json.loads(response.content)
 
@@ -1286,7 +1286,7 @@ class PyEVENG:
             json: That contains links informations
         """
         response = requests.get(
-            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/links", cookies=self._cookies, verify=False)
+            self._url+"/api/labs/"+self._folder+"/"+labName+"/links", cookies=self._cookies, verify=False)
         self._requests_error(response.status_code)
         return json.loads(response.content)
 
@@ -1413,7 +1413,7 @@ class PyEVENG:
         """
         for networkID in network:
             response = requests.put(
-                self._url+"/api/labs/"+self._userFolder+"/"+str(labName)+"/networks/"+str(networkID['id']), data="{\"visibility\":0}", cookies=self._cookies, verify=False)
+                self._url+"/api/labs/"+self._folder+"/"+str(labName)+"/networks/"+str(networkID['id']), data="{\"visibility\":0}", cookies=self._cookies, verify=False)
             self._requests_error(response.status_code)
 
 
@@ -1434,7 +1434,7 @@ class PyEVENG:
 
         self.lock_lab()
         response = requests.post(
-            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/networks", data=json.dumps(networkToAdd), cookies=self._cookies, verify=False)
+            self._url+"/api/labs/"+self._folder+"/"+labName+"/networks", data=json.dumps(networkToAdd), cookies=self._cookies, verify=False)
         self._requests_error(response.status_code)
 
         print("[PyEVENG _add_network_to_lab] -",
@@ -1482,11 +1482,11 @@ class PyEVENG:
                     if "ip_eve" in link.keys():
 
                         connexionInformations[oobInterface['host']] = {
-                            "ip_address_eve": self._ipAddress,
+                            "ip_address_eve": self._ip,
                             "ip_address_host": oobInterface['ip_mgmt'],
                             "con_ext_port": oobInterface['nat'],
                             "con_int_port": oobInterface['ssh'],
-                            "url": "ssh -p {} -l <username> {}".format(oobInterface['nat'], self._ipAddress)
+                            "url": "ssh -p {} -l <username> {}".format(oobInterface['nat'], self._ip)
                         }
 
                         self.create_iptables_nat(
@@ -1527,11 +1527,11 @@ class PyEVENG:
         print("[PyEVENG _add_link_to_lab] -",
               nodeID, interfaceID, "is deploying...")
 
-        print(self._url+"/api/labs/"+self._userFolder+"/" +
+        print(self._url+"/api/labs/"+self._folder+"/" +
               str(labName)+"/nodes/"+str(nodeID)+"/interfaces - data={\""+str(interfaceID)+"\":\""+str(networkID)+"\"}")
         self.lock_lab()
         response = requests.put(
-            self._url+"/api/labs/"+self._userFolder+"/"+str(labName)+"/nodes/"+str(nodeID)+"/interfaces", data="{\""+str(interfaceID)+"\":\""+str(networkID)+"\"}", cookies=self._cookies, verify=False)
+            self._url+"/api/labs/"+self._folder+"/"+str(labName)+"/nodes/"+str(nodeID)+"/interfaces", data="{\""+str(interfaceID)+"\":\""+str(networkID)+"\"}", cookies=self._cookies, verify=False)
         
         self._requests_error(response.status_code)
 
@@ -1585,7 +1585,7 @@ class PyEVENG:
             self.lock_lab()
             PP.pprint(json.dumps(nodesToAdd))
             response = requests.post(
-                self._url+"/api/labs/"+str(self._userFolder)+"/"+str(labName)+"/nodes", data=json.dumps(nodesToAdd), cookies=self._cookies, verify=False)
+                self._url+"/api/labs/"+str(self._folder)+"/"+str(labName)+"/nodes", data=json.dumps(nodesToAdd), cookies=self._cookies, verify=False)
 
             self._requests_error(response.status_code)
             print("[PyEVENG _add_node_to_lab] -",
@@ -1618,7 +1618,7 @@ class PyEVENG:
                   labName, self.get_node_name_by_id(labName, nodeID), "is starting...")
 
             response = requests.get(
-                self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes/"+nodeID+"/start", cookies=self._cookies, verify=False)
+                self._url+"/api/labs/"+self._folder+"/"+labName+"/nodes/"+nodeID+"/start", cookies=self._cookies, verify=False)
             self._requests_error(response.status_code)
 
             if self.get_node_status(labName, nodeID) == "2":
@@ -1689,17 +1689,17 @@ class PyEVENG:
         if self.get_node_status(labName, nodeID) != "0":
 
             if self._community is False:
-                print(self._url+"/api/labs/"+self._userFolder+"/" +
+                print(self._url+"/api/labs/"+self._folder+"/" +
                       labName+"/nodes/"+nodeID+"/stop/stopmode=3")
 
                 response = requests.get(
-                    self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes/"+nodeID+"/stop/stopmode=3", cookies=self._cookies, verify=False)
+                    self._url+"/api/labs/"+self._folder+"/"+labName+"/nodes/"+nodeID+"/stop/stopmode=3", cookies=self._cookies, verify=False)
 
             else:
-                print(self._url+"/api/labs/"+self._userFolder+"/" +
+                print(self._url+"/api/labs/"+self._folder+"/" +
                       labName+"/nodes/"+nodeID+"/stop")
                 response = requests.get(
-                    self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes/"+nodeID+"/stop", cookies=self._cookies, verify=False)
+                    self._url+"/api/labs/"+self._folder+"/"+labName+"/nodes/"+nodeID+"/stop", cookies=self._cookies, verify=False)
 
             self._requests_error(response.status_code)
 
@@ -1721,7 +1721,7 @@ class PyEVENG:
 
         """
         response = requests.get(
-            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes/stop/stopmode=3", cookies=self._cookies, verify=False)
+            self._url+"/api/labs/"+self._folder+"/"+labName+"/nodes/stop/stopmode=3", cookies=self._cookies, verify=False)
 
 
     # --------------------------------------------------------------------------------------------------
@@ -1798,7 +1798,7 @@ class PyEVENG:
 
         if call:
             response = requests.delete(self._url+"/api/labs/"+str(
-                self._userFolder)+"/"+str(labName), cookies=self._cookies, verify=False)
+                self._folder)+"/"+str(labName), cookies=self._cookies, verify=False)
             self._requests_error(response.status_code)
 
             print("[PyEVENG delete_lab] -",
@@ -1884,7 +1884,7 @@ class PyEVENG:
         #self.check_param_type_str(labName)
 
         response = requests.get(
-            self._url+"/api/labs/"+self._userFolder+"/"+labName, cookies=self._cookies, verify=False)
+            self._url+"/api/labs/"+self._folder+"/"+labName, cookies=self._cookies, verify=False)
         self._requests_error(response.status_code)
         return json.loads(response.content)
 
@@ -1907,7 +1907,7 @@ class PyEVENG:
         Returns:
             list: That contains all lab name
         """
-        response = requests.get(self._url+"/api/folders/"+str(self._userFolder),
+        response = requests.get(self._url+"/api/folders/"+str(self._folder),
                                 cookies=self._cookies, verify=False)
 
         self._requests_error(response.status_code)
@@ -2118,7 +2118,7 @@ class PyEVENG:
             print("[PyEVENG - login] ...")
 
         response = requests.post(
-            self._url+"/api/auth/login", data='{"username":"'+self._username+'","password":"'+self._password+'", "html5": "0"}', verify=False)
+            self._url+"/api/auth/login", data='{"username":"'+self._user+'","password":"'+self._pwd+'", "html5": "0"}', verify=False)
 
         self._requests_error(response.status_code)
 
@@ -2215,8 +2215,8 @@ class PyEVENG:
         try:
             sshClient = paramiko.SSHClient()
             sshClient.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            sshClient.connect(hostname=self._ipAddress,
-                              username=self._root, password=self._rootPassword)
+            sshClient.connect(hostname=self._ip,
+                              username=self._root, password=self._rpwd)
 
             return sshClient
         except paramiko.AuthenticationException as e:
@@ -2236,7 +2236,8 @@ class PyEVENG:
     #
     #
     #
-    def __init__(self, username, password, ipAddress, port=99999, useHTTPS=False, userFolder="Users", pod="0", root="root", rmdp="eve", community=True, verbose=True):
+
+    def __init__(self, username, password, ipAddress, port=99999, useHTTPS=False, folder="Users", pod="0", root="root", rmdp="eve", community=True, verbose=True):
         """
         Constructor / Initializer of PyEVENG
 
@@ -2253,15 +2254,14 @@ class PyEVENG:
         :param verbose:         If True logout and login message will be printed
         """
 
-        self._ipAddress = ipAddress
-        self._username = username
-        self._password = password
-        self._ipAddress = ipAddress
+        self._ip = ipAddress
+        self._user = username
+        self._pwd = password
         self._cookies = requests.cookies.RequestsCookieJar()
-        self._userFolder = userFolder
+        self._folder = folder
         self._pod = pod
         self._root = root
-        self._rootPassword = rmdp
+        self._rpwd = rmdp
         self._community = community
         self._project = ""
         self._verbose = verbose
@@ -2281,3 +2281,13 @@ class PyEVENG:
                 self._port = port
 
         self.login()
+
+
+    # --------------------------------------------------------------------------------------------------
+    #
+    #
+    #
+    def __repr__(self):
+        return f"<PyEVENG url={self._url}  ip={self._ip} port={self._port} user={self._user} pwd={self._pwd} \
+            folder={self._folder} pod={self._pod} community={self._community} verbose={self._verbose} \
+            root={self._root} rpwd={self._rpwd} cookies={self._cookies}>\n"
