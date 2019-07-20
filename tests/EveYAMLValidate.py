@@ -406,6 +406,8 @@ def checkDeviceIPAddressInOOB(yamlContent: dict()):
 
     for link in yamlContent['links']:
         if "OOB-NETWORK" in link['dst']:
+            if 'ip_mgmt' not in link['src'][0].keys():
+                return True
             for oob_link in link['src']:
                 if oob_link['ip_mgmt'] in list_nat_port:
                     raise EVENG_Exception(
