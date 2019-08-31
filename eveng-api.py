@@ -149,7 +149,7 @@ def exit_success():
 @click.option('--deploy', default="#", help='Path to yaml file that contains topology to deploy.')
 @click.option('--inventory', default="#", help='Generate Ansible virtual inventory hosts file.')
 @click.option('--vm', default="./vm/vm_info.yml", help='Path to yaml file that contains EVE-NG VM informations.')
-@click.option('--force', default=False, help='If --force=True, if a lab exists on the EVE-NG VM it will be remove.')
+@click.option('--force', default="False", help='If --force=True, if a lab exists on the EVE-NG VM it will be remove.')
 @click.option('--start', default="#", help='Labname you want to start')
 @click.option('--backup', default="#", help='Path to yaml file that contains informations about backups.')
 @click.option('--stop', default="#", help='Labname you want to stop')
