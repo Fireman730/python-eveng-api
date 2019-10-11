@@ -20,7 +20,8 @@ This script has been tested with *EVE-NG - 2.0.5-12-PRO* ```19.04.2019``` and *C
 ./eveng-api.py --vm=./vm/vm_info.yml --images=True
 ```
 
-> You can find information about "How write your network architecture YAML file in https://gitlab.com/DylanHamel/python-eveng-api/wikis/home
+> You can find information about "How write your network architecture YAML file in 
+> https://gitlab.com/DylanHamel/python-eveng-api/wikis/home
 
 
 ## Project presentation
@@ -42,7 +43,7 @@ All these questions are current.
 In network domain, we can change our pipeline.
 
 1. Code Ansible playbooks that will be modified our Network
-2. Create a Virtual network that are the same in production
+2. Create a Virtual network that are the same than your production
     In other words, I need to have my production network in a virtual environment.
     I need to deploy a network based on my production backup files
 
@@ -71,6 +72,7 @@ But with this base you can work and advance in your Network as Code and NetOps t
 Idea behind this repo is that you can use EVE-NG as a step (virtualize and tests) of your CI/CD pipeline.
 Example based on Cumulus.
 This repo contains functions for Cumulus Network. If you need more device types you need implement functions for them.
+You can also open an issue to ask the developpement of a device type.
 
 **Your help is welcome**
 #### Become a contributor !! 
@@ -80,6 +82,8 @@ The main objective of this project is automatically deploy a network architectur
 YAML file will contains your lab architecture.
 * Links
 * Devices
+* Deploy configuration on device
+* Generate new Ansible playbooks
 
 You can also deploy a configuration into your devices.
 With this feature you can deploy your lab based on your production network backup.
