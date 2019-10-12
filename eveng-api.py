@@ -291,7 +291,7 @@ def main(deploy, inventory, vm, force, start, backup, stop, remove, test, images
 
             # api.check_if_lab_exists(labName)
 
-        api.getBackupNodesConfig(ymlF)
+        api.get_backup_nodes_config(ymlF)
         api.logout()
         exit_success()
 

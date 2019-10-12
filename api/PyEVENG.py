@@ -32,6 +32,15 @@ Push Config are implemented for:
 * Cumulus Linux
 * Extreme Network
 
+
+
+STANDRD PEP 8
+
+## Function and Variable Names
+Function names should be lowercase, with words separated by underscores as necessary to improve readability.
+Variable names follow the same convention as function names.
+
+
 """
 
 __author__     = "Dylan Hamel"
@@ -51,6 +60,8 @@ __license__    = "MIT"
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
 
+HEADER = "Error import [PyEVENG] -"
+
 ######################################################
 #
 # Import Library
@@ -58,21 +69,21 @@ EXIT_FAILURE = 1
 try:
     import time
 except ImportError as importError:
-    print("Error import [PyEVENG] time")
+    print(f"{HEADER} time")
     print(importError)
     exit(EXIT_FAILURE)
 
 try:
     import yaml
 except ImportError as importError:
-    print("Error import [PyEVENG] yaml")
+    print(f"{HEADER} yaml")
     print(importError)
     exit(EXIT_FAILURE)
 
 try:
     import pexpect
 except ImportError as importError:
-    print("Error import [PyEVENG] pexpect")
+    print(f"{HEADER} pexpect")
     print(importError)
     exit(EXIT_FAILURE)
 
@@ -80,28 +91,28 @@ try:
     import pprint
     PP = pprint.PrettyPrinter(indent=4)
 except ImportError as importError:
-    print("Error import [PyEVENG] pprint")
+    print(f"{HEADER} pprint")
     print(importError)
     exit(EXIT_FAILURE)
 
 try:
     import tools.ip
 except ImportError as importError:
-    print("Error import [PyEVENG] tools.ip")
+    print(f"{HEADER} tools.ip")
     print(importError)
     exit(EXIT_FAILURE)
 
 try:
     import tools.routing
 except ImportError as importError:
-    print("Error import [PyEVENG] tools.routing")
+    print(f"{HEADER} tools.routing")
     print(importError)
     exit(EXIT_FAILURE)
 
 try:
     from exceptions.EveExceptions import EVENG_Exception
 except ImportError as importError:
-    print("Error import [PyEVENG] listdir")
+    print(f"{HEADER} listdir")
     print(importError)
     exit(EXIT_FAILURE)
 
@@ -110,7 +121,7 @@ try:
     from os.path import isfile, join
     from os import mkdir
 except ImportError as importError:
-    print("Error import [PyEVENG] listdir")
+    print(f"{HEADER} listdir")
     print(importError)
     exit(EXIT_FAILURE)
 
@@ -122,44 +133,70 @@ try:
     import devices.nexus_device as nexus_device
     import devices.arista_device as arista_device
 except ImportError as importError:
-    print("Error import [PyEVENG] xyz_device")
+    print(f"{HEADER} xyz_device")
     print(importError)
     exit(EXIT_FAILURE)
 
 try:
     import paramiko
 except ImportError as importError:
-    print("Error import [PyEVENG] paramiko")
+    print(f"{HEADER} paramiko")
     print(importError)
     exit(EXIT_FAILURE)
 
 try:
     import urllib3
 except ImportError as importError:
-    print("Error import [PyEVENG] urllib3")
+    print(f"{HEADER} urllib3")
     print(importError)
     exit(EXIT_FAILURE)
 
 try:
     import requests
 except ImportError as importError:
-    print("Error import [PyEVENG] requests")
+    print(f"{HEADER} requests")
     print(importError)
     exit(EXIT_FAILURE)
 
 try:
     import json
 except ImportError as importError:
-    print("Error import [PyEVENG] json")
+    print(f"{HEADER} json")
     print(importError)
     exit(EXIT_FAILURE)
 
 try:
     import sphinx
 except ImportError as importError:
-    print("Error import [PyEVENG] sphinx")
+    print(f"{HEADER} sphinx")
     print(importError)
     exit(EXIT_FAILURE)
+
+######################################################
+#
+# YAML file Keys
+#
+LABS_KEY = 'labs'
+FOLDER_KEY = 'folder'
+BACKUP_PATH_KEY = 'bck_path'
+LABNAME_KEY = 'labname'
+HOSTNAME_KEY = 'hostname'
+
+#### Nodes keys ####
+NODE_DATA_KEY = 'data'
+NODE_NAME_KEY = 'name'
+NODE_IMAGE_KEY = 'image'
+NODE_ID_KEY = 'id'
+
+
+
+#### Config keys ####
+CONFIG_NODE_KEY = 'node'
+CONFIG_TYPE_KEY = 'type'
+CONFIG_PATH_KEY = 'config'
+
+CONFIG_TYPE_FULL_KEYWORD = 'full'
+CONFIG_TYPE_OOB_KEYWORD = 'oob'
 
 ######################################################
 #
@@ -193,12 +230,11 @@ class PyEVENG:
     
     # ----------------------------------------------------------
     #
-    #
-    def getBackupNodesConfig(self, yamlFiles: dict()):
+    # 
+    def get_backup_nodes_config(self, yamlFiles: dict()):
         """
         This function will recover all devices that need to be backed up.
         
-
         ```
           - labname: dmvpn-ospf-qos.unl
             pod: 0
@@ -217,24 +253,26 @@ class PyEVENG:
                             => Example in ./backup/lab_to_backup.yml
         
         """
-        for lab in yamlFiles['labs']:
-            self._userFolder = lab['folder']
+        for lab in yamlFiles[LABS_KEY]:
+            self._userFolder = lab[FOLDER_KEY]
 
-            if lab['labname'] not in self.getLabsInFolder():
+            if lab[LABNAME_KEY] not in self.getLabsInFolder():
                 raise EVENG_Exception(
-                    "[PyEVENG - getBackupNodesConfig]"+str(lab['labname'])+" doesn't exist in "+str(lab['folder']), 910)
+                    f"[PyEVENG - get_backup_nodes_config] {str(lab[LABNAME_KEY])} doesn't exist in {str(lab['folder'])}", 910)
 
-            if "all" in lab['hostname']:
-                for hostname in self.getLabNodesName(lab['labname']):
-                    self.getBackupConfig(lab['bck_path'], lab['labname'], hostname)
+            if "all" in lab[HOSTNAME_KEY]:
+                for hostname in self.getLabNodesName(lab[LABNAME_KEY]):
+                    self.get_backup_config(
+                        lab[BACKUP_PATH_KEY], lab[LABNAME_KEY], hostname)
             else:
-                for hostname in lab['hostname']:
-                    self.getBackupConfig(lab['bck_path'], lab['labname'], hostname)
+                for hostname in lab[HOSTNAME_KEY]:
+                    self.get_backup_config(
+                        lab[BACKUP_PATH_KEY], lab[LABNAME_KEY], hostname)
 
     # ----------------------------------------------------------
     #
     #
-    def getBackupConfig(self, path:str(), project_name: str(), nodeName: str()):
+    def get_backup_config(self, path:str(), project_name: str(), node_name: str()):
         """
         This function will find the node image.
         According to the image. this function will call the function for backup the device.
@@ -244,7 +282,7 @@ class PyEVENG:
 
         Example:
           lif "NEW_DEVICE" in nodeImage:
-            self.get_newDevice_backup(path, project_name, nodeName, nodeID)
+            self.get_newDevice_backup(path, project_name, node_name, node_id)
 
         You also need to implement the get_newDevice_backup(...) function for create a object of your new class.
 
@@ -256,51 +294,51 @@ class PyEVENG:
         Returns:
             str: Device image
         """
-        allNodesID = self.getLabNodesID(project_name)
-        allNodes = self.getLabNodes(project_name)
-        for node in allNodes['data'].values():
-            if node['name'] == nodeName:
-                nodeImage = node['image']
-                nodeID = node['id']
+        all_nodes_id = self.getLabNodesID(project_name)
+        all_nodes = self.getLabNodes(project_name)
+        for node in all_nodes[NODE_DATA_KEY].values():
+            if node[NODE_NAME_KEY] == node_name:
+                node_image = node[NODE_IMAGE_KEY]
+                node_id = node[NODE_ID_KEY]
             
-        nodeImage = nodeImage.upper()
+        node_image = node_image.upper()
 
         try:
-            mkdir(path+"/"+project_name)
+            mkdir(f"{path}/{project_name}")
         except OSError as e:
-            print("[PyEVENG - getBackupConfig] create project folder", e)
+            print("[PyEVENG - get_backup_config] create project folder", e)
 
         try:
-            mkdir(path+"/"+project_name+"/"+nodeName)
+            mkdir(f"{path}/{project_name}/{node_name}")
         except OSError as e:
-            print("[PyEVENG - getBackupConfig] create node folder", e)
+            print("[PyEVENG - get_backup_config] create node folder", e)
 
-        path = path+"/"+project_name+"/"+nodeName
+        path = f"{path}/{project_name}/{node_name}"
 
-        print("*************",nodeImage, "***************")
+        print(f"************* {node_image} ***************")
         # CUMULUS LINUX
-        if "CUMULUS" in nodeImage :
-            self.getCumulusBackup(path, project_name, nodeName, nodeID)
+        if "CUMULUS" in node_image :
+            self.getCumulusBackup(path, project_name, node_name, node_id)
         # EXTREME NETWORK
-        elif "EXTREME" in nodeImage:
-            self.getExtremeBackup(path, project_name, nodeName, nodeID)
+        elif "EXTREME" in node_image:
+            self.getExtremeBackup(path, project_name, node_name, node_id)
         # CISCO
-        elif "VIOS" in nodeImage:
-            self.getCiscoBackup(path, project_name, nodeName, nodeID)
+        elif "VIOS" in node_image:
+            self.getCiscoBackup(path, project_name, node_name, node_id)
         # CISCO NEXUS
-        elif "NXOS" in nodeImage:
-            self.getNexusBackup(path, project_name, nodeName, nodeID)
+        elif "NXOS" in node_image:
+            self.getNexusBackup(path, project_name, node_name, node_id)
         # VYOS VYATTA
-        elif "VYOS" in nodeImage:
-            self.getVyosBackup(path, project_name, nodeName, nodeID)
+        elif "VYOS" in node_image:
+            self.getVyosBackup(path, project_name, node_name, node_id)
         # VEOS ARISTA
-        elif "VEOS" in nodeImage:
-            self.getAristaBackup(path, project_name, nodeName, nodeID)
+        elif "VEOS" in node_image:
+            self.getAristaBackup(path, project_name, node_name, node_id)
 
     # ----------------------------------------------------------
     #
     #
-    def getAristaBackup(self, path, projectName, nodeName, nodeID):
+    def getAristaBackup(self, path, project_name, node_name, node_id):
         """
         This function backup Arista configuration files in path  given in parameter
         Files will be retrieve with paramiko SFTP
@@ -312,15 +350,16 @@ class PyEVENG:
             param4 (str): EVE-NG Node ID.
         
         """
+
         arista = arista_device.AristaDevice(
             self._ipAddress, self._root, self._password, path,
-            self._pod, projectName, self.getLabID(projectName), nodeName, nodeID)
+            self._pod, project_name, self.getLabID(project_name), node_name, node_id)
 
         arista.getConfigVerbose()
     # ----------------------------------------------------------
     #
     #
-    def getVyosBackup(self, path, projectName, nodeName, nodeID):
+    def getVyosBackup(self, path, project_name, node_name, node_id):
         """
         This function backup VyOS configuration files in path  given in parameter
         Files will be retrieve with paramiko SFTP
@@ -332,16 +371,17 @@ class PyEVENG:
             param4 (str): EVE-NG Node ID.
         
         """
+
         vyos = vyos_device.VyosDevice(
             self._ipAddress, self._root, self._password, path,
-            self._pod, projectName, self.getLabID(projectName), nodeName, nodeID)
+            self._pod, project_name, self.getLabID(project_name), node_name, node_id)
 
         vyos.getConfigVerbose()
 
     # ----------------------------------------------------------
     #
     #
-    def getNexusBackup(self, path, projectName, nodeName, nodeID):
+    def getNexusBackup(self, path, project_name, node_name, node_id):
         """
         This function backup Cisco Nexus configuration files in path given in parameter
         Files will be retrieve with paramiko SFTP
@@ -355,14 +395,14 @@ class PyEVENG:
         """
         nexus = nexus_device.NexusDevice(
             self._ipAddress, self._root, self._password, path,
-            self._pod, projectName, self.getLabID(projectName), nodeName, nodeID)
+            self._pod, project_name, self.getLabID(project_name), node_name, node_id)
 
         nexus.getConfigVerbose()
 
     # ----------------------------------------------------------
     #
     #
-    def getCiscoBackup(self, path, projectName, nodeName, nodeID):
+    def getCiscoBackup(self, path, project_name, node_name, node_id):
         """
         This function backup Cisco configuration files in path given in parameter
         Files will be retrieve with paramiko SFTP
@@ -374,16 +414,17 @@ class PyEVENG:
             param4 (str): EVE-NG Node ID.
         
         """
+
         cisco = cisco_device.CiscoDevice(
             self._ipAddress, self._root, self._password, path,
-            self._pod, projectName, self.getLabID(projectName), nodeName, nodeID)
+            self._pod, project_name, self.getLabID(project_name), node_name, node_id)
 
         cisco.getConfigVerbose()
 
     # ----------------------------------------------------------
     #
     #
-    def getExtremeBackup(self, path, projectName, nodeName, nodeID):
+    def getExtremeBackup(self, path, project_name, node_name, node_id):
         """
         This function backup Extreme Network configuration files in path given in parameter
         Files will be retrieve with paramiko SFTP
@@ -395,16 +436,17 @@ class PyEVENG:
             param4 (str): EVE-NG Node ID.
         
         """
+
         extreme = extreme_device.ExtremeDevice(
             self._ipAddress, self._root, self._password, path,
-            self._pod, projectName, self.getLabID(projectName), nodeName, nodeID)
+            self._pod, project_name, self.getLabID(project_name), node_name, node_id)
 
         extreme.getConfigVerbose()
 
     # ----------------------------------------------------------
     #
     #
-    def getCumulusBackup(self, path, projectName, nodeName, nodeID):
+    def getCumulusBackup(self, path, project_name, node_name, node_id):
         """
         This function backup Cumulus Network configuration files in path given in parameter
         Files will be retrieve with paramiko SFTP
@@ -416,9 +458,10 @@ class PyEVENG:
             param4 (str): EVE-NG Node ID.
         
         """
+
         cumulus = cumulus_device.CumulusDevice(
             self._ipAddress, self._root, self._password, path, 
-            self._pod, projectName, self.getLabID(projectName), nodeName, nodeID)
+            self._pod, project_name, self.getLabID(project_name), node_name, node_id)
 
         cumulus.getConfigVerbose()
 
@@ -426,135 +469,223 @@ class PyEVENG:
     #
     #
     #
-    def addConfigToNodesLab(self, configToDeploy:dict(), labName:str()):
-        for config in configToDeploy:
-            nodeImage = self.getNodeImageAndNodeID(labName, config['node'])
-            if config['type'] == "full":
+    def addConfigToNodesLab(self, config_to_deploy:dict(), lab_name:str()):
+        """
+        This Function will retrieve node image name to push the configuration file on the device
+        It will call the good function according to the image name. 
+
+        Args:
+            param1 (str): Config information from the YAML file architecture
+            param2 (str): EVE-NG Lab Name.
+        
+        """
+
+        for config in config_to_deploy:
+            nodeImage = self.getNodeImageAndNodeID(lab_name, config[CONFIG_NODE_KEY])
+            if config[CONFIG_TYPE_KEY] == CONFIG_TYPE_FULL_KEYWORD:
                 if "CUMULUS" in nodeImage[0]:
-                    self.pushCumulusFullConfig(config, labName)
+                    self.push_cumulus_full_config(config, lab_name)
                 # CISCO
                 elif "VIOS" in nodeImage[0]:
-                    self.pushCiscoConfig(config, labName)
+                    self.push_cisco_config(config, lab_name)
                 # CISCO NEXUS
                 elif "NXOS" in nodeImage[0]:
-                    self.pushNexusConfig(config, labName)
+                    self.push_nexus_config(config, lab_name)
                 # EXTREME NETWORK
                 elif "EXTREME" in nodeImage[0]:
-                    self.pushExtremeConfig(config, labName)
+                    self.push_extreme_config(config, lab_name)
                 # ARISTA VEOS
                 elif "VEOS" in nodeImage[0]:
-                    self.pushAristaConfig(config, labName)
+                    self.push_arista_config(config, lab_name)
                 # Others ELIF
                 #
 
-            elif config['type'] == "oob":
+            elif config[CONFIG_TYPE_KEY] == CONFIG_TYPE_OOB_KEYWORD:
                 if "CUMULUS" in nodeImage[0]:
-                    self.pushCumulusOOBConfig(config, labName)
+                    self.push_cumulus_oob_config(config, lab_name)
                 elif "NXOS" in nodeImage[0]:
-                    self.pushNexusConfig(config, labName)
+                    self.push_nexus_config(config, lab_name)
                 elif "VIOS" in nodeImage[0]:
-                    self.pushCiscoConfig(config, labName)
+                    self.push_cisco_config(config, lab_name)
                 elif "EXTREME" in nodeImage[0]:
-                    self.pushExtremeConfig(config, labName)
+                    self.push_extreme_config(config, lab_name)
                 # ARISTA VEOS
                 elif "VEOS" in nodeImage[0]:
-                    self.pushAristaConfig(config, labName)
+                    self.push_arista_config(config, lab_name)
                         
                 # Others ELIF
                 # elif "EXTREME in nodeImage "
                 #
 
-    def pushAristaConfig(self, configToDeploy: dict(), labName: str()):
+    def push_arista_config(self, config_to_deploy: dict(), lab_name: str()):
         """
-        This function will call arista_device.py for push Full configuration
+        This function will call arista_device.py to push Full configuration
 
         Args:
             param1 (dict): Informations about config
             param2 (str): Lab name
         """
+
         arista = arista_device.AristaDevice(
-            self._ipAddress, self._root, self._password, configToDeploy['config'],
-            self._pod, labName, self.getLabID(labName), configToDeploy['node'], self.getNodeIDbyNodeName(labName, configToDeploy['node']))
+            self._ipAddress,
+            self._root,
+            self._password,
+            config_to_deploy[CONFIG_PATH_KEY],
+            self._pod,
+            lab_name,
+            self.getLabID(lab_name),
+            config_to_deploy[CONFIG_NODE_KEY],
+            self.getNodeIDbyNodeName(
+                lab_name,
+                config_to_deploy[CONFIG_NODE_KEY]
+            )
+        )
 
         arista.pushConfig()
 
-
-    def pushExtremeConfig(self, configToDeploy: dict(), labName: str()):
+    def push_extreme_config(self, config_to_deploy: dict(), lab_name: str()):
         """
-        This function will call extreme_device.py for push Full configuration
+        This function will call extreme_device.py to push Full configuration
 
         Args:
             param1 (dict): Informations about config
             param2 (str): Lab name
         """
+
         extreme = extreme_device.ExtremeDevice(
-            self._ipAddress, self._root, self._password, configToDeploy['config'],
-            self._pod, labName, self.getLabID(labName), configToDeploy['node'], self.getNodeIDbyNodeName(labName, configToDeploy['node']))
+            self._ipAddress,
+            self._root,
+            self._password,
+            config_to_deploy[CONFIG_PATH_KEY],
+            self._pod, lab_name,
+            self.getLabID(lab_name),
+            config_to_deploy[CONFIG_NODE_KEY],
+            self.getNodeIDbyNodeName(
+                lab_name,
+                config_to_deploy[CONFIG_NODE_KEY]
+            )
+        )
 
         extreme.pushConfig()
 
-    def pushNexusConfig(self, configToDeploy: dict(), labName: str()):
+    def push_nexus_config(self, config_to_deploy: dict(), lab_name: str()):
         """
-        This function will call nexus_device.py for push Full configuration
+        This function will call nexus_device.py to push Full configuration
 
         Args:
             param1 (dict): Informations about config
             param2 (str): Lab name
         """
+
         nexus = nexus_device.NexusDevice(
-            self._ipAddress, self._root, self._password, configToDeploy['config'],
-            self._pod, labName, self.getLabID(labName), configToDeploy['node'], self.getNodeIDbyNodeName(labName, configToDeploy['node']))
+            self._ipAddress,
+            self._root,
+            self._password,
+            config_to_deploy[CONFIG_PATH_KEY],
+            self._pod,
+            lab_name,
+            self.getLabID(lab_name),
+            config_to_deploy[CONFIG_NODE_KEY],
+            self.getNodeIDbyNodeName(
+                lab_name,
+                config_to_deploy[CONFIG_NODE_KEY]
+            )
+        )
 
         nexus.pushConfig()
 
-    def pushCiscoConfig(self, configToDeploy: dict(), labName: str()):
+    def push_cisco_config(self, config_to_deploy: dict(), lab_name: str()):
         """
-        This function will call cisco_device.py for push Full configuration
+        This function will call cisco_device.py to push Full configuration
 
         Args:
             param1 (dict): Informations about config
             param2 (str): Lab name
         """
+
         cisco = cisco_device.CiscoDevice(
-            self._ipAddress, self._root, self._password, configToDeploy['config'],
-            self._pod, labName, self.getLabID(labName), configToDeploy['node'], self.getNodeIDbyNodeName(labName, configToDeploy['node']))
+            self._ipAddress,
+            self._root,
+            self._password,
+            config_to_deploy[CONFIG_PATH_KEY],
+            self._pod,
+            lab_name,
+            self.getLabID(lab_name),
+            config_to_deploy[CONFIG_NODE_KEY],
+            self.getNodeIDbyNodeName(
+                lab_name,
+                config_to_deploy[CONFIG_NODE_KEY]
+            )
+        )
                 
         cisco.pushConfig()
 
-    def pushCumulusFullConfig(self, configToDeploy: dict(), labName: str()):
+    def push_cumulus_full_config(self, config_to_deploy: dict(), lab_name: str()):
         """
-        This function will call cumulus_device.py for push Full configuration
+        This function will call cumulus_device.py to push Full configuration
 
         Args:
             param1 (dict): Informations about config
             param2 (str): Lab name
         """
+
         cumulus = cumulus_device.CumulusDevice(
-            self._ipAddress, self._root, self._password, configToDeploy['config'],
-            self._pod, labName, self.getLabID(labName), configToDeploy['node'], self.getNodeIDbyNodeName(labName, configToDeploy['node']))
+            self._ipAddress,
+            self._root,
+            self._password,
+            config_to_deploy[CONFIG_PATH_KEY],
+            self._pod,
+            lab_name,
+            self.getLabID(lab_name),
+            config_to_deploy[CONFIG_NODE_KEY],
+            self.getNodeIDbyNodeName(
+                lab_name,
+                config_to_deploy[CONFIG_NODE_KEY]
+            )
+        )
                 
         cumulus.pushConfig()
 
-    def pushCumulusOOBConfig(self, configToDeploy: dict(), labName: str()):
+
+    def push_cumulus_oob_config(self, config_to_deploy: dict(), lab_name: str()):
         """
-        This function will call xxx_device.py for push OOB configuration
+        This function will call cumulus_device.py to push OOB configuration
 
         Args:
             param1 (dict): Informations about config
             param2 (str): Lab name
         """
+
         cumulus = cumulus_device.CumulusDevice(
-            self._ipAddress, self._root, self._password, configToDeploy['config'],
-            self._pod, labName, self.getLabID(labName), configToDeploy['node'], self.getNodeIDbyNodeName(labName, configToDeploy['node']))
+            self._ipAddress,
+            self._root,
+            self._password,
+            config_to_deploy[CONFIG_PATH_KEY],
+            self._pod,
+            lab_name,
+            self.getLabID(lab_name),
+            config_to_deploy[CONFIG_NODE_KEY],
+            self.getNodeIDbyNodeName(
+                lab_name,
+                config_to_deploy[CONFIG_NODE_KEY]
+            )
+        )
 
         cumulus.pushOOB()
 
-    def pushCumulusOOB(self, pathToConfigFileOOB, labName, nodeName, nodeID):
 
-        print("[PyEVENG - pushCumulusOOB]")
+    def push_cumulus_oob(self, path_to_config_file_oob, lab_name, node_name, node_id):
+        """
+        This function will call cumulus_device.py to push OOB configuration
+
+        Args:
+            param1 (dict): Informations about config
+            param2 (str): Lab name
+        """
+        
         cumulus = cumulus_device.CumulusDevice(
-            self._ipAddress, self._root, self._password, pathToConfigFileOOB,
-            self._pod, labName, self.getLabID(labName), nodeName, nodeID)
+            self._ipAddress, self._root, self._password, path_to_config_file_oob,
+            self._pod, lab_name, self.getLabID(lab_name), node_name, node_id)
 
         cumulus.pushOOB()
 
@@ -1918,7 +2049,7 @@ class PyEVENG:
         o = "".join(stdout.readlines())
 
         if "LOCK" not in o:
-            raise Exception("Error during lock_lab")
+            raise Exception(f"Error during lock_lab")
         ssh.close
         
     # =========
@@ -1932,15 +2063,15 @@ class PyEVENG:
 
             return sshClient
         except paramiko.AuthenticationException as e:
-            print("[PyEVENG - sshConnect] - Authentication issue during the SSH connection to EVE-NG VM")
+            print(f"[PyEVENG - sshConnect] - Authentication issue during the SSH connection to EVE-NG VM")
         except paramiko.BadHostKeyException as e:
-            print("[PyEVENG - sshConnect] - Bad Host Key issue during the SSH connection to EVE-NG VM")
+            print(f"[PyEVENG - sshConnect] - Bad Host Key issue during the SSH connection to EVE-NG VM")
         except paramiko.ChannelException as e:
-            print("[PyEVENG - sshConnect] - Channel issue during the SSH connection to EVE-NG VM")
+            print(f"[PyEVENG - sshConnect] - Channel issue during the SSH connection to EVE-NG VM")
         except paramiko.SSHException as e:
-            print("[PyEVENG - sshConnect] - SSH issue during the SSH connection to EVE-NG VM : {str(e)}")
+            print(f"[PyEVENG - sshConnect] - SSH issue during the SSH connection to EVE-NG VM : {str(e)}")
         except TimeoutError as e:
-            print("[PyEVENG - sshConnect] - Timeout during the SSH conenction to EVE-NG VM")
+            print(f"[PyEVENG - sshConnect] - Timeout during the SSH conenction to EVE-NG VM")
     
     # =========
     #
