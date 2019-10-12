@@ -72,6 +72,9 @@ except ImportError as importError:
 #
 # Constantes
 #
+HEADER = "[EveYAMLValidate.py -"
+KEYWORD_TO_TELL_THAT_A_LINK_IS_OOB = "OOB-NETWORK"
+
 IMAGE_TYPES = ["iol", "dynamips", "qemu"]
 CONSOLE_TYPES = ["telnet", "vnc"]
 CONFIG_TYPES = ["full", "oob"]
@@ -83,6 +86,20 @@ KEYS_IN_ANSIBLE = ["playbooks", "groups"]
 
 MAX_NAT_PORT = 30000
 MIN_NAT_PORT = 10000
+
+
+#### YAML file keys ####
+YAML_LINKS_KEY = 'links'
+
+#### Links keys ####
+LINKS_DST_KEY = 'dst'
+LINKS_SRC_KEY = 'src'
+
+
+#### OOB keys ####
+OOB_NAT_KEY = 'nat'
+OOB_HOST_KEY = 'host'
+OOB_IP_MGMT_KEY = 'ip_mgmt'
 
 ######################################################
 #
@@ -425,54 +442,58 @@ def checkPortValue(yamlContent: dict()):
     error = False
     list_error = list()
 
-    for link in yamlContent['links']:
-        if "OOB-NETWORK" in link['dst']:
-            for oob_link in link['src']:
-                if oob_link['nat'] > MAX_NAT_PORT or oob_link['nat'] < MIN_NAT_PORT:
-                    list_error.append(
-                        f"{oob_link['host']} - {oob_link['nat']}")
-                    error = True
+    for link in yamlContent[YAML_LINKS_KEY]:
+        if KEYWORD_TO_TELL_THAT_A_LINK_IS_OOB in link[LINKS_DST_KEY]:
+            for oob_link in link[LINKS_SRC_KEY]:
+                if OOB_NAT_KEY in oob_link.keys():
+                    if oob_link[OOB_NAT_KEY] > MAX_NAT_PORT or oob_link[OOB_NAT_KEY] < MIN_NAT_PORT:
+                        list_error.append(
+                            f"{oob_link[OOB_HOST_KEY]} - {oob_link[OOB_NAT_KEY]}")
+                        error = True
 
     if error:
         raise EVENG_Exception(
-            str(f"[EveYAMLValidate.py - checkPortValue] - Port is > thant {MAX_NAT_PORT} or < {MIN_NAT_PORT} for : {list_error}"), 900)
+            str(f"{HEADER} checkPortValue] - Port is > thant {MAX_NAT_PORT} or < {MIN_NAT_PORT} for : {list_error}"), 900)
 
     return True
+
 
 #
 #### Check that each EVENG port used to NAT is unique ####
 #
+
 def checkNatPort(yamlContent: dict()):
 
     list_nat_port = list()
 
-    for link in yamlContent['links']:
-        if "OOB-NETWORK" in link['dst']:
-            for oob_link in link['src']:
-                if oob_link['nat'] in list_nat_port:
-                    raise EVENG_Exception(
-                        str("[EveYAMLValidate.py - checkNatPort] - Two devices have the same external NAT port : "+str(oob_link['nat'])), 900)
-                else:
-                    list_nat_port.append(oob_link['nat'])
+    for link in yamlContent[YAML_LINKS_KEY]:
+        if KEYWORD_TO_TELL_THAT_A_LINK_IS_OOB in link[LINKS_DST_KEY]:
+            for oob_link in link[LINKS_SRC_KEY]:
+                if OOB_NAT_KEY in oob_link.keys():
+                    if oob_link[OOB_NAT_KEY] in list_nat_port:
+                        raise EVENG_Exception(
+                            str(f"{HEADER} checkNatPort] - Two devices have the same external NAT port : {str(oob_link['nat'])}"), 900)
+                    else:
+                        list_nat_port.append(oob_link[OOB_NAT_KEY])
     return True
 
 #
 #### Check that each device has a unique IP address in OOB NETWORK ####
 #
 
-
 def checkDeviceIPAddressInOOB(yamlContent: dict()):
 
     list_nat_port = list()
 
     for link in yamlContent['links']:
-        if "OOB-NETWORK" in link['dst']:
-            for oob_link in link['src']:
-                if oob_link['ip_mgmt'] in list_nat_port:
-                    raise EVENG_Exception(
-                        str("[EveYAMLValidate.py - checkDeviceIPAddressInOOB] - Two devices have the same OOB IP address : "+str(oob_link['ip_mgmt'])), 900)
-                else:
-                    list_nat_port.append(oob_link['ip_mgmt'])
+        if KEYWORD_TO_TELL_THAT_A_LINK_IS_OOB in link[LINKS_DST_KEY]:
+            for oob_link in link[LINKS_SRC_KEY]:
+                if OOB_NAT_KEY in oob_link.keys():
+                    if oob_link[OOB_IP_MGMT_KEY] in list_nat_port:
+                        raise EVENG_Exception(
+                            str(f"{HEADER} - checkDeviceIPAddressInOOB] - Two devices have the same OOB IP address : {str(oob_link['ip_mgmt'])}"), 900)
+                    else:
+                        list_nat_port.append(oob_link[OOB_IP_MGMT_KEY])
     return True
 
 #
