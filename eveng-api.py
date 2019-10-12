@@ -117,6 +117,22 @@ except ImportError as importError:
 # Constantes
 #
 
+#### YAML file keys ####
+YAML_PROJECT_KEY = 'project'
+YAML_DEVICES_KEY = 'devices'
+YAML_LINKS_KEY = 'links'
+YAML_CONFIGS_KEY = 'configs'
+YAML_ANSIBLE_KEY = 'ansible'
+
+#### Project keys ####
+PROJECT_NAME_KEY = 'name'
+PROJECT_PATH_KEY = 'path'
+PROJECT_VERSION_KEY = 'version'
+PROJECT_AUTHOR_KEY = 'author'
+PROJECT_DESCRIPTION_KEY = 'description'
+PROJECT_BODY_KEY = 'body'
+
+
 ######################################################
 #
 # Functions
@@ -125,6 +141,9 @@ except ImportError as importError:
 # ----------------------------------------------------
 #
 #
+def printline():
+    print("==================================================================")
+
 def pjson(jsonPrint: dict()):
     """
     Print JSON files with indexation
@@ -216,15 +235,15 @@ def main(deploy, inventory, vm, force, start, backup, stop, remove, test, images
                 "[eveng-api - main] - You probably don't use the right syntax of OOB links...")
             print(
                 "eveng-api - main] - Please see https://gitlab.com/DylanHamel/python-eveng-api/wikis/Write-your-YAML-file-that-describes-your-netwrok-(part-4)")
-            print("\n==================================================================")
+            printline()
             PP.pprint(open_file("./tools/oob_iptables_ex.yml"))
-            print("==================================================================")
+            printline()
 
 
     if ports is not "null":
-        print("==================================================================")
+        printline()
         PP.pprint(open_file("./devices/_port_device.yml")[ports])
-        print("==================================================================")
+        printline()
 
     if test:
         PP.pprint(api.status())
@@ -238,9 +257,9 @@ def main(deploy, inventory, vm, force, start, backup, stop, remove, test, images
             if len(versions):
                 result[deviceType] = versions
 
-        print("==================================================================")
+        printline()
         PP.pprint(result)
-        print("==================================================================")
+        printline()
         api.logout()
 
     if inventory!= "#":
@@ -262,7 +281,7 @@ def main(deploy, inventory, vm, force, start, backup, stop, remove, test, images
             # Validate your yaml file
             #
             validateYamlFileForPyEVENG(api, ymlF, vmInfo)
-
+            print(f"Your YAML file is OK :) !")
             #
             # Call function that will create Lab, deploy devices, deploy links and push config
             #
@@ -335,63 +354,66 @@ def deploy_all (api: PyEVENG.PyEVENG, ymlF: dict(), vmInfo: dict(), force: str()
     """
     try:
 
+        api._set_folder(ymlF[YAML_PROJECT_KEY][PROJECT_PATH_KEY])
+
         #
         # Remove the lab if option --force=True
         #
-
         if force.upper() == "TRUE":
-            api.deleteLab(ymlF['project']['name']+".unl")
-            print("[eveng-api - deploy_all] - lab"+str(ymlF['project']['name'])+".unl has been removed !")
+            api.deleteLab(ymlF[YAML_PROJECT_KEY][PROJECT_NAME_KEY]+".unl")
+            print(
+                f"[eveng-api - deploy_all] - lab {str(ymlF[YAML_PROJECT_KEY][PROJECT_NAME_KEY])}.unl has been removed !")
 
         #
         # Step to Create the lab
         #
-        if "project" in ymlF.keys():
-            print("[eveng-api - deploy_all] - deploy projects")
-            api.createLab(ymlF['project'])
+        if YAML_PROJECT_KEY in ymlF.keys():
+            print(f"[eveng-api - deploy_all] - deploy projects")
+            api.createLab(ymlF[YAML_PROJECT_KEY])
 
-        if "devices" in ymlF.keys():
-            print("[eveng-api - deploy_all] - deploy devices")
-            api.addNodesToLab(ymlF['devices'],
-                    ymlF['project']['name']+".unl")
+        if YAML_DEVICES_KEY in ymlF.keys():
+            print(f"[eveng-api - deploy_all] - deploy devices")
+            api.addNodesToLab(ymlF[YAML_DEVICES_KEY],
+                              ymlF[YAML_PROJECT_KEY][PROJECT_NAME_KEY]+".unl")
 
-        if "links" in ymlF.keys():
-            print("[eveng-api - deploy_all] - deploy links")
-            api.addNetworksLinksToLab(ymlF['links'],
-                    ymlF['project']['name']+".unl")
+        if YAML_LINKS_KEY in ymlF.keys():
+            print(f"[eveng-api - deploy_all] - deploy links")
+            api.addNetworksLinksToLab(ymlF[YAML_LINKS_KEY],
+                                      ymlF[YAML_PROJECT_KEY][PROJECT_NAME_KEY]+".unl")
 
         #
         # Start hosts to create folders in
         # /opt/unetlab/tmp/0/{LAB_ID}/{NODE_ID}/*
         #
-        api.startLabAllNodes(ymlF['project']['name']+".unl")
+        api.startLabAllNodes(ymlF[YAML_PROJECT_KEY][PROJECT_NAME_KEY]+".unl")
 
-        if "configs" in ymlF.keys():
+        if YAML_CONFIGS_KEY in ymlF.keys():
 
             #
             # Stop hosts to push config with mount NBD
             #
-            api.stopLabAllNodes(ymlF['project']['name']+".unl")
+            api.stopLabAllNodes(ymlF[YAML_PROJECT_KEY][PROJECT_NAME_KEY]+".unl")
 
             print("[eveng-api - deploy_all] - push configs")
-            api.addConfigToNodesLab(ymlF['configs'],
-                                    ymlF['project']['name']+".unl")
+            api.addConfigToNodesLab(ymlF[YAML_CONFIGS_KEY],
+                                    ymlF[YAML_PROJECT_KEY][PROJECT_NAME_KEY]+".unl")
 
             #
             # Restart hosts when config files are pushed
             #
-            api.startLabAllNodes(ymlF['project']['name']+".unl", enable=True)
+            api.startLabAllNodes(
+                ymlF[YAML_PROJECT_KEY][PROJECT_NAME_KEY]+".unl", enable=True)
 
     except EVENG_Exception as eve:
         print(eve._message)
         if eve._error != 12:
-            api.deleteLab(ymlF['project']['name']+".unl")
+            api.deleteLab(ymlF[YAML_PROJECT_KEY][PROJECT_NAME_KEY]+".unl")
 
 
     except Exception as e:
         print(e)
         print("[eveng-api - deploy_all] - error during la creation !")
-        api.deleteLab(ymlF['project']['name']+".unl")
+        api.deleteLab(ymlF[YAML_PROJECT_KEY][PROJECT_NAME_KEY]+".unl")
 
 # ----------------------------------------------------
 #

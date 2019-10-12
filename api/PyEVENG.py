@@ -182,6 +182,21 @@ BACKUP_PATH_KEY = 'bck_path'
 LABNAME_KEY = 'labname'
 HOSTNAME_KEY = 'hostname'
 
+#### YAML file keys ####
+YAML_PROJECT_KEY = 'project'
+YAML_DEVICES_KEY = 'devices'
+YAML_LINKS_KEY = 'links'
+YAML_CONFIGS_KEY = 'configs'
+YAML_ANSIBLE_KEY = 'ansible'
+
+#### Project keys ####
+PROJECT_NAME_KEY = 'name'
+PROJECT_PATH_KEY = 'path'
+PROJECT_VERSION_KEY = 'version'
+PROJECT_AUTHOR_KEY = 'author'
+PROJECT_DESCRIPTION_KEY = 'description'
+PROJECT_BODY_KEY = 'body'
+
 #### Nodes keys ####
 NODE_DATA_KEY = 'data'
 NODE_NAME_KEY = 'name'
@@ -1181,11 +1196,21 @@ class PyEVENG:
         Returns:
             list: That contains all lab name
         """
-        response = requests.get(self._url+"/api/folders/"+str(self._userFolder),
+        
+        
+        print(f"{HEADER} getLabsInFolder] - lab folder = {self._userFolder}")
+        print(f"{HEADER} getLabsInFolder] - {self._url}/api/folders/{str(self._userFolder)}")
+
+        response = requests.get(f"{self._url}/api/folders/{str(self._userFolder)}",
                                 cookies=self._cookies, verify=False)
+
+        print(f"{HEADER} getLabsInFolder] - Call status code = {response.status_code}")
 
         self.requestsError(response.status_code)
         data = json.loads(response.content)
+
+        print(f"{HEADER} getLabsInFolder] - Call data :")
+        PP.pprint(data['data']['labs'])
 
         labsInFolder = list()
         for lab in data['data']['labs']:
@@ -1553,8 +1578,9 @@ class PyEVENG:
         Args:
             param1 (dict): All lab informations
         """
+        self._userFolder = labInformations[PROJECT_PATH_KEY]
         if str(labInformations['name']+".unl") in self.getLabsInFolder():
-            raise EVENG_Exception(str("[EXCEPTION][PyEVENG - createLab] - Lab ("+labInformations['name']+") already exists in this folder"), 12)
+            raise EVENG_Exception(str(f"[EXCEPTION][PyEVENG - createLab] - Lab ({labInformations['name']}) already exists in this folder"), 12)
         
         self._project = labInformations['name']+".unl"
         print("[PyEVENG createLab] -",
@@ -1619,7 +1645,9 @@ class PyEVENG:
         Args:
             param1 (str): Lab name to delete
         """
+        
         call = True
+
         print("[PyEVENG - deleteLab] -",
               labName, "is deleting...")
         try:
@@ -2073,6 +2101,11 @@ class PyEVENG:
         except TimeoutError as e:
             print(f"[PyEVENG - sshConnect] - Timeout during the SSH conenction to EVE-NG VM")
     
+    # =========
+    #
+    def _set_folder(self, new_folder):
+        self._userFolder = new_folder
+
     # =========
     #
     def __init__(self, username, password, ipAddress, port=99999, useHTTPS=False, userFolder="Users", pod="0", root="root", rmdp="eve", community=True, verbose=True):

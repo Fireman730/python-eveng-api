@@ -29,6 +29,9 @@
  11. Check if path_to_vm value is a yaml file
  12. Check if ethernet: number is higher that port connection number
  13. Check if links:node is in devices:name
+ 14: Check if Memory on EVE-NG VM is suffisant
+ 15: Check if NAT port are correct and are between MAX_NAT_PORT & MIN_NAT_PORT
+ 16: Check if project:path exist
 """
 
 __author__ = "Dylan Hamel"
@@ -89,7 +92,11 @@ MIN_NAT_PORT = 10000
 
 
 #### YAML file keys ####
+YAML_PROJECT_KEY = 'project'
+YAML_DEVICES_KEY = 'devices'
 YAML_LINKS_KEY = 'links'
+YAML_CONFIGS_KEY = 'configs'
+YAML_ANSIBLE_KEY = 'ansible'
 
 #### Links keys ####
 LINKS_DST_KEY = 'dst'
