@@ -61,6 +61,7 @@ except ImportError as importError:
 #
 # Constantes
 #
+HEADER = "[VyosDevice -"
 
 ######################################################
 #
@@ -72,46 +73,45 @@ class VyosDevice(devices.abstract_device.DeviceQEMUAbstract):
     #
     # Class variables
     #
-    _shellCommandsCatFiles = yaml.load(
+    _shell_commands_cat_files = yaml.load(
         open("./commands/vyos/config_files_verbose_shell.yml"))
-    _configFilesVerbose = yaml.load(
+    _config_files_verbose = yaml.load(
         open("./commands/vyos/config_files_verbose.yml"))
-    _configFilesSimple = yaml.load(
+    _config_files_simple = yaml.load(
         open("./commands/vyos/config_files_simple.yml"))
-    _pushConfigFiles = yaml.load(
+    _push_config_files = yaml.load(
         open("./commands/vyos/push_config_files.yml"))
-    _noPushConfigFiles = yaml.load(
+    _no_push_config_files = yaml.load(
         open("./commands/vyos/push_no_config_files.yml"))
-    _shellCommandsMountNBD = yaml.load(
+    _shell_commands_mount_nbd = yaml.load(
         open("./commands/vyos/command_mount_nbd.yml"))
 
     # ------------------------------------------------------------------------------------------------------------
     #
     #
     #
-    def mountNBD(self, sshClient: paramiko.SSHClient):
+    def mount_nbd(self, sshClient: paramiko.SSHClient):
         first = True
-        for command in self._shellCommandsMountNBD:
-            print("[EVE-NG VYOS shell mount]", command)
+        for command in self._shell_commands_mount_nbd:
+            print(f"{HEADER} mount_nbd]", command)
             stdin, stdout, stderr = sshClient.exec_command(command)
             output = "".join(stdout.readlines())
             if first:
-                print("[EVE-NG VYOS shell mount]", "sudo qemu-nbd -c /dev/nbd0 /opt/unetlab/tmp/" + str(
-                    self._pod) + "/" + str(self._labID) + "/" + str(self._nodeID) + "/virtioa.qcow2")
+                print(f"{HEADER} mount_nbd] sudo qemu-nbd -c /dev/nbd0 /opt/unetlab/tmp/{str(self._pod)}/{str(self._labID)}/{str(self._nodeID)}/virtioa.qcow2")
                 stdin, stdout, stderr = sshClient.exec_command(
-                    "sudo qemu-nbd -c /dev/nbd0 /opt/unetlab/tmp/" + str(self._pod) + "/" + str(self._labID) + "/" + str(self._nodeID) + "/virtioa.qcow2")
+                    f"sudo qemu-nbd -c /dev/nbd0 /opt/unetlab/tmp/{str(self._pod)}/{str(self._labID)}/{str(self._nodeID)}/virtioa.qcow2")
                 output = stdout.readlines()
                 first = False
 
             if "cat" in command:
                 output = output[:-1]
-                print("[VyosDevice - mountNBD] cat hostname -", output)
+                print(f"{HEADER} mount_nbd] cat hostname - {output}")
                 if output is self._nodeName:
-                    raise Exception("Wrong qcow2 is mount in /mnt/disk")
+                    raise Exception(f"Wrong qcow2 is mount in /mnt/disk")
 
             if "error adding partition 1" in output:
                 raise EVENG_Exception(
-                    "[VyosDevice - mountNBD] - Error during partition sudo partx -a /dev/nbd0", 802)
+                    f"{HEADER} mount_nbd] - Error during partition sudo partx - a / dev/nbd0", 802)
     
     # ------------------------------------------------------------------------------------------------------------
     #
@@ -121,7 +121,7 @@ class VyosDevice(devices.abstract_device.DeviceQEMUAbstract):
         ssh = self.sshConnect()
 
         self.umountNBDWithOutCheck(ssh)
-        self.mountNBD(ssh)
+        self.mount_nbd(ssh)
         self.checkMountNBD(ssh)
 
         ftp_client = ssh.open_sftp()
@@ -147,18 +147,18 @@ class VyosDevice(devices.abstract_device.DeviceQEMUAbstract):
             self._path) if "DS" not in f and isfile(join(self._path, f))]
 
         ssh = self.sshConnect()
-        self.mountNBD(ssh)
+        self.mount_nbd(ssh)
         self.checkMountNBD(ssh)
 
         ftp_client = ssh.open_sftp()
 
         for file in configFiles:
             try:
-                if file not in self._noPushConfigFiles:
-                    print("[VyosConfig - pushConfig] copy",
-                          str(self._path+"/"+file), "to", str(self._pushConfigFiles[file])+file)
+                if file not in self._no_push_config_files:
+                    print(f"{HEADER} pushConfig] copy",
+                          str(f"{self._path}/{file} to {str(self._push_config_files[file])}{file}"))
                     ftp_client.put(localpath=(str(self._path+"/"+file)),
-                                   remotepath=(str(self._pushConfigFiles[file])+file))
+                                   remotepath=(str(self._push_config_files[file])+file))
             except Exception as e:
                 print(e)
 
@@ -171,14 +171,14 @@ class VyosDevice(devices.abstract_device.DeviceQEMUAbstract):
     #
     #
     def getConfigSimple(self):
-        self.getConfig(self._configFilesSimple, False)
+        self.getConfig(self._config_files_simple, False)
 
     # ------------------------------------------------------------------------------------------------------------
     #
     #
     #
     def getConfigVerbose(self):
-        self.getConfig(self._configFilesVerbose, True)
+        self.getConfig(self._config_files_verbose, True)
     
     # ------------------------------------------------------------------------------------------------------------
     #
@@ -190,19 +190,29 @@ class VyosDevice(devices.abstract_device.DeviceQEMUAbstract):
         print("[VyosDevice - getConfig]", self._labName, self._nodeName)
 
         self.umountNBDWithOutCheck(ssh)
-        self.mountNBD(ssh)
+        self.mount_nbd(ssh)
         self.checkMountNBD(ssh)
 
         ftp_client = ssh.open_sftp()
 
         try:
             for line in commands:
-                ftp_client.get(
-                    line, str(self._path+"/"+str(line[line.rfind("/")+1:])))
+                print(f"[VyosDevice - getConfig] \n{line} \n--> {str(self._path)}/{str(line[line.rfind('/')+1:])}")
+                
+                if "config.boot" in line:
+                    try:
+                        ftp_client.get(
+                            line, str(self._path+"/"+str(line[line.rfind("/")+1:])))
+                    except FileNotFoundError as e:
+                        print(f"ERROR - [VyosDevice - getConfig] - config.boot not found VyOS has not configuration ????")
+                
+                else:
+                    ftp_client.get(
+                        line, str(self._path+"/"+str(line[line.rfind("/")+1:])))
 
             """
             if v:
-                for filename, command in self._shellCommandsCatFiles.items():
+                for filename, command in self._shell_commands_cat_files.items():
                     stdin, stdout, stderr = ssh.exec_command(command)
                     ftp_client.get("/tmp/"+filename, self._path+"/"+filename)
             """

@@ -60,7 +60,7 @@ __license__    = "MIT"
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
 
-HEADER = "Error import [PyEVENG] -"
+HEADER = "[PyEVENG -"
 
 ######################################################
 #
@@ -178,11 +178,19 @@ except ImportError as importError:
 #
 LABS_KEY = 'labs'
 FOLDER_KEY = 'folder'
-BACKUP_PATH_KEY = 'bck_path'
 LABNAME_KEY = 'labname'
 HOSTNAME_KEY = 'hostname'
 
-#### YAML file keys ####
+#### DEPLOY YAML file keys ####
+BACKUP_LABNAME_KEY = 'labname'
+BACKUP_POD_KEY = 'pod'
+BACKUP_PATH_KEY = 'bck_path'
+BACKUP_TYPE_KEY = 'bck_type'
+BACKUP_HOSTNAME_KEY = 'hostname'
+BACKUP_VERBOSE_KEYWORD = 'verbose'
+BACKUP_SIMPLE_KEYWORD = 'simple'
+
+#### DEPLOY YAML file keys ####
 YAML_PROJECT_KEY = 'project'
 YAML_DEVICES_KEY = 'devices'
 YAML_LINKS_KEY = 'links'
@@ -278,7 +286,7 @@ class PyEVENG:
             if "all" in lab[HOSTNAME_KEY]:
                 for hostname in self.getLabNodesName(lab[LABNAME_KEY]):
                     self.get_backup_config(
-                        lab[BACKUP_PATH_KEY], lab[LABNAME_KEY], hostname)
+                        lab[BACKUP_PATH_KEY], lab[LABNAME_KEY], hostname, lab[BACKUP_TYPE_KEY])
             else:
                 for hostname in lab[HOSTNAME_KEY]:
                     self.get_backup_config(
@@ -287,7 +295,7 @@ class PyEVENG:
     # ----------------------------------------------------------
     #
     #
-    def get_backup_config(self, path:str(), project_name: str(), node_name: str()):
+    def get_backup_config(self, path:str(), project_name: str(), node_name: str(), config_type:str()):
         """
         This function will find the node image.
         According to the image. this function will call the function for backup the device.
@@ -345,7 +353,7 @@ class PyEVENG:
             self.getNexusBackup(path, project_name, node_name, node_id)
         # VYOS VYATTA
         elif "VYOS" in node_image:
-            self.getVyosBackup(path, project_name, node_name, node_id)
+            self.getVyosBackup(path, project_name, node_name, node_id, config_type)
         # VEOS ARISTA
         elif "VEOS" in node_image:
             self.getAristaBackup(path, project_name, node_name, node_id)
@@ -374,7 +382,7 @@ class PyEVENG:
     # ----------------------------------------------------------
     #
     #
-    def getVyosBackup(self, path, project_name, node_name, node_id):
+    def getVyosBackup(self, path, project_name, node_name, node_id, config_type:str()):
         """
         This function backup VyOS configuration files in path  given in parameter
         Files will be retrieve with paramiko SFTP
@@ -391,7 +399,10 @@ class PyEVENG:
             self._ipAddress, self._root, self._password, path,
             self._pod, project_name, self.getLabID(project_name), node_name, node_id)
 
-        vyos.getConfigVerbose()
+        if config_type == BACKUP_SIMPLE_KEYWORD:
+            vyos.getConfigSimple()
+        else:
+            vyos.getConfigVerbose()
 
     # ----------------------------------------------------------
     #
@@ -948,7 +959,8 @@ class PyEVENG:
 
         return nodesID
 
-    def getLabNodesName(self, labName:str()) -> list():
+
+    def getLabNodesName(self, lab_name:str()) -> list():
         """
         This function will return a list that contains all nodes name according to the lab name given in parameter
 
@@ -959,20 +971,25 @@ class PyEVENG:
             list: That contains all node name
         """
 
-        #self.check_param_type_str(labName)
+        print(f"{HEADER} getLabNodesName] lab={self._userFolder} / lab_name={lab_name}")
 
         response = requests.get(
-            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes", cookies=self._cookies, verify=False)
+            f"{self._url}/api/labs/{self._userFolder}/{lab_name}/nodes",
+            cookies=self._cookies,
+            verify=False
+        )
+        
         self.requestsError(response.status_code)
         content = json.loads(response.content)["data"]
 
-        nodesName = list()
+        nodes_name_lst = list()
         if content.__len__() == 0:
-            return nodesName
+            return nodes_name_lst
+
         for key, val in content.items():
-            nodesName.append(val["name"])
+            nodes_name_lst.append(val["name"])
             
-        return nodesName
+        return nodes_name_lst
 
     def getLabNodes(self, labName:str()) -> dict():
         """
@@ -1542,9 +1559,12 @@ class PyEVENG:
         if self._verbose:
             print("[PyEVENG - login] ...") 
         
+        print(self._url, self._username, self._password)
+        
         response = requests.post(
-            self._url+"/api/auth/login", data='{"username":"'+self._username+'","password":"'+self._password+'", "html5": "0"}', verify=False)
+            f"{self._url}/api/auth/login", data='{"username":"'+self._username+'","password":"'+self._password+'", "html5": "0"}', verify=False)
 
+        print(response)
         self.requestsError(response.status_code)
         
         if self._verbose:
@@ -1688,7 +1708,7 @@ class PyEVENG:
     }
 
     
-    def addNodeToLab(self, nodesToAdd: dict(), labName: str()):
+    def addNodeToLab(self, nodes_to_add: dict(), lab_name: str()):
         """
         This function add a node to a Lab
 
@@ -1696,22 +1716,29 @@ class PyEVENG:
             param1 (dict): Node Informamations
             param2 (str): Labname to add nodes
         """
-        print("[PyEVENG addNodeToLab] -", nodesToAdd['name'], "is deploying...")
+        print("[PyEVENG addNodeToLab] -",
+              nodes_to_add['name'], "is deploying...")
 
-        nodeNameAlreadyInLab = self.getLabNodesName(labName)
+        node_name_already_in_lab = self.getLabNodesName(lab_name)
     
-        if nodesToAdd['name'] in nodeNameAlreadyInLab:
+        if nodes_to_add['name'] in node_name_already_in_lab:
             print("[PyEVENG addNodeToLab] - a node with the name \"",
-                  nodesToAdd['name'], "\" is already deployed!")
+                  nodes_to_add['name'], "\" is already deployed!")
 
         else:
             self.lock_lab()
-            PP.pprint(json.dumps(nodesToAdd))
+            PP.pprint(json.dumps(nodes_to_add))
+
             response = requests.post(
-                self._url+"/api/labs/"+str(self._userFolder)+"/"+str(labName)+"/nodes", data=json.dumps(nodesToAdd), cookies=self._cookies, verify=False)
+                f"{self._url}/api/labs/{str(self._userFolder)}/{str(lab_name)}+/nodes",
+                data=json.dumps(nodes_to_add),
+                cookies=self._cookies,
+                verify=False
+            )
 
             self.requestsError(response.status_code)
-            print("[PyEVENG addNodeToLab] -", nodesToAdd['name'], "has been deployed!")
+            print("[PyEVENG addNodeToLab] -",
+                  nodes_to_add['name'], "has been deployed!")
     
     # =========
     #

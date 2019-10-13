@@ -81,14 +81,14 @@ class NexusDevice(devices.abstract_device.DeviceQEMUAbstract):
     #
     #
     #
-    def mountNBD(self, sshClient: paramiko.SSHClient):
+    def mount_nbd(self, sshClient: paramiko.SSHClient):
         first = True
         for command in self._shellCommandsMountNBD:
-            print("[EVE-NG Nexus shell mount]", command)
+            print("[NexusDevice - mount_nbd]", command)
             stdin, stdout, stderr = sshClient.exec_command(command)
             output = "".join(stdout.readlines())
             if first:
-                print("[EVE-NG Nexus shell mount]", "sudo qemu-nbd -c /dev/nbd0 /opt/unetlab/tmp/" + str(
+                print("[NexusDevice - mount_nbd]", "sudo qemu-nbd -c /dev/nbd0 /opt/unetlab/tmp/" + str(
                     self._pod) + "/" + str(self._labID) + "/" + str(self._nodeID) + "/sataa.qcow2")
                 stdin, stdout, stderr = sshClient.exec_command(
                     "sudo qemu-nbd -c /dev/nbd0 /opt/unetlab/tmp/" + str(
@@ -98,7 +98,7 @@ class NexusDevice(devices.abstract_device.DeviceQEMUAbstract):
 
             if "error adding partition 1" in output:
                 raise EVENG_Exception(
-                    "[NexusDevice - mountNBD] - Error during partition sudo partx -a /dev/nbd0", 802)
+                    "[NexusDevice - mount_nbd] - Error during partition sudo partx -a /dev/nbd0", 802)
 
     # ------------------------------------------------------------------------------------------------------------
     #
@@ -114,7 +114,7 @@ class NexusDevice(devices.abstract_device.DeviceQEMUAbstract):
     def pushConfig(self):
 
         ssh = self.sshConnect()
-        self.mountNBD(ssh)
+        self.mount_nbd(ssh)
         self.checkMountNBD(ssh)
 
         ftp_client = ssh.open_sftp()
@@ -154,7 +154,7 @@ class NexusDevice(devices.abstract_device.DeviceQEMUAbstract):
         print("[NexusDevice - getConfig]", self._labName, self._nodeName)
 
         self.umountNBDWithOutCheck(ssh)
-        self.mountNBD(ssh)
+        self.mount_nbd(ssh)
         self.checkMountNBD(ssh)
 
         ftp_client = ssh.open_sftp()

@@ -1,10 +1,10 @@
 ---
 labs:
-  - labname: vyos-test.unl
+  - labname: vyos_bgp_sessions.unl
     pod: 0
-    folder: Users
+    folder: Network
     bck_path: /Volumes/Data/gitlab/python-eveng-api/backup
-    bck_type: verbose
+    bck_type: simple
     hostname: 
       - all
     

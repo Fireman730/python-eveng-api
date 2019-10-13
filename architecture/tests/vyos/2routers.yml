@@ -1,0 +1,54 @@
+---
+project:
+  path: /Users/
+  name: vyos_2routers
+  version: 1
+  author: DylanHamel
+  description: Tests VyOS devices
+  body: Deploy VyOS Lab
+
+devices:
+  - type: qemu
+    template: vyos
+    config: Unconfigured
+    delay: 0
+    icon: Router.png
+    image: vyos-1.1.8-amd64
+    name: Router01
+    left: 177%
+    top: 381%
+    ram: 512
+    console: telnet
+    cpu: 1
+    ethernet: 4
+    uuid: 0c5f57ad-fcff-47b1-b43b-4ba39b8545da
+  - type: qemu
+    template: vyos
+    config: Unconfigured
+    delay: 0
+    icon: Router.png
+    image: vyos-1.1.8-amd64
+    name: Router02
+    left: 177%
+    top: 381%
+    ram: 512
+    console: telnet
+    cpu: 1
+    ethernet: 4
+    uuid: 0c5f57ad-fcff-47b1-b43b-4ba39b8545db
+
+links:
+  - id: 1
+    type: ethernet
+    network: bridge
+    src: Router01
+    sport: eth0
+    dst: Router02
+    dport: eth0
+
+
+configs:
+  - node: Spine01
+    config: /Volumes/Data/gitlab/python-eveng-api/backup/cumulus-spine-leaf.unl/Spine01
+  - node: Spine02
+    config: /Volumes/Data/gitlab/python-eveng-api/backup/cumulus-spine-leaf.unl/Spine02

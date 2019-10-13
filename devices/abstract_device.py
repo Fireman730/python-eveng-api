@@ -56,7 +56,7 @@ class DeviceQEMUAbstract(ABC):
     #
 
     @abstractmethod
-    def mountNBD(self, sshClient: paramiko.SSHClient):
+    def mount_nbd(self, sshClient: paramiko.SSHClient):
         pass
 
     # ------------------------------------------------------------------------------------------------------------
@@ -68,7 +68,9 @@ class DeviceQEMUAbstract(ABC):
             "mount | grep nbd | wc -l")
 
         o = "".join(stdout.readlines())
-    
+
+        print(f"[DeviceQEMUAbstract - checkMountNBD] {o}")
+        
         if str(o[0]) != "1":
             raise EVENG_Exception(
                 "[DeviceQEMUAbstract - checkMountNBD] - error with umount nbd", 802)

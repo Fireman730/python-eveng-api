@@ -81,14 +81,14 @@ class CumulusDevice(devices.abstract_device.DeviceQEMUAbstract):
     #
     #
     #
-    def mountNBD(self, sshClient: paramiko.SSHClient):
+    def mount_nbd(self, sshClient: paramiko.SSHClient):
         first = True
         for command in self._shellCommandsMountNBD:
-            print("[EVE-NG shell mount]", command)
+            print("[CumulusDevice - mount_nbd]", command)
             stdin, stdout, stderr = sshClient.exec_command(command)
             output = "".join(stdout.readlines())
             if first:
-                print("[EVE-NG shell mount]", "sudo qemu-nbd -c /dev/nbd0 /opt/unetlab/tmp/" + str(
+                print("[CumulusDevice - mount_nbd]", "sudo qemu-nbd -c /dev/nbd0 /opt/unetlab/tmp/" + str(
                     self._pod) + "/" + str(self._labID) + "/" + str(self._nodeID) + "/virtioa.qcow2")
                 stdin, stdout, stderr = sshClient.exec_command(
                     "sudo qemu-nbd -c /dev/nbd0 /opt/unetlab/tmp/" + str(self._pod) + "/" + str(self._labID) + "/" + str(self._nodeID) + "/virtioa.qcow2")
@@ -102,7 +102,7 @@ class CumulusDevice(devices.abstract_device.DeviceQEMUAbstract):
 
             if "error adding partition 1" in output:
                 raise EVENG_Exception(
-                    "[AristaDevice - mountNBD] - Error during partition sudo partx -a /dev/nbd0", 802)
+                    "[CumulusDevice - mount_nbd] - Error during partition sudo partx -a /dev/nbd0", 802)
     
     # ------------------------------------------------------------------------------------------------------------
     #
@@ -113,7 +113,7 @@ class CumulusDevice(devices.abstract_device.DeviceQEMUAbstract):
         ssh = self.sshConnect()
 
         self.umountNBDWithOutCheck(ssh)
-        self.mountNBD(ssh)
+        self.mount_nbd(ssh)
         self.checkMountNBD(ssh)
 
         ftp_client = ssh.open_sftp()
@@ -138,7 +138,7 @@ class CumulusDevice(devices.abstract_device.DeviceQEMUAbstract):
         configFiles = [f for f in listdir(self._path) if "DS" not in f and isfile(join(self._path, f))]
         
         ssh = self.sshConnect()
-        self.mountNBD(ssh)
+        self.mount_nbd(ssh)
         self.checkMountNBD(ssh)
 
         ftp_client = ssh.open_sftp()
@@ -180,7 +180,7 @@ class CumulusDevice(devices.abstract_device.DeviceQEMUAbstract):
         print("[CumulusDevice - getConfig]", self._labName, self._nodeName)
         
         self.umountNBDWithOutCheck(ssh)
-        self.mountNBD(ssh)       
+        self.mount_nbd(ssh)
         self.checkMountNBD(ssh)
 
         ftp_client = ssh.open_sftp()

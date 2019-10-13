@@ -1,3 +1,3 @@
-ip_route : sudo touch /tmp/ip_route && netstat -rn > /tmp/ip_route
-vyos_config : show configuration all | cat > /tmp/config.cfg
-vyos_interf : show interfaces all | cat > /tmp/interfaces.cfg
+# ip_route : sudo touch /tmp/ip_route && netstat -rn > /tmp/ip_route
+# vyos_config : show configuration all | cat > /tmp/config.cfg
+# vyos_interf : show interfaces all | cat > /tmp/interfaces.cfg

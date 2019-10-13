@@ -76,4 +76,4 @@ except ImportError as importError:
 #
 
 class JuniperDevice(devices.abstract_device.DeviceQEMUAbstract):
-
+    raise NotImplementedError
