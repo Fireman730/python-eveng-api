@@ -106,6 +106,14 @@ YAML_LINKS_KEY = 'links'
 YAML_CONFIGS_KEY = 'configs'
 YAML_ANSIBLE_KEY = 'ansible'
 
+#### Project keys ####
+PROJECT_NAME_KEY = 'name'
+PROJECT_PATH_KEY = 'path'
+PROJECT_VERSION_KEY = 'version'
+PROJECT_AUTHOR_KEY = 'author'
+PROJECT_DESCRIPTION_KEY = 'description'
+PROJECT_BODY_KEY = 'body'
+
 #### Links keys ####
 LINKS_DST_KEY = 'dst'
 LINKS_SRC_KEY = 'src'
@@ -128,9 +136,15 @@ def pprintline(data: dict()) -> None:
     PP.pprint(data)
     print("==================================================================")
 
+def pprintline(data: str()) -> None:
+    print("==================================================================")
+    print(data)
+    print("==================================================================")
 
-def validateYamlFileForPyEVENG(api: PyEVENG.PyEVENG, yaml_content: dict(), vmInfo):
+def validateYamlFileForPyEVENG(api: PyEVENG.PyEVENG, yaml_content: dict(), vm_info):
 
+    # Check that project:path doesn't start or end with "/"
+    # assert check_project_path_not_start_or_end_with_slash(yaml_content)
     # Check that path_to_vm info value is a yaml file
     # assert CheckIfPathToVMKeyGoToYAMLfile(yaml_content)
     # Check that YAML file contains project:, devices: and links: keys
@@ -185,6 +199,18 @@ def validateYamlFileForPyEVENG(api: PyEVENG.PyEVENG, yaml_content: dict(), vmInf
 #
 # Create test functions below ...
 #
+def check_project_path_not_start_or_end_with_slash(yaml_content:dict()) -> bool:
+
+    if str(yaml_content[YAML_PROJECT_KEY][PROJECT_PATH_KEY]).startswith('/') or \
+        str(yaml_content[YAML_PROJECT_KEY][PROJECT_PATH_KEY]).endswith('/'): 
+        pprintline(f"{yaml_content[YAML_PROJECT_KEY][PROJECT_PATH_KEY]}")
+        raise EVENG_Exception(
+            f"[EveYAMLValidate.py - check_project_path_not_start_or_end_with_slash] Error ! 'project:path' starts or ends with a / (slash).", 903)
+
+    else:
+        return True
+
+
 def checkVMMemoryFreeVSDevicesMemoryAskedWithPath(api: PyEVENG.PyEVENG, pat_to_yaml_file: str()) -> bool:
     return checkVMMemoryFreeVSDevicesMemoryAsked(api, open_yaml_files(pat_to_yaml_file))
 

@@ -1,6 +1,6 @@
 ---
 project:
-  path: /Users/
+  path: Users
   name: extreme-mlt-vlan
   version: 1
   author: DylanHamel

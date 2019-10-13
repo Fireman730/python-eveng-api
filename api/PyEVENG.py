@@ -66,6 +66,9 @@ HEADER = "[PyEVENG -"
 #
 # Import Library
 #
+import cheroot.ssl.builtin
+cheroot.ssl.builtin.IS_BELOW_PY37 = True
+
 try:
     import time
 except ImportError as importError:
@@ -971,7 +974,7 @@ class PyEVENG:
             list: That contains all node name
         """
 
-        print(f"{HEADER} getLabNodesName] lab={self._userFolder} / lab_name={lab_name}")
+        print(f"{HEADER} getLabNodesName] folder={self._userFolder} / lab_name={lab_name}")
 
         response = requests.get(
             f"{self._url}/api/labs/{self._userFolder}/{lab_name}/nodes",
@@ -1707,7 +1710,6 @@ class PyEVENG:
         "uuid": "641a4800-1b19-427c-ae87-5555590b7790"
     }
 
-    
     def addNodeToLab(self, nodes_to_add: dict(), lab_name: str()):
         """
         This function add a node to a Lab
@@ -1727,14 +1729,19 @@ class PyEVENG:
 
         else:
             self.lock_lab()
-            PP.pprint(json.dumps(nodes_to_add))
+            
+            print(
+                f"{self._url}/api/labs/{str(self._userFolder)}/{str(lab_name)}/nodes")
+            #PP.pprint(json.dumps(nodes_to_add))
 
             response = requests.post(
-                f"{self._url}/api/labs/{str(self._userFolder)}/{str(lab_name)}+/nodes",
+                f"{self._url}/api/labs/{str(self._userFolder)}/{str(lab_name)}/nodes",
                 data=json.dumps(nodes_to_add),
                 cookies=self._cookies,
                 verify=False
             )
+
+            print(f"[PyEVENG addNodeToLab] status code = {response.status_code}")
 
             self.requestsError(response.status_code)
             print("[PyEVENG addNodeToLab] -",

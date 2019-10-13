@@ -48,7 +48,9 @@ links:
 
 
 configs:
-  - node: Spine01
-    config: /Volumes/Data/gitlab/python-eveng-api/backup/cumulus-spine-leaf.unl/Spine01
-  - node: Spine02
-    config: /Volumes/Data/gitlab/python-eveng-api/backup/cumulus-spine-leaf.unl/Spine02
+  - node: Router01
+    config: /Volumes/Data/gitlab/python-eveng-api/backup/vyos_bgp_sessions.unl/Router01
+    type: oob
+  - node: Router02
+    config: /Volumes/Data/gitlab/python-eveng-api/backup/vyos_bgp_sessions.unl/Router01
+    type: oob

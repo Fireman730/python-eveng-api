@@ -1,3 +1,4 @@
+config.boot: "/mnt/disk/opt/vyatta/etc/config/config.boot"
 hostname: "/mnt/disk/etc/hostname"
 sudoers: "/mnt/disk/etc/sudoers"
 resolv.conf: "/mnt/disk/etc/resolv.conf"

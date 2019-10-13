@@ -128,10 +128,12 @@ class VyosDevice(devices.abstract_device.DeviceQEMUAbstract):
 
         print(self._path)
         try:
-            ftp_client.put(localpath=(str(self._path+"/interfaces")),
-                           remotepath=(str("/mnt/disk/etc/network/interfaces")))
+            ftp_client.put(
+                localpath=(str(f"{self._path}/config.boot")),
+                remotepath=(str(f"/mnt/disk/opt/vyatta/etc/config/config.boot"))
+            )
         except Exception as e:
-            print("[VyosDevice - pushOOB] error during sftp put transfert.")
+            print(f"{HEADER} - pushOOB] error during sftp put transfert.")
             print(e)
 
         self.umountNBD(ssh)
@@ -154,11 +156,13 @@ class VyosDevice(devices.abstract_device.DeviceQEMUAbstract):
 
         for file in configFiles:
             try:
-                if file not in self._no_push_config_files:
+                if file not in self._noPushConfigFiles:
                     print(f"{HEADER} pushConfig] copy",
-                          str(f"{self._path}/{file} to {str(self._push_config_files[file])}{file}"))
-                    ftp_client.put(localpath=(str(self._path+"/"+file)),
-                                   remotepath=(str(self._push_config_files[file])+file))
+                          str(self._path+"/"+file), "to", str(self._pushConfigFiles[file])+file)
+                    ftp_client.put(
+                        localpath=(str(self._path+"/"+file)),
+                        remotepath=(str(self._pushConfigFiles[file])+file)
+                    )
             except Exception as e:
                 print(e)
 
@@ -202,19 +206,25 @@ class VyosDevice(devices.abstract_device.DeviceQEMUAbstract):
                 if "config.boot" in line:
                     try:
                         ftp_client.get(
-                            line, str(self._path+"/"+str(line[line.rfind("/")+1:])))
+                            line, 
+                            str(self._path+"/"+str(line[line.rfind("/")+1:]))
+                        )
                     except FileNotFoundError as e:
                         print(f"ERROR - [VyosDevice - getConfig] - config.boot not found VyOS has not configuration ????")
                 
                 else:
                     ftp_client.get(
-                        line, str(self._path+"/"+str(line[line.rfind("/")+1:])))
-
+                        line, 
+                        str(self._path+"/"+str(line[line.rfind("/")+1:]))
+                    )
             """
             if v:
                 for filename, command in self._shell_commands_cat_files.items():
                     stdin, stdout, stderr = ssh.exec_command(command)
-                    ftp_client.get("/tmp/"+filename, self._path+"/"+filename)
+                    ftp_client.get(
+                        "/tmp/"+filename,
+                        self._path+"/"+filename
+                    )
             """
 
         except Exception as e:

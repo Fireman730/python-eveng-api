@@ -42,11 +42,15 @@ class EVENG_Exception(Exception):
 
     9XY   = Error in YAML file
       -> 900 - Error un "project:"
+          -> 901: Key missing ing project:
+          -> 902: Value for a key is not in a list
+          -> 903: Error in a value
       -> 910 - Error in "devices:"
       -> 920 - Error in "links:"
       -> 930 - Error in "configs:"
           -> 931: Key missing in configs:
           -> 932: Value for a key is not in a list
+          -> 933: Error in a value
       -> 940 - Error in "ansible:"
 
     """
