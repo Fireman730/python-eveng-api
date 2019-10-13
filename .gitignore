@@ -1,0 +1,7 @@
+# Ignore a file type
+docker
+*.pyc
+*.DS_Store
+.DS_Store
+inv_ansible.py
+nornir.log

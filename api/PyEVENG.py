@@ -179,6 +179,11 @@ except ImportError as importError:
 #
 # YAML file Keys
 #
+API_CALL_DELETE = "DELETE"
+API_CALL_POST = "POST"
+API_CALL_GET = "GET"
+API_CALL_PUT = "PUT"
+
 LABS_KEY = 'labs'
 FOLDER_KEY = 'folder'
 LABNAME_KEY = 'labname'
@@ -2137,8 +2142,74 @@ class PyEVENG:
     
     # =========
     #
-    def _set_folder(self, new_folder):
+    def _set_folder(self, new_folder) -> None:
+        """
+        This internal function is used to change the private value _useFolder
+
+        Args:
+            param1 (str): Lab Names
+        """
+        
         self._userFolder = new_folder
+
+    # =========
+    #
+    def _execute_api_call(self, url:str(), call_type:str(), data_call:str()) -> bool:
+        """
+        This function will execute an api call regarding the url and the mode given in parameter
+
+        Args:
+            param1 (str): Call API url
+            param2 (str): Call type
+        """
+        try:
+            if call_type == API_CALL_GET:
+                response = requests.get(
+                    f"{self._url}{url}",
+                    cookies=self._cookies,
+                    verify=False
+                )
+
+            elif call_type == API_CALL_POST:
+                requests.post(
+                    f"{self._url}{url}",
+                    data=json.dumps(data_call),
+                    cookies=self._cookies, 
+                    verify=False
+                )
+
+            elif call_type == API_CALL_PUT:
+                response = requests.put(
+                    f"{self._url}{url}",
+                    data=data_call,
+                    cookies=self._cookies,
+                    verify=False
+                )
+
+            elif call_type == API_CALL_DELETE:
+                response = requests.delete(
+                    f"{self._url}{url}",
+                    cookies=self._cookies, 
+                    verify=False
+                )
+
+        except requests.exceptions.ConnectionError as e:
+            not NotImplemented
+
+        except OpenSSL.SSL.SysCallError as e:
+            not NotImplemented
+
+        except ssl.SSLError as e:
+            not NotImplemented
+
+        except urllib3.exceptions.MaxRetryError as e:
+            not NotImplemented
+
+        except requests.exceptions.SSLError as e:
+            not NotImplemented
+
+        except
+
 
     # =========
     #
