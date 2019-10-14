@@ -1,0 +1,13 @@
+stages:
+  - test
+  
+  
+tests:
+  image: "python:3.7"
+  stage: test
+  script:
+    - pip install --upgrade pip
+    - pip install -r requirements.txt
+    - python ./tests/test_validator.py
+  tags:
+    - docker
