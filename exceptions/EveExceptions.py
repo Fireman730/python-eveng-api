@@ -20,6 +20,7 @@ class EVENG_Exception(Exception):
     This class is used for EVENG Exception
 
     0XY   =   Erro with API call
+        -> 001 API Call method Error (GET, PUT, POST, etc)
     
     1XY   =   Error in lab creation
       -> 11 Lab Already Exists

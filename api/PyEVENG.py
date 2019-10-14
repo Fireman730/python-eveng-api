@@ -175,6 +175,22 @@ except ImportError as importError:
     print(importError)
     exit(EXIT_FAILURE)
 
+try:
+    import logging
+    pyeveng_logging = logging.getLogger(__name__)
+
+    pyeveng_logging.basicConfig(
+        level=logging.DEBUG,
+        filename="./logs/PyEVENG.log"
+        format='[%(asctime)s] - %(levelname)s - %(message)s',
+        datefmt='%d-%b-%y %H:%M:%S'
+    )  
+except ImportError as importError:
+    print(f"{HEADER} logging")
+    print(importError)
+    exit(EXIT_FAILURE)
+
+
 ######################################################
 #
 # YAML file Keys
@@ -183,6 +199,7 @@ API_CALL_DELETE = "DELETE"
 API_CALL_POST = "POST"
 API_CALL_GET = "GET"
 API_CALL_PUT = "PUT"
+API_CALL_LIST = ["PUT", "GET", "POST", "DELETE"]
 
 LABS_KEY = 'labs'
 FOLDER_KEY = 'folder'
@@ -2154,7 +2171,7 @@ class PyEVENG:
 
     # =========
     #
-    def _execute_api_call(self, url:str(), call_type:str(), data_call:str()) -> bool:
+    def _execute_api_call(self, url:str(), call_type:str(), *, data_call="{}", return_data=False) -> bool:
         """
         This function will execute an api call regarding the url and the mode given in parameter
 
@@ -2192,6 +2209,21 @@ class PyEVENG:
                     cookies=self._cookies, 
                     verify=False
                 )
+
+            else:
+                print(f"[PyEVENG.py - _execute_api_call] Call type ({call_type}) is not in the list {API_CALL_LIST}.")
+                raise EVENG_Exception(f"[PyEVENG.py - _execute_api_call] Call type ({call_type}) is not in the list {API_CALL_LIST}.", 001)
+        
+        # Check the request status_code with an internal function
+        self.requestsError(response.status_code)
+
+        if return_data = True:
+            return json.loads(response.content)
+
+        expect HTTPSConnectionPool as e:
+            message = f"[PyEVENG.py - _execute_api_call] Error <HTTPSConnectionPool> during a {call_type} call on {self._url}{url} ."
+            print(message)
+            pyeveng_logging.debug(message, exc_info=True)
 
         except requests.exceptions.ConnectionError as e:
             not NotImplemented
