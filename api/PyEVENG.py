@@ -156,6 +156,7 @@ except ImportError as importError:
 
 try:
     import requests
+    #requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS = 'DES-CBC3-SHA'
 except ImportError as importError:
     print(f"{HEADER} requests")
     print(importError)
@@ -177,14 +178,19 @@ except ImportError as importError:
 
 try:
     import logging
-    pyeveng_logging = logging.getLogger(__name__)
-
-    pyeveng_logging.basicConfig(
+    logging.getLogger(__name__)
+    logging.basicConfig(
         level=logging.DEBUG,
-        filename="./logs/PyEVENG.log"
+        filename="./logs/PyEVENG.log",
         format='[%(asctime)s] - %(levelname)s - %(message)s',
-        datefmt='%d-%b-%y %H:%M:%S'
-    )  
+        datefmt="%Y-%m-%d %H:%M:%S"
+    )
+
+    logging.debug("##########################################################")
+    logging.debug("#")
+    logging.debug("# NEW RUN !!!")
+    logging.debug("#")
+    logging.debug("##########################################################")
 except ImportError as importError:
     print(f"{HEADER} logging")
     print(importError)
@@ -1586,16 +1592,20 @@ class PyEVENG:
         
         print(self._url, self._username, self._password)
         
-        response = requests.post(
-            f"{self._url}/api/auth/login", data='{"username":"'+self._username+'","password":"'+self._password+'", "html5": "0"}', verify=False)
+        self._execute_api_call(
+            url=f"/api/auth/login",
+            call_type=API_CALL_POST,
+            data_call='{"username": "'+self._username+'","password": "'+self._password+'", "html5": "0"}',
+            return_data=False,
+            verify=False,
+            cookie=False,
+            login=True
+        )
 
-        print(response)
-        self.requestsError(response.status_code)
-        
-        if self._verbose:
-            print(f"[PyEVENG - login] ({response.status_code}) logged !")
+        #def _execute_api_call(self, url:str(), call_type:str(), *, data_call="{}", return_data=False, verify=False, cookie=False) -> json:
+        # response = requests.post(
+        #    f"{self._url}/api/auth/login", data='{"username":"'+self._username+'","password":"'+self._password+'", "html5": "0"}', verify=False)
 
-        self._cookies = response.cookies
 
     def logout(self):
         """
@@ -2171,7 +2181,7 @@ class PyEVENG:
 
     # =========
     #
-    def _execute_api_call(self, url:str(), call_type:str(), *, data_call="{}", return_data=False) -> bool:
+    def _execute_api_call(self, url:str(), call_type:str(), *, data_call="{}", return_data=False, verify=False, cookie=False, login=False) -> json:
         """
         This function will execute an api call regarding the url and the mode given in parameter
 
@@ -2179,68 +2189,105 @@ class PyEVENG:
             param1 (str): Call API url
             param2 (str): Call type
         """
+
+        logging.debug(f"{HEADER} _execute_api_call] {call_type} on {self._url}{url} will be executed with {data_call}")
+        logging.debug(f"Cookies are set = {cookie}")
+        logging.debug(f"Verify SSL is = {verify}")
+        logging.debug(f"Login function is = {login}")
+        logging.debug(f"This call return data = {return_data}")
+
+        response = requests.models.Response
+
         try:
             if call_type == API_CALL_GET:
-                response = requests.get(
-                    f"{self._url}{url}",
-                    cookies=self._cookies,
-                    verify=False
-                )
-
+                logging.debug("Enter in API_CALL_GET")
+                if cookie:
+                    response = requests.get(
+                        f"{self._url}{url}",
+                        cookies=self._cookies,
+                        verify=verify
+                    )
+                else:
+                    response = requests.get(
+                        f"{self._url}{url}",
+                        verify=verify
+                    )
+            
             elif call_type == API_CALL_POST:
-                requests.post(
-                    f"{self._url}{url}",
-                    data=json.dumps(data_call),
-                    cookies=self._cookies, 
-                    verify=False
-                )
+                logging.debug("Enter in API_CALL_POST")
+                if cookie:
+                    response = requests.post(
+                        f"{self._url}{url}",
+                        data=data_call,
+                        cookies=self._cookies, 
+                        verify=verify
+                    )
+                else:
+                    response = requests.post(
+                        f"{self._url}{url}",
+                        data=data_call,
+                        verify=verify
+                    )
 
             elif call_type == API_CALL_PUT:
-                response = requests.put(
-                    f"{self._url}{url}",
-                    data=data_call,
-                    cookies=self._cookies,
-                    verify=False
-                )
+                logging.debug("Enter in API_CALL_PUT")
+                if cookie:
+                    response = requests.put(
+                        f"{self._url}{url}",
+                        data=json.dumps(data_call),
+                        cookies=self._cookies,
+                        verify=verify
+                    )
+                else:
+                    response = requests.put(
+                        f"{self._url}{url}",
+                        data=json.dumps(data_call),
+                        verify=verify
+                    )
 
             elif call_type == API_CALL_DELETE:
-                response = requests.delete(
-                    f"{self._url}{url}",
-                    cookies=self._cookies, 
-                    verify=False
-                )
-
+                logging.debug("Enter in API_CALL_DELETE")
+                if cookie:
+                    response = requests.delete(
+                        f"{self._url}{url}",
+                        cookies=self._cookies, 
+                        verify=verify
+                    )
+                else:
+                    response = requests.delete(
+                        f"{self._url}{url}",
+                        verify=verify
+                    )
             else:
                 print(f"[PyEVENG.py - _execute_api_call] Call type ({call_type}) is not in the list {API_CALL_LIST}.")
-                raise EVENG_Exception(f"[PyEVENG.py - _execute_api_call] Call type ({call_type}) is not in the list {API_CALL_LIST}.", 001)
-        
-        # Check the request status_code with an internal function
-        self.requestsError(response.status_code)
+                raise EVENG_Exception(f"[PyEVENG.py - _execute_api_call] Call type ({call_type}) is not in the list {API_CALL_LIST}.", 1)
 
-        if return_data = True:
-            return json.loads(response.content)
+            logging.debug(f"Response type is {type(response)}")
+            logging.debug(response.status_code)
+            logging.debug(response.content)
 
-        expect HTTPSConnectionPool as e:
-            message = f"[PyEVENG.py - _execute_api_call] Error <HTTPSConnectionPool> during a {call_type} call on {self._url}{url} ."
+            # Check the request status_code with an internal function
+            self.requestsError(response.status_code)
+
+            if login:
+                self._cookies = response.cookies
+
+            if return_data == True:
+                return json.loads(response.content)
+            else:
+                return json.loads("{}")
+
+
+        except requests.ConnectionError as e:
+            message = f"[PyEVENG.py - _execute_api_call] Error <requests.ConnectionError> during a {call_type} call on {self._url}{url} ."
             print(message)
-            pyeveng_logging.debug(message, exc_info=True)
-
-        except requests.exceptions.ConnectionError as e:
-            not NotImplemented
-
-        except OpenSSL.SSL.SysCallError as e:
-            not NotImplemented
-
-        except ssl.SSLError as e:
-            not NotImplemented
+            logging.debug(message, exc_info=True)
 
         except urllib3.exceptions.MaxRetryError as e:
             not NotImplemented
 
         except requests.exceptions.SSLError as e:
             not NotImplemented
-
-        except
 
 
     # =========

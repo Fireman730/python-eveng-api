@@ -1,0 +1,20 @@
+[2019-10-14 20:43:11] - DEBUG - ##########################################################
+[2019-10-14 20:43:11] - DEBUG - #
+[2019-10-14 20:43:11] - DEBUG - # NEW RUN !!!
+[2019-10-14 20:43:11] - DEBUG - #
+[2019-10-14 20:43:11] - DEBUG - ##########################################################
+[2019-10-14 20:43:11] - DEBUG - [PyEVENG - _execute_api_call] POST on https://172.16.194.239/api/auth/login will be executed with {"username": "admin","password": "eve", "html5": "0"}
+[2019-10-14 20:43:11] - DEBUG - Cookies are set = False
+[2019-10-14 20:43:11] - DEBUG - Verify SSL is = False
+[2019-10-14 20:43:11] - DEBUG - Login function is = True
+[2019-10-14 20:43:11] - DEBUG - This call return data = False
+[2019-10-14 20:43:11] - DEBUG - Enter in API_CALL_POST
+[2019-10-14 20:43:11] - DEBUG - Starting new HTTPS connection (1): 172.16.194.239:443
+[2019-10-14 20:43:11] - DEBUG - https://172.16.194.239:443 "POST /api/auth/login HTTP/1.1" 200 67
+[2019-10-14 20:43:11] - DEBUG - Response type is <class 'requests.models.Response'>
+[2019-10-14 20:43:11] - DEBUG - 200
+[2019-10-14 20:43:11] - DEBUG - b'{"code":200,"status":"success","message":"User logged in (90013)."}'
+[2019-10-14 20:43:11] - DEBUG - Starting new HTTPS connection (1): 172.16.194.239:443
+[2019-10-14 20:43:12] - DEBUG - https://172.16.194.239:443 "GET /api/status HTTP/1.1" 200 348
+[2019-10-14 20:43:12] - DEBUG - Starting new HTTPS connection (1): 172.16.194.239:443
+[2019-10-14 20:43:13] - DEBUG - https://172.16.194.239:443 "GET /api/auth/logout HTTP/1.1" 200 68

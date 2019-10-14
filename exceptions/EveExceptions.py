@@ -19,23 +19,23 @@ class EVENG_Exception(Exception):
     """
     This class is used for EVENG Exception
 
-    0XY   =   Erro with API call
-        -> 001 API Call method Error (GET, PUT, POST, etc)
+    1XY   =   Erro with API call
+      -> 101 API Call method Error (GET, PUT, POST, etc)
     
-    1XY   =   Error in lab creation
-      -> 11 Lab Already Exists
-      -> 12 ...
+    2XY   =   Error in lab creation
+      -> 201 Lab Already Exists
+      -> 202 ...
 
-    2XY   =   Error in devices creation
-      -> 21 Not all nodes have been created
+    3XY   =   Error in devices creation
+      -> 301 Not all nodes have been created
 
-    3XY   =   Error in links creation
+    4XY   =   Error in links creation
 
-    4XY   =   Error in configs deployement
+    5XY   =   Error in configs deployement
     
     7XY   =   Error with Call API
-        708   = Return code = 404
-        7081  = Return code = 404 Lab doesn't exist
+        701   = Return code = 404
+        702   = Return code = 404 Lab doesn't exist
 
     8XY   =   Error with SSH command
       -> 801 UMOUNT
