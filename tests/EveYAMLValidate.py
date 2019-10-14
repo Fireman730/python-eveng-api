@@ -53,21 +53,21 @@ EXIT_FAILURE = 1
 try:
     from exceptions.EveExceptions import EVENG_Exception
 except ImportError as importError:
-    print("Error import EVENG_Exception")
+    print("Error import [eveng-api] EVENG_Exception")
     print(importError)
     exit(EXIT_FAILURE)
 
 try:
     import yaml
 except ImportError as importError:
-    print("Error import yaml")
+    print("Error import [eveng-api] yaml")
     print(importError)
     exit(EXIT_FAILURE)
 
 try:
     import api.PyEVENG as PyEVENG
 except ImportError as importError:
-    print("Error import PyEVENG")
+    print("Error import [eveng-api] PyEVENG")
     print(importError)
     exit(EXIT_FAILURE)
 
@@ -141,7 +141,10 @@ def pprintline(data: str()) -> None:
     print(data)
     print("==================================================================")
 
-def validateYamlFileForPyEVENG(api: PyEVENG.PyEVENG, yaml_content: dict(), vm_info):
+
+@click.command()
+@click.option('--pipeline', default=False, help='If pipeline is True, Function with an api call will not be run.')
+def validateYamlFileForPyEVENG(api: PyEVENG.PyEVENG, yaml_content: dict(), vm_info, * , pipeline=False):
 
     # Check that project:path doesn't start or end with "/"
     # assert check_project_path_not_start_or_end_with_slash(yaml_content)
@@ -185,9 +188,11 @@ def validateYamlFileForPyEVENG(api: PyEVENG.PyEVENG, yaml_content: dict(), vm_in
         assert checkDeviceElement(
             CONFIG_TYPES, yaml_content, dict_to_verify="configs", param_to_verify="type")
     # Check that device image is available in the EVE-NG
-    assert checkIfImageIsAvaiable(api, yaml_content)
+    if pipeline is False:
+        assert checkIfImageIsAvaiable(api, yaml_content)
     # Check memory available vs memery asked by devices
-    assert checkVMMemoryFreeVSDevicesMemoryAsked(api, yaml_content)
+    if pipeline is False:
+        assert checkVMMemoryFreeVSDevicesMemoryAsked(api, yaml_content)
     # Check that nodes in configs: node is in devices added
     if "configs" in yaml_content.keys():
         assert checkIfConfigsNodesExists(yaml_content)
