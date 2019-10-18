@@ -53,21 +53,21 @@ EXIT_FAILURE = 1
 try:
     from exceptions.EveExceptions import EVENG_Exception
 except ImportError as importError:
-    print("Error import [eveng-api] EVENG_Exception")
+    print("Error import [EveYamlValidate.py] EVENG_Exception")
     print(importError)
     exit(EXIT_FAILURE)
 
 try:
     import yaml
 except ImportError as importError:
-    print("Error import [eveng-api] yaml")
+    print("Error import [EveYamlValidate.py] yaml")
     print(importError)
     exit(EXIT_FAILURE)
 
 try:
     import api.PyEVENG as PyEVENG
 except ImportError as importError:
-    print("Error import [eveng-api] PyEVENG")
+    print("Error import [EveYamlValidate.py] PyEVENG")
     print(importError)
     exit(EXIT_FAILURE)
 
@@ -75,7 +75,14 @@ try:
     import pprint
     PP = pprint.PrettyPrinter(indent=4)
 except ImportError as importError:
-    print("Error import [eveng-api] pprint")
+    print("Error import [EveYamlValidate.py] pprint")
+    print(importError)
+    exit(EXIT_FAILURE)
+
+try:
+    import click
+except ImportError as importError:
+    print("Error import [EveYamlValidate.py] click")
     print(importError)
     exit(EXIT_FAILURE)
 
@@ -144,7 +151,7 @@ def pprintline(data: str()) -> None:
 
 @click.command()
 @click.option('--pipeline', default=False, help='If pipeline is True, Function with an api call will not be run.')
-def validateYamlFileForPyEVENG(api: PyEVENG.PyEVENG, yaml_content: dict(), vm_info, * , pipeline=False):
+def validateYamlFileForPyEVENG(api: PyEVENG.PyEVENG, yaml_content: dict(), vm_info, * , pipeline):
 
     # Check that project:path doesn't start or end with "/"
     # assert check_project_path_not_start_or_end_with_slash(yaml_content)
