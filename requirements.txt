@@ -8,3 +8,4 @@ pprint==0.1
 ipaddress==1.0.22
 pexpect==4.7.0
 Jinja2==2.10
+cheroot==8.1.0
