@@ -1905,7 +1905,8 @@ class PyEVENG:
                 self._url+"/api/labs/"+self._userFolder+"/"+str(labName)+"/networks/"+str(networkID['id']), data="{\"visibility\":0}", cookies=self._cookies, verify=False)
             self.requestsError(response.status_code)
 
-    # =========
+    # =========================================================================================================================================================
+    #
     #
     def addNetworksToLab(self, networksToAdd: dict(), labName:str()):
         """
@@ -1935,7 +1936,8 @@ class PyEVENG:
                 print("[PyEVENG addNetworkToLab] -",
                       data['name'], " is already deployed!")
 
-    # =========
+    # =========================================================================================================================================================
+    #
     #
     def addNetworkToLab(self, networkToAdd: dict(), labName: str()) -> str():
         """
@@ -1958,7 +1960,8 @@ class PyEVENG:
         
         return (json.loads(response.content)['data']['id'])
 
-    # =========
+    # =========================================================================================================================================================
+    #
     #
     def addNetworksLinksToLab(self, interfacesToAdd: dict(), labName: str()):
         """
@@ -1978,7 +1981,8 @@ class PyEVENG:
         self.addLinksToLab(interfacesToAdd, labName)
         self.setNetworkVisibilityTo0(interfacesToAdd, labName)
 
-    # =========
+    # =========================================================================================================================================================
+    #
     #
     def addLinksToLab(self, interfaceToAdd: dict(), labName: str()):
         """
@@ -2023,6 +2027,16 @@ class PyEVENG:
                             "url": "ssh -p {} -l <username> {}".format(oobInterface['nat'], self._ipAddress)
                         }
 
+                        if self._check_if_forwarding_is_activate_by_interface(ssh, link[LINKS_NETWORK_KEY]) is False:
+                            if self._active_forwarding_on_an_inteface(ssh, link[LINKS_NETWORK_KEY]) is False:
+                                raise EVENG_Exception(
+                                    f"{HEADER} _execute_api_call] Error during forwading activation for interface {link[LINKS_NETWORK_KEY]}", 803)
+
+                        if self._check_if_forwarding_is_activate_by_ip(ssh, link[LINKS_IP_PUB_KEY]) is False:
+                            if self._active_forwarding_for_an_ip(ssh, link[LINKS_IP_PUB_KEY]) is False:
+                                raise EVENG_Exception(
+                                    f"{HEADER} _execute_api_call] Error during forwading activation for interface {link[LINKS_NETWORK_KEY]}", 803)
+                            
                         self.create_iptables_nat(
                             ssh, link['ip_pub'], link['network'], oobInterface['ip_mgmt'], oobInterface['ssh'], ipMgmtEve, oobInterface['nat'])
                     #
@@ -2040,9 +2054,9 @@ class PyEVENG:
         self.write_in_remote_file(ssh, connexionInformations, "/root/.eveng/connexion_{}".format(labName), mode='w')
         ssh.close()
     
-    # =========
+    # =========================================================================================================================================================
     #
-
+    #
     def write_in_remote_file(self, ssh:paramiko.SSHClient(), content, path:str(), *, mode="a"):
         """
         This function will write devices connection informations in a file on EVE-NG VM.
@@ -2061,6 +2075,9 @@ class PyEVENG:
         sftp.close()
         print("[PyEVENG - write_in_remote_file] - create new files OK ! ")
 
+    # =========================================================================================================================================================
+    #
+    #
     def get_remote_connexion_file(self, labName) -> dict:
         """ 
         This function will retrieve data from a connexion_labname file
@@ -2080,6 +2097,144 @@ class PyEVENG:
         ssh.close()
 
         return data
+
+    # =========================================================================================================================================================
+    #
+    #
+    def _check_if_forwarding_is_activate_by_interface(self, ssh_connexion:paramiko.SSHClient(), inteface_name: str()) -> bool:
+        """
+        This function will check if forwarding is activate for an interface EVE-NG VM.
+
+        Args:
+            param1 (str): Interface name
+
+        """
+        
+        logging.debug(f"{HEADER} _check_if_forwarding_is_activate_by_interface] Enter in function.")
+        logging.debug(f"{HEADER} _check_if_forwarding_is_activate_by_interface] Interface name = {inteface_name}")
+
+        logging.debug(f"{HEADER} _check_if_forwarding_is_activate_by_interface] Execute command :")
+        logging.debug(f"\t\t => cat /proc/sys/net/ipv4/conf/{inteface_name}/forwarding")
+
+        stdin, stdout, stderr = ssh_connexion.exec_command(
+            f"cat /proc/sys/net/ipv4/conf/{inteface_name}/forwarding"
+        )
+        o = "".join(stdout.readlines())
+
+        logging.debug(f"{HEADER} _check_if_forwarding_is_activate_by_interface] Command result {o} :")
+
+        logging.debug(f"{HEADER} _check_if_forwarding_is_activate_by_interface] End function.")
+        if "1" in o:
+            logging.debug(f"{HEADER} _check_if_forwarding_is_activate_by_interface] Return True.")
+            return True
+        else:
+            logging.debug(f"{HEADER} _check_if_forwarding_is_activate_by_interface] Return False.")
+            return True
+
+    # =========================================================================================================================================================
+    #
+    #
+    def _check_if_forwarding_is_activate_by_ip(self, ssh_connexion: paramiko.SSHClient(), address_ip: str()) -> bool:
+        """
+        This function will check if forwarding is activate for an interface EVE-NG VM.
+        Interface will be automatically retrieve with the IP address.
+
+        Args:
+            param1 (str): Interface IP Address
+
+        """
+
+        logging.debug(f"{HEADER} _check_if_forwarding_is_activate_by_ip] Enter in function.")
+        logging.debug(f"{HEADER} _check_if_forwarding_is_activate_by_ip] IP address = {address_ip}")
+
+        logging.debug(f"{HEADER} _check_if_forwarding_is_activate_by_ip] Execute command :")
+        logging.debug("\t\t => cat /proc/sys/net/ipv4/conf/$(ip route show | grep {} | awk '{print $3}')/forwarding".format(address_ip))
+
+        stdin, stdout, stderr = ssh_connexion.exec_command(
+            "cat /proc/sys/net/ipv4/conf/$(ip route show | grep {} | awk '{print $3}')/forwarding".format(address_ip)
+        )
+        o = "".join(stdout.readlines())
+
+        logging.debug(f"{HEADER} _check_if_forwarding_is_activate_by_ip] Command result {o} :")
+
+        logging.debug(f"{HEADER} _check_if_forwarding_is_activate_by_ip] End function.")
+        if "1" in o:
+            logging.debug(f"{HEADER} _check_if_forwarding_is_activate_by_ip] Return True.")
+            return True
+        else:
+            logging.debug(f"{HEADER} _check_if_forwarding_is_activate_by_ip] Return False.")
+            return True
+
+
+    # =========================================================================================================================================================
+    #
+    #
+    def _active_forwarding_on_an_inteface(self, ssh_connexion:paramiko.SSHClient(), inteface_name: str()) -> bool:
+        """
+        This function activate forwarding for an interface EVE-NG VM.
+
+        Args:
+            param1 (str): Interface name
+
+        """
+        ERROR_MESSAGE_ACTIVE_FORWARDING = "No such file or directory"
+
+        logging.debug(f"{HEADER} _active_forwarding_on_an_inteface] Enter in function.")
+        logging.debug(f"{HEADER} _active_forwarding_on_an_inteface] Interface name = {inteface_name}")  
+
+        logging.debug(f"{HEADER} _active_forwarding_on_an_inteface] Execute command :")
+        logging.debug(f"\t\t => echo '1' | sudo tee /proc/sys/net/ipv4/conf/{inteface_name}/forwarding")
+
+        stdin, stdout, stderr = ssh_connexion.exec_command(
+            f"sudo tee /proc/sys/net/ipv4/conf/{inteface_name}/forwarding"
+        )
+        o = "".join(stdout.readlines())
+
+        logging.debug(f"{HEADER} _active_forwarding_on_an_inteface] Command result {o} :")
+
+        logging.debug(f"{HEADER} _active_forwarding_on_an_inteface] End function.")
+        if ERROR_MESSAGE_ACTIVE_FORWARDING in o:
+            logging.debug(f"{HEADER} _active_forwarding_on_an_inteface] Return False.")
+            return False
+        else:
+            logging.debug(f"{HEADER} _active_forwarding_on_an_inteface] Return True.")
+            return True 
+
+    # =========================================================================================================================================================
+    #
+    #
+    def _active_forwarding_for_an_ip(self, ssh_connexion: paramiko.SSHClient(), address_ip: str()) -> bool:
+        """
+        This function activate forwarding for an interface on EVE-NG VM regarding the ip address given in parameter.
+
+        Args:
+            param1 (str): Interface IP address
+
+        """
+        ERROR_MESSAGE_ACTIVE_FORWARDING = "No such file or directory"
+
+        logging.debug(f"{HEADER} _active_forwarding_for_an_ip] Enter in function.")
+        logging.debug(f"{HEADER} _active_forwarding_for_an_ip] IP address = {address_ip}")  
+
+        logging.debug(f"{HEADER} _active_forwarding_for_an_ip] Execute command :")
+        logging.debug("\t\t => echo '1' | sudo tee /proc/sys/net/ipv4/conf/$(ip route show | grep {} | awk '{print $3}')/forwarding".format(address_ip))
+
+        stdin, stdout, stderr = ssh_connexion.exec_command(
+            "echo '1' | sudo tee /proc/sys/net/ipv4/conf/$(ip route show | grep {} | awk '{print $3}')/forwarding".format(address_ip)
+        )
+        o = "".join(stdout.readlines())
+
+        logging.debug(f"{HEADER} _active_forwarding_for_an_ip] Command result {o} :")
+
+        logging.debug(f"{HEADER} _active_forwarding_for_an_ip] End function.")
+        if ERROR_MESSAGE_ACTIVE_FORWARDING in o:
+            logging.debug(f"{HEADER} _active_forwarding_for_an_ip] Return False.")
+            return False
+        else:
+            logging.debug(
+                f"{HEADER} _active_forwarding_for_an_ip] Return True.")
+            return True 
+
 
     # =========================================================================================================================================================
     #

@@ -40,6 +40,7 @@ class EVENG_Exception(Exception):
     8XY   =   Error with SSH command
       -> 801 UMOUNT
       -> 802 MOUNT
+      -> 803 Forwarding activation (echo '1' | sudo tee /proc/sys/net/ipv4/conf/pnet0/forwarding)
 
     9XY   = Error in YAML file
       -> 900 - Error un "project:"
