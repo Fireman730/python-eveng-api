@@ -359,7 +359,7 @@ def deploy_all (api: PyEVENG.PyEVENG, ymlF: dict(), vmInfo: dict(), force: str()
         #
         if YAML_PROJECT_KEY in ymlF.keys():
             print(f"[eveng-api - deploy_all] - deploy projects")
-            api.createLab(ymlF[YAML_PROJECT_KEY])
+            api.create_lab(ymlF[YAML_PROJECT_KEY])
 
         if YAML_DEVICES_KEY in ymlF.keys():
             print(f"[eveng-api - deploy_all] - deploy devices")
