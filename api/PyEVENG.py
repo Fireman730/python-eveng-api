@@ -2014,6 +2014,7 @@ class PyEVENG:
                         "sudo ifconfig {} up && sudo ifconfig {} {} netmask {}".format(link['network'], link['network'], ipMgmtEve, ipMaskEve))
                     o = "".join(stdout.readlines())
 
+
                 if self._check_if_forwarding_is_activate_by_interface(ssh, link[LINKS_NETWORK_KEY]) is False:
                             if self._active_forwarding_on_an_inteface(ssh, link[LINKS_NETWORK_KEY]) is False:
                                 raise EVENG_Exception(
@@ -2147,10 +2148,10 @@ class PyEVENG:
         logging.debug(f"{HEADER} _check_if_forwarding_is_activate_by_ip] IP address = {address_ip}")
 
         logging.debug(f"{HEADER} _check_if_forwarding_is_activate_by_ip] Execute command :")
-        logging.debug("\t\t => cat /proc/sys/net/ipv4/conf/$(ip route show | grep {} | awk '{print $3}')/forwarding".format(address_ip))
+        logging.debug(f"\t\t => cat /proc/sys/net/ipv4/conf/$(ip route show | grep {address_ip} | awk '{{print $3}}')/forwarding")
 
         stdin, stdout, stderr = ssh_connexion.exec_command(
-            "cat /proc/sys/net/ipv4/conf/$(ip route show | grep {} | awk '{print $3}')/forwarding".format(address_ip)
+            f"cat /proc/sys/net/ipv4/conf/$(ip route show | grep {address_ip} | awk '{{print $3}}')/forwarding"
         )
         o = "".join(stdout.readlines())
 
@@ -2216,10 +2217,10 @@ class PyEVENG:
         logging.debug(f"{HEADER} _active_forwarding_for_an_ip] IP address = {address_ip}")  
 
         logging.debug(f"{HEADER} _active_forwarding_for_an_ip] Execute command :")
-        logging.debug("\t\t => echo '1' | sudo tee /proc/sys/net/ipv4/conf/$(ip route show | grep {} | awk '{print $3}')/forwarding".format(address_ip))
+        logging.debug(f"\t\t => echo '1' | sudo tee /proc/sys/net/ipv4/conf/$(ip route show | grep {address_ip} | awk '{{print $3}}')/forwarding")
 
         stdin, stdout, stderr = ssh_connexion.exec_command(
-            "echo '1' | sudo tee /proc/sys/net/ipv4/conf/$(ip route show | grep {} | awk '{print $3}')/forwarding".format(address_ip)
+            f"echo '1' | sudo tee /proc/sys/net/ipv4/conf/$(ip route show | grep {address_ip} | awk '{{print $3}}')/forwarding"
         )
         o = "".join(stdout.readlines())
 
