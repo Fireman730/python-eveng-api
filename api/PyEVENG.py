@@ -66,8 +66,13 @@ HEADER = "[PyEVENG -"
 #
 # Import Library
 #
-import cheroot.ssl.builtin
-cheroot.ssl.builtin.IS_BELOW_PY37 = True
+
+try:
+    from const.constantes import *
+except ImportError as importError:
+    print(f"{HEADER} const.constantes")
+    print(importError)
+    exit(EXIT_FAILURE)
 
 try:
     import time
@@ -149,14 +154,15 @@ except ImportError as importError:
 
 try:
     import urllib3
+    from urllib3 import PoolManager
+    import ssl
 except ImportError as importError:
-    print(f"{HEADER} urllib3")
+    print(f"{HEADER} urllib3 / ssl")
     print(importError)
     exit(EXIT_FAILURE)
 
 try:
     import requests
-    #requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS = 'DES-CBC3-SHA'
 except ImportError as importError:
     print(f"{HEADER} requests")
     print(importError)
@@ -256,6 +262,7 @@ CONFIG_TYPE_OOB_KEYWORD = 'oob'
 #
 # Class
 #
+
 class PyEVENG:
     """
     
@@ -263,10 +270,6 @@ class PyEVENG:
     The main aim is provided an Python script for automate an deploy your network un EVE-NG    
     
     """
-    # ------------------------------------------------------------------------------------------
-    #
-    # Class CONST
-    # 
     
     # ------------------------------------------------------------------------------------------
     #
@@ -310,7 +313,7 @@ class PyEVENG:
         for lab in yamlFiles[LABS_KEY]:
             self._userFolder = lab[FOLDER_KEY]
 
-            if lab[LABNAME_KEY] not in self.getLabsInFolder():
+            if lab[LABNAME_KEY] not in self.get_labs_in_folder():
                 raise EVENG_Exception(
                     f"[PyEVENG - get_backup_nodes_config] {str(lab[LABNAME_KEY])} doesn't exist in {str(lab['folder'])}", 910)
 
@@ -1237,7 +1240,7 @@ class PyEVENG:
         return json.loads(response.content)
 
 
-    def getLabsInFolder(self) -> list():
+    def get_labs_in_folder(self) -> list():
         """
         This function will return a list that contains all lab name in the folder
 
@@ -1245,26 +1248,40 @@ class PyEVENG:
             list: That contains all lab name
         """
         
-        
-        print(f"{HEADER} getLabsInFolder] - lab folder = {self._userFolder}")
-        print(f"{HEADER} getLabsInFolder] - {self._url}/api/folders/{str(self._userFolder)}")
+        logging.debug(f"{HEADER} - get_labs_in_folder] Enter in function.")
+        logging.debug(f"{HEADER} get_labs_in_folder] - lab folder = {self._userFolder}")
+        logging.debug(
+            f"{HEADER} get_labs_in_folder] - {self._url}/api/folders/{str(self._userFolder)}")
 
-        response = requests.get(f"{self._url}/api/folders/{str(self._userFolder)}",
-                                cookies=self._cookies, verify=False)
+        print(f"{HEADER} get_labs_in_folder] - lab folder = {self._userFolder}")
+        print(f"{HEADER} get_labs_in_folder] - {self._url}/api/folders/{str(self._userFolder)}")
 
-        print(f"{HEADER} getLabsInFolder] - Call status code = {response.status_code}")
+        data = self._execute_api_call(
+            url=f"/api/folders/{str(self._userFolder)}",
+            call_type=API_CALL_GET,
+            data_call='{}',
+            return_data=True,
+            verify=False,
+            cookie=self._cookies,
+            login=False
+        )
 
-        self.requestsError(response.status_code)
-        data = json.loads(response.content)
+        #response = requests.get(f"{self._url}/api/folders/{str(self._userFolder)}",
+        #                        cookies=self._cookies, verify=False)
+        # print(f"{HEADER} get_labs_in_folder] - Call status code = {response.status_code}")
+        # self.requestsError(response.status_code)
+        # data = json.loads(response.content)
 
-        print(f"{HEADER} getLabsInFolder] - Call data :")
+        logging.debug(f"{HEADER} - get_labs_in_folder] Call data :")
+        logging.debug(f"{HEADER} - get_labs_in_folder] {data['data']['labs']}")
+        print(f"{HEADER} get_labs_in_folder] Call data :")
         PP.pprint(data['data']['labs'])
 
-        labsInFolder = list()
+        labs_in_folder_lst = list()
         for lab in data['data']['labs']:
-            labsInFolder.append(lab['file'])
+            labs_in_folder_lst.append(lab['file'])
 
-        return labsInFolder
+        return labs_in_folder_lst
 
 
     def getUsers(self):
@@ -1494,7 +1511,7 @@ class PyEVENG:
 
         return json.loads(response.content)
 
-    def getImageVersionByModel(self, deviceType):
+    def get_image_version_by_model(self, device_type):
         """
         This
          function will return a list that contains all installed nodes
@@ -1505,17 +1522,38 @@ class PyEVENG:
         Returns:
             list: Information about device type
         """
-        response = requests.get(
-            self._url+"/api/list/templates/"+str(deviceType), cookies=self._cookies, verify=False)
-        self.requestsError(response.status_code)
 
-        content = json.loads(response.content)
+        logging.debug(f"{HEADER} - get_image_version_by_model] Enter in function.")
+        logging.debug(f"{HEADER} - get_image_version_by_model] device_type = {device_type}.")
+
+        data = self._execute_api_call(
+            url=f"/api/list/templates/{str(device_type)}",
+            call_type=API_CALL_GET,
+            data_call='{}',
+            return_data=True,
+            verify=False,
+            cookie=self._cookies,
+            login=False
+        )
+
+        #response = requests.get(
+        #      self._url+"/api/list/templates/"+str(device_type), cookies=self._cookies, verify=False)
+        #  self.requestsError(response.status_code)
+        #content = json.loads(response.content)
 
         listResult = list()
-        if "image" in content['data']['options'].keys():
-            if len(content['data']['options']['image']['list']) != 0:
-                for value in content['data']['options']['image']['list'].values():
+
+        logging.debug(f"{HEADER} - get_image_version_by_model] 'image' in data['data']['options'].keys() ?? ")
+        logging.debug(f"\t\t => {'image' in data['data']['options'].keys()} ")
+        logging.debug(f"\t\t data['data']['options'].keys() = {data['data']['options'].keys()}")
+        
+        if "image" in data['data']['options'].keys():
+            if len(data['data']['options']['image']['list']) != 0:
+                for value in data['data']['options']['image']['list'].values():
                     listResult.append(value)
+
+        logging.debug(f"{HEADER} - get_image_version_by_model] Return value :")
+        logging.debug(f"\t\t => {listResult} ")
 
         return listResult
     
@@ -1528,7 +1566,7 @@ class PyEVENG:
         Returns:
             list: That contains all installed nodes
         """
-        data = self.getImageVersionByModel(deviceType)
+        data = self.get_image_version_by_model(deviceType)
         return data
 
 
@@ -1578,15 +1616,21 @@ class PyEVENG:
         self.requestsError(response.status_code)
         return json.loads(response.content)
 
+    # =========================================================================================================================================================
+    #
+    #
     def login(self):
         """
         This function login to EVE-NG
-        Store Cookie
+        It calls internal function to execute api call : _execute_api_call.
+        Store cookie in the current object.
 
         """
         # For avoid InsecureRequestWarning error
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         
+        logging.debug(f"{HEADER} login] Start login() function")
+
         if self._verbose:
             print("[PyEVENG - login] ...") 
         
@@ -1602,51 +1646,83 @@ class PyEVENG:
             login=True
         )
 
-        #def _execute_api_call(self, url:str(), call_type:str(), *, data_call="{}", return_data=False, verify=False, cookie=False) -> json:
-        # response = requests.post(
-        #    f"{self._url}/api/auth/login", data='{"username":"'+self._username+'","password":"'+self._password+'", "html5": "0"}', verify=False)
+        logging.debug(f"{HEADER} login] End login() function")
 
 
+    # =========================================================================================================================================================
+    #
+    #
     def logout(self):
         """
-        This function logout to EVE-NG        
+        This function logout to EVE-NG.
+        It calls internal function to execute api call : _execute_api_call.
+        Destroy cookies.
         """
+
+        logging.debug(f"{HEADER} logout] Start logout() function")
+
         if self._verbose:
             print("[PyEVENG - logout] ...")
-        response = requests.get(
-            self._url+"/api/auth/logout", cookies=self._cookies, verify=False)
 
-        self.requestsError(response.status_code)
+        self._execute_api_call(
+            url=f"/api/auth/logout",
+            call_type=API_CALL_GET,
+            cookie=True,
+        )
+
+        logging.debug(f"{HEADER} logout] Start logout() function")
 
         if self._verbose:
-            print(f"[PyEVENG - logout] ({response.status_code}) EVE-NG says Byyye :) !")
+            print(f"[PyEVENG - logout] EVE-NG says Byyye :) !")
         
 
     # --------------------------------------------------------------------------------------------------
     #
     # CREATE / DELETE functions
     #
-    def createLab(self, labInformations:dict()):
+    def create_lab(self, lab_infos:dict()):
         """
         This function will create a Lab
 
         Args:
             param1 (dict): All lab informations
         """
-        self._userFolder = labInformations[PROJECT_PATH_KEY]
-        if str(labInformations['name']+".unl") in self.getLabsInFolder():
-            raise EVENG_Exception(str(f"[EXCEPTION][PyEVENG - createLab] - Lab ({labInformations['name']}) already exists in this folder"), 12)
-        
-        self._project = labInformations['name']+".unl"
-        print("[PyEVENG createLab] -",
-              labInformations['name'], "is creating...")
-        
-        response = requests.post(
-            self._url+"/api/labs", data=json.dumps(labInformations), cookies=self._cookies, verify=False)
 
-        self.requestsError(response.status_code)
-        print("[PyEVENG createLab] -",
-              labInformations['name'], "has been created...")
+        logging.debug(f"{HEADER} - create_lab] Enter in function.")
+
+        self._userFolder = lab_infos[PROJECT_PATH_KEY]
+
+        if str(f"{lab_infos[PROJECT_NAME_KEY]}{EVENG_LAB_EXTENSION}") in self.get_labs_in_folder():
+            logging.debug(f"{HEADER} - create_lab] Error during lab creation.")
+            logging.debug(f"{HEADER} - create_lab] Condition =")
+            logging.debug(str(f"{lab_infos[PROJECT_NAME_KEY]}{EVENG_LAB_EXTENSION}"))
+            logging.debug(f"in self.get_labs_in_folder()")
+            logging.debug(f"{HEADER} - create_lab] lab_informations = {lab_infos}.")
+            raise EVENG_Exception(str(f"[EXCEPTION][PyEVENG - create_lab] - Lab ({lab_infos['name']}) already exists in this folder"), 12)
+        
+        self._project = (f"{lab_infos[PROJECT_NAME_KEY]}{EVENG_LAB_EXTENSION}")
+
+        logging.debug(f"{HEADER} - create_lab] {lab_infos[PROJECT_NAME_KEY]} is creating...")
+        logging.debug(f"{lab_infos[PROJECT_NAME_KEY]}")
+        print(f"{HEADER} - create_lab] {lab_infos[PROJECT_NAME_KEY]} is creating...")
+        
+        self._execute_api_call(
+            url="/api/labs",
+            call_type=API_CALL_POST,
+            data_call=json.dumps(lab_infos),
+            return_data=False,
+            verify=False,
+            cookie=self._cookies,
+            login=False
+        )
+
+        #response = requests.post(
+        #    self._url+"/api/labs", data=json.dumps(lab_infos), cookies=self._cookies, verify=False)
+        #         self.requestsError(response.status_code)
+
+        logging.debug(f"{HEADER} - create_lab] {lab_infos[PROJECT_NAME_KEY]} has been created...")
+        print(f"{HEADER} - create_lab] {lab_infos[PROJECT_NAME_KEY]} has been created...")
+
 
     def remove_remote_connexion_file(self, labName):
         """
@@ -1693,7 +1769,7 @@ class PyEVENG:
 
     # =========
     #
-    def deleteLab(self, labName: dict()):
+    def delete_lab(self, lab_name: dict()):
         """
         This function will delete a Lab
 
@@ -1703,24 +1779,35 @@ class PyEVENG:
         
         call = True
 
-        print("[PyEVENG - deleteLab] -",
-              labName, "is deleting...")
+        logging.debug(f"{HEADER} - delete_lab] Enter in function.")
+        print(f"[PyEVENG - delete_lab] {lab_name} is deleting...")
+        
         try:
-            self.stopLabAllNodes(labName)
+            self.stopLabAllNodes(lab_name)
             
         except EVENG_Exception as e:
-            print("[PyEVENG - deleteLab] - lab doesn't exist ... check for remove files")
+            logging.debug(f"{HEADER} - delete_lab] Lab doesn't exist ... check for remove files.")
+            print(f"{HEADER} - delete_lab] Lab doesn't exist ... check for remove files.")
             call = False
         
-        self.remove_remote_connexion_file(labName)
+        self.remove_remote_connexion_file(lab_name)
 
+        logging.debug(f"{HEADER} - delete_lab] Variable 'call' = {call}.")
         if call:
-            response = requests.delete(self._url+"/api/labs/"+str(
-                self._userFolder)+"/"+str(labName), cookies=self._cookies, verify=False)
-            self.requestsError(response.status_code)
+            self._execute_api_call(
+                f"/api/labs/{str(self._userFolder)}/{str(lab_name)}",
+                call_type=API_CALL_DELETE,
+                data_call='{}',
+                return_data=False,
+                verify=False,
+                cookie=self._cookies,
+                login=False
+            )
+            # response = requests.delete(self._url+"/api/labs/"+str(
+            #     self._userFolder)+"/"+str(lab_name), cookies=self._cookies, verify=False)
+            # self.requestsError(response.status_code)
         
-            print("[PyEVENG createLab] -",
-                labName, "has been deleted...")
+            logging.debug(f"{HEADER} - delete_lab] End function.")
     # --------------------------------------------------------------------------------------------------
     #
     # EDIT (POST) functions
@@ -1994,7 +2081,8 @@ class PyEVENG:
 
         return data
 
-    # =========
+    # =========================================================================================================================================================
+    #
     #
     def create_iptables_nat(self, ssh: paramiko.SSHClient(), evengIP: str(), interface: str(), hostsIP: str(), sshMgmt: str(), eveIP: str(), eveSsh: str()):
         """
@@ -2066,7 +2154,8 @@ class PyEVENG:
         f.close()
         sftp.close()
 
-    # =========
+    # =========================================================================================================================================================
+    #
     #
     def addLinkToLab(self, networkID: str(), nodeID:str(), interfaceID:str(), labName: str()):
         """
@@ -2092,9 +2181,7 @@ class PyEVENG:
         
         self.requestsError(response.status_code)
 
-
-    # --------------------------------------------------------------------------------------------------
-    #
+    # =========================================================================================================================================================
     #
     #
     def requestsError(self, status_code):
@@ -2113,11 +2200,11 @@ class PyEVENG:
         elif status_code == 500:
             raise "HTTP 500 : Internal Server Error"
         elif status_code == 412:
-            raise "HTTP 412 : please login before to make requests \n" + \
-                "api= PyEVENG.PyEVENG(login, mdp, ip, port, ssl, user, pod) \n" + \
-                    "api.login() \n api.getLabNodes"
+            pass
+            #raise "HTTP 412 : Precondition Faileds \n"
 
-    # =========
+    # =========================================================================================================================================================
+    #
     #
     def check_param_type_str(self, param:str()):
         """
@@ -2131,9 +2218,7 @@ class PyEVENG:
             raise TypeError(
                 "For <getlab(labName:str())> function you need to give a string in parameter !")
 
-
-    # --------------------------------------------------------------------------------------------------
-    #
+    # =========================================================================================================================================================
     #
     #
     def lock_lab(self):
@@ -2146,7 +2231,8 @@ class PyEVENG:
             raise Exception(f"Error during lock_lab")
         ssh.close
         
-    # =========
+    # =========================================================================================================================================================
+    #
     #
     def sshConnect(self) -> paramiko.SSHClient():
         try:
@@ -2167,7 +2253,8 @@ class PyEVENG:
         except TimeoutError as e:
             print(f"[PyEVENG - sshConnect] - Timeout during the SSH conenction to EVE-NG VM")
     
-    # =========
+    # =========================================================================================================================================================
+    #
     #
     def _set_folder(self, new_folder) -> None:
         """
@@ -2179,8 +2266,27 @@ class PyEVENG:
         
         self._userFolder = new_folder
 
-    # =========
+    # =========================================================================================================================================================
     #
+    #
+    CIPHERS = (
+        'ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+HIGH:'
+        'DH+HIGH:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+HIGH:RSA+3DES:!aNULL:'
+        '!eNULL:!MD5'
+    )
+    """
+    A TransportAdapter that re-enables 3DES support in Requests.
+    """
+    
+    def init_poolmanager(self, *args, **kwargs):
+        context = create_urllib3_context(ciphers=CIPHERS)
+        kwargs['ssl_context'] = context
+        return super(DESAdapter, self).init_poolmanager(*args, **kwargs)
+
+    # =========================================================================================================================================================
+    #
+    #
+    
     def _execute_api_call(self, url:str(), call_type:str(), *, data_call="{}", return_data=False, verify=False, cookie=False, login=False) -> json:
         """
         This function will execute an api call regarding the url and the mode given in parameter
@@ -2267,7 +2373,7 @@ class PyEVENG:
             logging.debug(response.content)
 
             # Check the request status_code with an internal function
-            self.requestsError(response.status_code)
+            # self.requestsError(response.status_code)
 
             if login:
                 self._cookies = response.cookies
@@ -2277,6 +2383,8 @@ class PyEVENG:
             else:
                 return json.loads("{}")
 
+        except requests.exceptions.SSLError as e:
+            pass
 
         except requests.ConnectionError as e:
             message = f"[PyEVENG.py - _execute_api_call] Error <requests.ConnectionError> during a {call_type} call on {self._url}{url} ."
@@ -2289,8 +2397,8 @@ class PyEVENG:
         except requests.exceptions.SSLError as e:
             not NotImplemented
 
-
-    # =========
+    # =========================================================================================================================================================
+    #
     #
     def __init__(self, username, password, ipAddress, port=99999, useHTTPS=False, userFolder="Users", pod="0", root="root", rmdp="eve", community=True, verbose=True):
         """

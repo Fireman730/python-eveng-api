@@ -371,7 +371,7 @@ def checkIfImageIsAvaiableWithPath(availableImages: dict(), pat_to_yaml_file: st
 def checkIfImageIsAvaiable(pyeveng, yaml_content: dict(), dict_to_verify: str() = "devices", param_to_verify: str() = "image") -> bool:
 
     for device in yaml_content['devices']:
-        images = pyeveng.getImageVersionByModel(device['template'])
+        images = pyeveng.get_image_version_by_model(device['template'])
 
         if device[param_to_verify] not in images:
             raise EVENG_Exception(str("[EveYAMLValidate.py - checkIfImageIsAvaiable] - Image "+str(

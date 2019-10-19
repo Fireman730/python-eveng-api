@@ -316,7 +316,7 @@ def main(deploy, inventory, vm, force, start, backup, stop, remove, test, images
         exit_success()
 
     if remove != "#":
-        api.deleteLab(remove)
+        api.delete_lab(remove)
         api.logout()
         exit_success()
 
@@ -349,8 +349,8 @@ def deploy_all (api: PyEVENG.PyEVENG, ymlF: dict(), vmInfo: dict(), force: str()
         #
         # Remove the lab if option --force=True
         #
-        if force.upper() == "TRUE":
-            api.deleteLab(ymlF[YAML_PROJECT_KEY][PROJECT_NAME_KEY]+".unl")
+        if str(force).upper() == "TRUE":
+            api.delete_lab(ymlF[YAML_PROJECT_KEY][PROJECT_NAME_KEY]+".unl")
             print(
                 f"[eveng-api - deploy_all] - lab {str(ymlF[YAML_PROJECT_KEY][PROJECT_NAME_KEY])}.unl has been removed !")
 
@@ -397,13 +397,13 @@ def deploy_all (api: PyEVENG.PyEVENG, ymlF: dict(), vmInfo: dict(), force: str()
     except EVENG_Exception as eve:
         print(eve._message)
         if eve._error != 12:
-            api.deleteLab(ymlF[YAML_PROJECT_KEY][PROJECT_NAME_KEY]+".unl")
+            api.delete_lab(ymlF[YAML_PROJECT_KEY][PROJECT_NAME_KEY]+".unl")
 
 
     except Exception as e:
         print(e)
         print("[eveng-api - deploy_all] - error during la creation !")
-        api.deleteLab(ymlF[YAML_PROJECT_KEY][PROJECT_NAME_KEY]+".unl")
+        api.delete_lab(ymlF[YAML_PROJECT_KEY][PROJECT_NAME_KEY]+".unl")
 
 # ----------------------------------------------------
 #
