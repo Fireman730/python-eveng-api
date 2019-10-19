@@ -33,16 +33,6 @@ except ImportError as importError:
     exit(EXIT_FAILURE)
 
 try:
-    from ansible.executor.playbook_executor import PlaybookExecutor
-    from ansible.parsing.dataloader import DataLoader
-    from ansible.vars.manager import VariableManager
-    from ansible.inventory.manager import InventoryManager
-except ImportError as importError:
-    print("Error import [eveng-api] ansible")
-    print(importError)
-    exit(EXIT_FAILURE)
-
-try:
     import pexpect
 except ImportError as importError:
     print("Error import [eveng-api] pexpect")
