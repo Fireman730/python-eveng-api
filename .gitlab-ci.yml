@@ -8,6 +8,6 @@ tests:
   script:
     - pip install --upgrade pip
     - pip install -r requirements.txt
-    - python ./tests/test_validator.py
+    - python ./test_validator.py
   tags:
     - docker

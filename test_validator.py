@@ -59,10 +59,10 @@ except ImportError as importError:
 #
 # Constantes
 #
-FILES_TO_TEST_PATH = "./../architecture/tests"
+FILES_TO_TEST_PATH = "./architecture/tests"
 FILE_EXTENSION_YML = ".yml"
 FILE_EXTENSION_YAML = ".yaml"
-VM_INFO_PATH_GHOST = "./../vm/vm_info.yml"
+VM_INFO_PATH_GHOST = "./vm/vm_info.yml"
 
 ######################################################
 #
@@ -94,17 +94,26 @@ def open_file(path: str()) -> dict():
 def main():
     
     ghost_api = api.PyEVENG.PyEVENG
+    return_value = True
+    file_nok_lst = list
 
     for r, d, f in os.walk(FILES_TO_TEST_PATH):
         for file in f:
             if FILE_EXTENSION_YML in file or FILE_EXTENSION_YAML in file: 
-                validateYamlFileForPyEVENG(
+                print(f"[test_validator.py - main] {file} will be tested")
+                file_ok = validateYamlFileForPyEVENG(
                     ghost_api, 
                     open_file(os.path.join(r, file)),
                     vm_info=VM_INFO_PATH_GHOST,
                     pipeline=True
                 )
+                print(f"[test_validator.py - main] {file} is {file_ok}")
+                if file_ok is False:
+                    file_nok_lst.append(file)
+                    return_value = False
 
+    print(f"\n[test_validator.py - main] All files are ok ? {str(return_value).upper()}\n")
+    
 # -----------------------------------------------------------------------------------------------------------------------------
 #
 #

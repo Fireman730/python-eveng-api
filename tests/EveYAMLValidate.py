@@ -142,10 +142,7 @@ def pprintline(data: str()) -> None:
     print("==================================================================")
 
 
-def test_function(pipeline):
-    validateYamlFileForPyEVENG(api=PyEVENG.PyEVENG, yaml=dict, vm_info="null", pipeline=True)
-
-def validateYamlFileForPyEVENG(api: PyEVENG.PyEVENG, yaml_content: dict(), vm_info, * , pipeline):
+def validateYamlFileForPyEVENG(api: PyEVENG.PyEVENG, yaml_content: dict(), vm_info, * , pipeline=False):
 
     # Check that project:path doesn't start or end with "/"
     # assert check_project_path_not_start_or_end_with_slash(yaml_content)
@@ -198,7 +195,7 @@ def validateYamlFileForPyEVENG(api: PyEVENG.PyEVENG, yaml_content: dict(), vm_in
     if "configs" in yaml_content.keys():
         assert checkIfConfigsNodesExists(yaml_content)
 
-
+    return True
 ######################################################
 #
 # Test functions
