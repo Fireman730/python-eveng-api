@@ -79,13 +79,6 @@ except ImportError as importError:
     print(importError)
     exit(EXIT_FAILURE)
 
-try:
-    import click
-except ImportError as importError:
-    print("Error import [EveYamlValidate.py] click")
-    print(importError)
-    exit(EXIT_FAILURE)
-
 ######################################################
 #
 # Constantes
@@ -149,8 +142,9 @@ def pprintline(data: str()) -> None:
     print("==================================================================")
 
 
-@click.command()
-@click.option('--pipeline', default=False, help='If pipeline is True, Function with an api call will not be run.')
+def test_function(pipeline):
+    validateYamlFileForPyEVENG(api=PyEVENG.PyEVENG, yaml=dict, vm_info="null", pipeline=True)
+
 def validateYamlFileForPyEVENG(api: PyEVENG.PyEVENG, yaml_content: dict(), vm_info, * , pipeline):
 
     # Check that project:path doesn't start or end with "/"
