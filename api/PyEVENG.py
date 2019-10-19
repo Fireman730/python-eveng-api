@@ -2014,6 +2014,15 @@ class PyEVENG:
                         "sudo ifconfig {} up && sudo ifconfig {} {} netmask {}".format(link['network'], link['network'], ipMgmtEve, ipMaskEve))
                     o = "".join(stdout.readlines())
 
+                if self._check_if_forwarding_is_activate_by_interface(ssh, link[LINKS_NETWORK_KEY]) is False:
+                            if self._active_forwarding_on_an_inteface(ssh, link[LINKS_NETWORK_KEY]) is False:
+                                raise EVENG_Exception(
+                                    f"{HEADER} _execute_api_call] Error during forwading activation for interface {link[LINKS_NETWORK_KEY]}", 803)
+
+                if self._check_if_forwarding_is_activate_by_ip(ssh, link[LINKS_IP_PUB_KEY]) is False:
+                    if self._active_forwarding_for_an_ip(ssh, link[LINKS_IP_PUB_KEY]) is False:
+                            raise EVENG_Exception(
+                                f"{HEADER} _execute_api_call] Error during forwading activation for interface {link[LINKS_NETWORK_KEY]}", 803)
 
                 for oobInterface in link['src']:
 
@@ -2026,16 +2035,6 @@ class PyEVENG:
                             "con_int_port": oobInterface['ssh'],
                             "url": "ssh -p {} -l <username> {}".format(oobInterface['nat'], self._ipAddress)
                         }
-
-                        if self._check_if_forwarding_is_activate_by_interface(ssh, link[LINKS_NETWORK_KEY]) is False:
-                            if self._active_forwarding_on_an_inteface(ssh, link[LINKS_NETWORK_KEY]) is False:
-                                raise EVENG_Exception(
-                                    f"{HEADER} _execute_api_call] Error during forwading activation for interface {link[LINKS_NETWORK_KEY]}", 803)
-
-                        if self._check_if_forwarding_is_activate_by_ip(ssh, link[LINKS_IP_PUB_KEY]) is False:
-                            if self._active_forwarding_for_an_ip(ssh, link[LINKS_IP_PUB_KEY]) is False:
-                                raise EVENG_Exception(
-                                    f"{HEADER} _execute_api_call] Error during forwading activation for interface {link[LINKS_NETWORK_KEY]}", 803)
                             
                         self.create_iptables_nat(
                             ssh, link['ip_pub'], link['network'], oobInterface['ip_mgmt'], oobInterface['ssh'], ipMgmtEve, oobInterface['nat'])
