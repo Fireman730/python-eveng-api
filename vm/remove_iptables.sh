@@ -8,4 +8,12 @@ iptables -t mangle -F
 iptables -F
 iptables -X
 
+ip6tables -P INPUT ACCEPT
+ip6tables -P FORWARD ACCEPT
+ip6tables -P OUTPUT ACCEPT
+ip6tables -t nat -F
+ip6tables -t mangle -F
+ip6tables -F
+ip6tables -X
+
 # echo '1' | sudo tee /proc/sys/net/ipv4/conf/pnet0/forwarding

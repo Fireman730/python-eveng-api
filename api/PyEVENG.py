@@ -1993,7 +1993,8 @@ class PyEVENG:
             param2 (str): Labname
         """
         ssh = self.sshConnect()
-        connexionInformations = dict()
+        connexion_informations = dict()
+        create_connexion_file = False
 
         for link in interfaceToAdd:
             if link['dst'] == "OOB-NETWORK":
@@ -2002,6 +2003,9 @@ class PyEVENG:
                 # 
                 
                 if "ip_eve" in link.keys():
+
+                    create_connexion_file = True
+
                     index = link['ip_eve'].find("/")
                     ipMgmtEve = link['ip_eve'][:index]
                     ipMaskEveCidr = link['ip_eve'][index+1:]
@@ -2015,13 +2019,13 @@ class PyEVENG:
                     o = "".join(stdout.readlines())
 
 
-                if self._check_if_forwarding_is_activate_by_interface(ssh, link[LINKS_NETWORK_KEY]) is False:
-                            if self._active_forwarding_on_an_inteface(ssh, link[LINKS_NETWORK_KEY]) is False:
-                                raise EVENG_Exception(
-                                    f"{HEADER} _execute_api_call] Error during forwading activation for interface {link[LINKS_NETWORK_KEY]}", 803)
+                    if self._check_if_forwarding_is_activate_by_interface(ssh, link[LINKS_NETWORK_KEY]) is False:
+                        if self._active_forwarding_on_an_inteface(ssh, link[LINKS_NETWORK_KEY]) is False:
+                            raise EVENG_Exception(
+                                f"{HEADER} _execute_api_call] Error during forwading activation for interface {link[LINKS_NETWORK_KEY]}", 803)
 
-                if self._check_if_forwarding_is_activate_by_ip(ssh, link[LINKS_IP_PUB_KEY]) is False:
-                    if self._active_forwarding_for_an_ip(ssh, link[LINKS_IP_PUB_KEY]) is False:
+                    if self._check_if_forwarding_is_activate_by_ip(ssh, link[LINKS_IP_PUB_KEY]) is False:
+                        if self._active_forwarding_for_an_ip(ssh, link[LINKS_IP_PUB_KEY]) is False:
                             raise EVENG_Exception(
                                 f"{HEADER} _execute_api_call] Error during forwading activation for interface {link[LINKS_NETWORK_KEY]}", 803)
 
@@ -2029,7 +2033,7 @@ class PyEVENG:
 
                     if "ip_eve" in link.keys():
 
-                        connexionInformations[oobInterface['host']] = {
+                        connexion_informations[oobInterface['host']] = {
                             "ip_address_eve": self._ipAddress,
                             "ip_address_host": oobInterface['ip_mgmt'],
                             "con_ext_port": oobInterface['nat'],
@@ -2050,8 +2054,9 @@ class PyEVENG:
                 self.addLinkToLab(link['id'], self.getNodeIDbyNodeName(labName, link['dst']),
                                   self.getNodeInterfaceID(labName, self.getNodeIDbyNodeName(labName, link['dst']), link['dport']), labName)
 
+        if create_connexion_file:
+            self.write_in_remote_file(ssh, connexion_informations, "/root/.eveng/connexion_{}".format(labName), mode='w')
 
-        self.write_in_remote_file(ssh, connexionInformations, "/root/.eveng/connexion_{}".format(labName), mode='w')
         ssh.close()
     
     # =========================================================================================================================================================
