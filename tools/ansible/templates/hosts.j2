@@ -3,7 +3,7 @@
 {% for groups_name, members in ansible['groups'].items() %}
 [{{ groups_name }}]
 {% for member in members %}
-{{ member }} {% if links is defined %}{% for link in links -%}{% if "OOB-NETWORK" in link['dst'] %}{% for host in link['src'] %}{% if host['host'] == member %}ansible_host={{ host['ip_mgmt']}} ansible_port={{ host['nat'] }} {% endif %}{% endfor %}{% endif %}{%- endfor %}{% endif %}
+{{ member }} {% if links is defined %}{% for link in links -%}{% if "OOB-NETWORK" in link['dst'] %}{% for host in link['src'] %}{% if host['host'] == member %}ansible_host={{ link['ip_pub']}} ansible_port={{ host['nat'] }} {% endif %}{% endfor %}{% endif %}{%- endfor %}{% endif %}
 {% endfor %}
 {% endfor %}
 {% endif %}

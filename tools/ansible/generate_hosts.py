@@ -20,7 +20,8 @@ __license__ = "MIT"
 #
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
-
+ERROR_IMPORT = "Error import [generate_hosts]"
+HEADER = "[generate_hosts -"
 ######################################################
 #
 # Import Library
@@ -28,14 +29,14 @@ EXIT_FAILURE = 1
 try:
     import jinja2
 except ImportError as importError:
-    print("Error import [generate_hosts] jinja2")
+    print(f"{ERROR_IMPORT} jinja2")
     print(importError)
     exit(EXIT_FAILURE)
 
 try:
     import yaml
 except ImportError as importError:
-    print("Error import [generate_hosts] yaml")
+    print(f"{ERROR_IMPORT} yaml")
     print(importError)
     exit(EXIT_FAILURE)
 
@@ -43,7 +44,21 @@ try:
     import pprint
     PP = pprint.PrettyPrinter(indent=4)
 except ImportError as importError:
-    print("Error import [eveng-api] pprint")
+    print(f"{ERROR_IMPORT} pprint")
+    print(importError)
+    exit(EXIT_FAILURE)
+
+try:
+    import logging
+    logging.getLogger(__name__)
+    logging.basicConfig(
+    level=logging.DEBUG,
+    filename="./logs/genAnsible.log",
+    format='[%(asctime)s] - %(levelname)s - %(message)s',
+    datefmt="%Y-%m-%d %H:%M:%S"
+    )
+except ImportError as importError:
+    print(f"{ERROR_IMPORT} logging")
     print(importError)
     exit(EXIT_FAILURE)
 ######################################################
@@ -71,37 +86,51 @@ def open_file(path: str()) -> dict():
     Returns:
         str: Node name
     """
-
+    logging.debug(f"[{HEADER} open_file] Open {path}...")
     with open(path, 'r') as yamlFile:
         try:
+            logging.debug(f"[{HEADER} open_file] Retrieve content of {path}...")
             data = yaml.load(yamlFile)
         except yaml.YAMLError as exc:
             print(exc)
 
+    logging.debug(f"[{HEADER} open_file] Return data :")
+    logging.debug(f"[{HEADER} open_file] {data} :")
     return data
 
 
+# ----------------------------------------------------
+#
+#
 def write_string_in_file(data: str(), path=ANSIBLE_HOSTFILE, *, mode="w+"):
+    logging.debug(f"[{HEADER} write_string_in_file] Open {path}...")
     file = open(path, mode)
+    logging.debug(f"[{HEADER} write_string_in_file] Write data...")
     file.write(data)
+    logging.debug(f"[{HEADER} write_string_in_file] Close {path}...")
     file.close()
-
 
 # ----------------------------------------------------
 #
 #
 def generate(data:dict()):
 
-    print(f"[generate_hosts - generate] Your dynamic hosts file is being created ...")
+    logging.debug(f"[{HEADER} generate] Your dynamic hosts file is being created ...")
+    print(f"[{HEADER} generate] Your dynamic hosts file is being created ...")
 
     env = jinja2.Environment(loader=jinja2.FileSystemLoader(
         HOSTS_FILE_DIRECTORY), trim_blocks=False, lstrip_blocks=True)
     template = env.get_template(HOSTS_FILE_TEMPLATE)
-                       
+
     result = template.render(data)
+
+    logging.debug(f"[{HEADER} generate] file content :")
+    logging.debug(f"{result}")
+
     write_string_in_file(data=result)
 
-    print(f"[generate_hosts - generate] Your dynamic hosts file has been created ...")
+    logging.debug(f"[{HEADER} generate] Your dynamic hosts file has been created ...")
+    print(f"[{HEADER} generate] Your dynamic hosts file has been created ...")
 # -----------------------------------------------------------------------------------------------------------------------------
 #
 #

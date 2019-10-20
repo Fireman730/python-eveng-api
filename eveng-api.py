@@ -182,14 +182,15 @@ def main(deploy, inventory, vm, force, start, backup, stop, remove, test, images
     # [and]
     # ymlF that contains lab to deploy informations
     #
-    vmInfo = open_file(vm)
+    if inventory == "#":
+        vmInfo = open_file(vm)
 
-    #
-    # Create the object that is connected with EVE-NG API
-    #
-    cliVerbose = connexion is "null" and telnet is "null"
+        #
+        # Create the object that is connected with EVE-NG API
+        #
+        cliVerbose = connexion is "null" and telnet is "null"
 
-    api = PyEVENG.PyEVENG(vmInfo['https_username'],
+        api = PyEVENG.PyEVENG(vmInfo['https_username'],
                         vmInfo['https_password'],
                         vmInfo['ip'],
                         vmInfo['https_port'],
@@ -200,7 +201,7 @@ def main(deploy, inventory, vm, force, start, backup, stop, remove, test, images
                         rmdp=vmInfo['ssh_pass'],
                         community=vmInfo['community'],
                         verbose=cliVerbose
-    )
+        )
 
     # ======================================================================================================
     if telnet is not "null":
