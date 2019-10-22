@@ -153,7 +153,7 @@ links:
   - id: 1
     type: ethernet
     network: bridge
-    src: spine01
+    src: TEST_ERROR
     sport: swp1
     dst: leaf01
     dport: swp1
@@ -350,12 +350,12 @@ links:
         port: eth0
         ip_mgmt: 10.0.4.204
         ssh: 22
-        nat: 22
+        nat: 22204
       - host: exit01
         port: eth0
         ip_mgmt: 10.0.4.151
         ssh: 22
-        nat: 65535
+        nat: 22151
       - host: exit02
         port: eth0
         ip_mgmt: 10.0.4.152

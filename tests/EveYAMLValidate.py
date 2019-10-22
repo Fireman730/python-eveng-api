@@ -195,11 +195,14 @@ def validateYamlFileForPyEVENG(api: PyEVENG.PyEVENG, yaml_content: dict(), vm_in
     # Check that each EVENG port used to NAT is unique
     assert checkNatPort(yaml_content)
     # Check port-forwarding is between 10000 et 30000
-    assert checkPortValue(yaml_content)
+    if check_port_value(yaml_content) is False:
+        return_value = False
     # Check that each device has a unique IP address in OOB NETWORK
     assert checkDeviceIPAddressInOOB(yaml_content)
     # Check that links:node is in devices:name
-    assert checkIfLinksHostIsExisting(yaml_content)
+    if check_if_links_host_exists(yaml_content) is False:
+        return_value = False
+
     # Check that devices type is in IMAGE_TYPES
     assert checkDeviceElement(IMAGE_TYPES, yaml_content)
     # Check that devices console is in CONSOLE_TYPES
@@ -216,8 +219,9 @@ def validateYamlFileForPyEVENG(api: PyEVENG.PyEVENG, yaml_content: dict(), vm_in
     if pipeline is False:
         assert checkVMMemoryFreeVSDevicesMemoryAsked(api, yaml_content)
     # Check that nodes in configs: node is in devices added
-    if "configs" in yaml_content.keys():
-        assert checkIfConfigsNodesExists(yaml_content)
+    if YAML_CONFIGS_KEY in yaml_content.keys():
+        if check_if_configs_nodes_exists(yaml_content) is False:
+            return_value = False
 
     # Check that ip_eve or ip_pub doesn't exist if there is not port-forwarding
     if check_ip_pub_if_not_port_fowrading(yaml_content) is False:
@@ -345,22 +349,36 @@ def checkIfRamIsAllowed(yaml_content: dict()) -> bool:
 ## Check that nodes in configs: node is in devices added
 
 
-def checkIfConfigsNodesExistsWithPath(pat_to_yaml_file: str()) -> bool:
-    return checkIfConfigsNodesExists(open_yaml_files(pat_to_yaml_file))
+def check_if_configs_nodes_exists_with_path(pat_to_yaml_file: str()) -> bool:
+    return check_if_configs_nodes_exists(open_yaml_files(pat_to_yaml_file))
 
 
-def checkIfConfigsNodesExists(yaml_content: dict()) -> bool:
+def check_if_configs_nodes_exists(yaml_content: dict()) -> bool:
     # Retrieve all devices: hostname
-    allDevices = list()
+    all_devices_lst = list()
+    return_value = True
 
-    for device in yaml_content['devices']:
-        allDevices.append(device['name'])
+    logging.debug(f"{HEADER} - check_if_configs_nodes_exists] Start function !")
 
-    for node in yaml_content['configs']:
-        if node['node'] not in allDevices:
-            raise EVENG_Exception(
-                str("[EveYAMLValidate.py - checkIfConfigsNodesExists] - Node "+str(node['node'])+" but node in your devices to add."), 900)
-    return True
+    if YAML_DEVICES_KEY in yaml_content.keys():
+        for device in yaml_content[YAML_DEVICES_KEY]:
+            all_devices_lst.append(device['name'])
+
+        logging.debug(f"{HEADER} - check_if_configs_nodes_exists] All nodes in YAML file !")
+        logging.debug(f"{all_devices_lst}")
+
+    if YAML_CONFIGS_KEY in yaml_content.keys():
+        for node in yaml_content[YAML_CONFIGS_KEY]:
+            logging.debug(f"{HEADER} - check_if_configs_nodes_exists] Is {node[CONFIG_NODE_KEY]} in the list ? ")
+            logging.debug(f"{all_devices_lst}")
+
+            if node[CONFIG_NODE_KEY] not in all_devices_lst:
+                logging.debug(f"{HEADER} - check_if_configs_nodes_exists] NOPE {node[CONFIG_NODE_KEY]} is NOT in the list !")
+                print(f"{HEADER} check_if_configs_nodes_exists] Node {node[CONFIG_NODE_KEY]} is not in the 'devices:' list ...")
+                return_value = False
+            else:
+                logging.debug(f"{HEADER} - check_if_configs_nodes_exists] Yes {node[CONFIG_NODE_KEY]} is in the list !")
+    return return_value
 
 ## Check if path_to_vm info value is a yaml file ###
 
@@ -473,37 +491,56 @@ def checkIfLinkConnectedToExistingDevice(yaml_content: dict(), devicesToVerify: 
 #
 
 
-def checkIfLinksHostIsExistingWithPath(pat_to_yaml_file: str(), dict_to_verify: str() = "links", param_to_verify: list() = ['src', 'sport', 'dst', 'dport']) -> bool:
-    return checkIfLinksHostIsExisting(open_yaml_files(pat_to_yaml_file), dict_to_verify, param_to_verify)
+def check_if_links_host_exists_with_path(pat_to_yaml_file: str(), dict_to_verify: str() = "links", param_to_verify: list() = ['src', 'sport', 'dst', 'dport']) -> bool:
+    return check_if_links_host_exists(open_yaml_files(pat_to_yaml_file), dict_to_verify, param_to_verify)
 
 
-def checkIfLinksHostIsExisting(yaml_content: dict(), dict_to_verify: str() = "links", param_to_verify: list() = ['src', 'sport', 'dst', 'dport']) -> bool:
-    allHostInLinks = set()
+def check_if_links_host_exists(yaml_content: dict(), dict_to_verify: str() = "links", param_to_verify: list() = ['src', 'sport', 'dst', 'dport']) -> bool:
 
-    for link in yaml_content[dict_to_verify]:
-        if link[param_to_verify[2]] != "OOB-NETWORK":
-            if link[param_to_verify[0]] not in allHostInLinks:
-                allHostInLinks.add([link[param_to_verify[0]]][0])
+    all_values = set()
+    return_value = True
 
-            if link[param_to_verify[2]] not in allHostInLinks:
-                allHostInLinks.add([link[param_to_verify[2]]][0])
+    logging.debug(f"{HEADER} check_if_links_host_exists] Start function !")
+    logging.debug(f"{HEADER} check_if_links_host_exists] dict_to_verify={dict_to_verify} !")
+    logging.debug(f"{HEADER} check_if_links_host_exists] param_to_verify={param_to_verify} !")
+    logging.debug(f"{HEADER} check_if_links_host_exists] param_to_verify={param_to_verify} !")
 
-        else:
-            for oobConnection in link[param_to_verify[0]]:
-                if oobConnection['host'] not in allHostInLinks:
-                    allHostInLinks.add([oobConnection['host']][0])
+    if dict_to_verify in yaml_content.keys():
+        for link in yaml_content[dict_to_verify]:
+            if link[param_to_verify[2]] != KEYWORD_TO_TELL_THAT_A_LINK_IS_OOB:
+                if link[param_to_verify[0]] not in all_values:
+                    logging.debug(
+                        f"{HEADER} check_if_links_host_exists] (1) Add {link[param_to_verify[0]]} in all_values !")
+                    all_values.add([link[param_to_verify[0]]][0])
+
+                if link[param_to_verify[2]] not in all_values:
+                    logging.debug(
+                        f"{HEADER} check_if_links_host_exists] (2) Add {link[param_to_verify[0]]} in all_values !")
+                    all_values.add([link[param_to_verify[2]]][0])
+
+            else:
+                logging.debug(f"{HEADER} check_if_links_host_exists] OOB Connexion !")
+                for oobConnection in link[param_to_verify[0]]:
+                    if oobConnection[OOB_HOST_KEY] not in all_values:
+                        logging.debug(
+                            f"{HEADER} check_if_links_host_exists] (3) Add {link[param_to_verify[0]]} in all_values !")
+                        all_values.add([oobConnection[OOB_HOST_KEY]][0])
 
     # Retrieve all devices: hostname
-    allDevices = list()
+    all_devices = list()
 
-    for device in yaml_content['devices']:
-        allDevices.append(device['name'])
+    for device in yaml_content[YAML_DEVICES_KEY]:
+        all_devices.append(device[DEVICES_NAME_KEY])
 
-    for linksHost in allHostInLinks:
-        if linksHost not in allDevices:
-            raise EVENG_Exception(str("[EveYAMLValidate.py - checkIfLinksHostIsExisting] - There is a link on "+str(
-                linksHost)+" but this node is not create in devices."), 900)
-    return True
+    for value in all_values:
+        if value not in all_devices:
+            logging.debug(f"{HEADER} check_if_links_host_exists] Link {value} is not in 'devices:'")
+            print(f"{HEADER} check_if_links_host_exists] Link {value} is not in 'devices:'")
+            return_value = False
+            #raise EVENG_Exception(f"{HEADER} check_if_links_host_exists] - There is a link on "+str(
+            #    linksHost)+" but this node is not create in devices."), 900)
+
+    return return_value
 
 #
 #### Check if port is use many time ####
@@ -560,26 +597,37 @@ def checkIfPortUseManyTime(yaml_content: dict(), dict_to_verify: str() = "links"
 #
 #### Check port-forwarding is between 10000 et 30000
 #
-def checkPortValue(yaml_content: dict()):
+def check_port_value(yaml_content: dict()):
 
-    error = False
+    return_value = True
     list_error = list()
+
+    logging.debug(f"{HEADER} check_port_value] Start function !")
 
     for link in yaml_content[YAML_LINKS_KEY]:
         if KEYWORD_TO_TELL_THAT_A_LINK_IS_OOB in link[LINKS_DST_KEY]:
+            logging.debug(f"{HEADER} check_port_value] link_id {link[LINKS_ID_KEY]} is OOB !")
             for oob_link in link[LINKS_SRC_KEY]:
                 if OOB_NAT_KEY in oob_link.keys():
+                    logging.debug(f"{HEADER} check_port_value] Link :")
+                    logging.debug(f"{oob_link}")
                     if oob_link[OOB_NAT_KEY] > MAX_NAT_PORT or oob_link[OOB_NAT_KEY] < MIN_NAT_PORT:
+                        logging.debug(f"{HEADER} check_port_value] ERROR with this LINK !")
                         list_error.append(
                             f"{oob_link[OOB_HOST_KEY]} - {oob_link[OOB_NAT_KEY]}")
-                        error = True
+                        return_value = False
+                    else:
+                        logging.debug(f"{HEADER} check_port_value] This link is OK !")
 
-    if error:
-        raise EVENG_Exception(
-            str(f"{HEADER} checkPortValue] - Port is > thant {MAX_NAT_PORT} or < {MIN_NAT_PORT} for : {list_error}"), 900)
+    if return_value is False:
+        logging.debug(f"{HEADER} check_port_value] Error with the following link(s) :")
+        logging.debug(f"{list_error}")
+        print(f"{HEADER} check_port_value] Error with the following link(s) :")
+        print(f"{list_error}")
+        #raise EVENG_Exception(
+        #    str(f"{HEADER} check_port_value] - Port is > thant {MAX_NAT_PORT} or < {MIN_NAT_PORT} for : {list_error}"), 900)
 
-    return True
-
+    return return_value
 
 #
 #### Check that each EVENG port used to NAT is unique ####

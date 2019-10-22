@@ -17,7 +17,7 @@ devices:
     name: spine01
     left: 45%
     top: 20%
-    ram: 512
+    ram: 1000
     console: telnet
     cpu: 1
     ethernet: 8
@@ -31,7 +31,7 @@ devices:
     name: spine02
     left: 55%
     top: 20%
-    ram: 1024
+    ram: 18306174659236498
     console: telnet
     cpu: 1
     ethernet: 8
@@ -350,12 +350,12 @@ links:
         port: eth0
         ip_mgmt: 10.0.4.204
         ssh: 22
-        nat: 22
+        nat: 22204
       - host: exit01
         port: eth0
         ip_mgmt: 10.0.4.151
         ssh: 22
-        nat: 65535
+        nat: 22151
       - host: exit02
         port: eth0
         ip_mgmt: 10.0.4.152

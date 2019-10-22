@@ -323,24 +323,54 @@ links:
     src:
       - host: spine01
         port: eth0
+        ip_mgmt: 10.0.4.101
+        ssh: 22
+        nat: 22101
       - host: spine02
         port: eth0
+        ip_mgmt: 10.0.4.102
+        ssh: 22
+        nat: 22102
       - host: leaf01
         port: eth0
+        ip_mgmt: 10.0.4.201
+        ssh: 22
+        nat: 22201
       - host: leaf02
         port: eth0
+        ip_mgmt: 10.0.4.202
+        ssh: 22
+        nat: 22202
       - host: leaf03
         port: eth0
+        ip_mgmt: 10.0.4.203
+        ssh: 22
+        nat: 22203
       - host: leaf04
         port: eth0
+        ip_mgmt: 10.0.4.204
+        ssh: 22
+        nat: 22
       - host: exit01
         port: eth0
+        ip_mgmt: 10.0.4.151
+        ssh: 22
+        nat: 65535
       - host: exit02
         port: eth0
+        ip_mgmt: 10.0.4.152
+        ssh: 22
+        nat: 22152
       - host: core01
         port: Mgmt
-      - host: core02
+        ip_mgmt: 10.0.4.51
+        ssh: 22
+        nat: 22051
+      - host: test_error!!!
         port: Mgmt
+        ip_mgmt: 10.0.4.52
+        ssh: 22
+        nat: 22052
     dst: OOB-NETWORK
     # Enter a free address in the range
     # This ip addr will be assigned to EVE-NG VM

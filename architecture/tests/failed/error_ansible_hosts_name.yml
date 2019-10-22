@@ -350,12 +350,12 @@ links:
         port: eth0
         ip_mgmt: 10.0.4.204
         ssh: 22
-        nat: 22
+        nat: 22204
       - host: exit01
         port: eth0
         ip_mgmt: 10.0.4.151
         ssh: 22
-        nat: 65535
+        nat: 22151
       - host: exit02
         port: eth0
         ip_mgmt: 10.0.4.152
@@ -415,7 +415,7 @@ ansible:
     leaf:
       - leaf01
       - leaf02
-      - leaf03
+      - TEST_ERROR
       - leaf04
     spine:
       - spine01
@@ -425,4 +425,4 @@ ansible:
       - exit02
     core:
       - core01
-      - core02
+      - TEST_ERROR
