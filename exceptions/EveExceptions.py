@@ -49,6 +49,7 @@ class EVENG_Exception(Exception):
           -> 903: Error in a value
       -> 910 - Error in "devices:"
       -> 920 - Error in "links:"
+          -> 921: ip_pub or ip_eve exist but there is not port-fowarding
       -> 930 - Error in "configs:"
           -> 931: Key missing in configs:
           -> 932: Value for a key is not in a list

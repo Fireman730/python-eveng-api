@@ -45,7 +45,8 @@ __status__ = "Prototype"
 #
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
-
+HEADER_ERR = "Error import [EveYamlValidate.py]"
+HEADER = "[EveYamlValidate.py -"
 ######################################################
 #
 # Import Library
@@ -53,21 +54,21 @@ EXIT_FAILURE = 1
 try:
     from exceptions.EveExceptions import EVENG_Exception
 except ImportError as importError:
-    print("Error import [EveYamlValidate.py] EVENG_Exception")
+    print(f"{HEADER_ERR} EVENG_Exception")
     print(importError)
     exit(EXIT_FAILURE)
 
 try:
     import yaml
 except ImportError as importError:
-    print("Error import [EveYamlValidate.py] yaml")
+    print(f"{HEADER_ERR}  yaml")
     print(importError)
     exit(EXIT_FAILURE)
 
 try:
     import api.PyEVENG as PyEVENG
 except ImportError as importError:
-    print("Error import [EveYamlValidate.py] PyEVENG")
+    print(f"{HEADER_ERR}  PyEVENG")
     print(importError)
     exit(EXIT_FAILURE)
 
@@ -75,7 +76,28 @@ try:
     import pprint
     PP = pprint.PrettyPrinter(indent=4)
 except ImportError as importError:
-    print("Error import [EveYamlValidate.py] pprint")
+    print(f"{HEADER_ERR}  pprint")
+    print(importError)
+    exit(EXIT_FAILURE)
+
+try:
+    from const.constantes import  *
+except ImportError as importError:
+    print(f"{HEADER_ERR} const.constantes")
+    print(importError)
+    exit(EXIT_FAILURE)
+
+try:
+    import logging
+    logging.getLogger(__name__)
+    logging.basicConfig(
+    level=logging.DEBUG,
+    filename="./../logs/yaml_validation.log",
+    format='[%(asctime)s] - %(levelname)s - %(message)s',
+    datefmt="%Y-%m-%d %H:%M:%S"
+    )
+except ImportError as importError:
+    print(f"{HEADER_ERR} logging")
     print(importError)
     exit(EXIT_FAILURE)
 
@@ -144,6 +166,8 @@ def pprintline(data: str()) -> None:
 
 def validateYamlFileForPyEVENG(api: PyEVENG.PyEVENG, yaml_content: dict(), vm_info, * , pipeline=False):
 
+    return_value = True
+
     # Check that project:path doesn't start or end with "/"
     # assert check_project_path_not_start_or_end_with_slash(yaml_content)
     # Check that path_to_vm info value is a yaml file
@@ -195,13 +219,57 @@ def validateYamlFileForPyEVENG(api: PyEVENG.PyEVENG, yaml_content: dict(), vm_in
     if "configs" in yaml_content.keys():
         assert checkIfConfigsNodesExists(yaml_content)
 
-    return True
+    # Check that ip_eve or ip_pub doesn't exist if there is not port-forwarding
+    if check_ip_pub_if_not_port_fowrading(yaml_content) is False:
+        return_value = False
+
+    return return_value
 ######################################################
 #
 # Test functions
 #
 # Create test functions below ...
 #
+
+# Check that ip_eve is not present if there are no port-forwarding
+def check_ip_pub_if_not_port_fowrading(yaml_content:dict()) -> bool:
+
+    logging.debug(f"{HEADER} - check_ip_pub_if_not_port_fowrading] Start function !")
+
+    port_forwarding = False
+    return_value = True
+
+    if YAML_LINKS_KEY in yaml_content.keys():
+        for link in yaml_content[YAML_LINKS_KEY]:
+            if LINKS_DST_KEY in link.keys():
+                if link[LINKS_DST_KEY] == KEYWORD_TO_TELL_THAT_A_LINK_IS_OOB:
+                    logging.debug(
+                        f"{HEADER} - check_ip_pub_if_not_port_fowrading] link_id {link[LINKS_ID_KEY]} is OOB !")
+                    if LINKS_SRC_KEY in link.keys():
+                        for oob_interface in link[LINKS_SRC_KEY]:
+                            if OOB_IP_MGMT_KEY in oob_interface.keys() and OOB_SSH_KEY in oob_interface.keys() and OOB_NAT_KEY in oob_interface.keys():
+                                logging.debug(
+                                    f"{HEADER} - check_ip_pub_if_not_port_fowrading] There are port-forwarding !")
+                                port_forwarding = True
+                            else:
+                                logging.debug(
+                                    f"{HEADER} - check_ip_pub_if_not_port_fowrading] There are NOT port-forwarding !")
+
+                    if port_forwarding is False:
+                        if LINKS_IP_EVE_KEY in  link.keys() or LINKS_IP_PUB_KEY in link.keys():
+                            logging.debug(
+                                f"{HEADER} - check_ip_pub_if_not_port_fowrading] ip_pub: or ip_eve are present...")
+                            return_value = False
+                            print(
+                                f"{HEADER} - check_ip_pub_if_not_port_fowrading] Error ip_eve or ip_pub can not exist if there are no port-forwarding")
+                            #raise EVENG_Exception(
+                            #    f"{HEADER} - check_ip_pub_if_not_port_fowrading] Error ip_eve or ip_pub can not exist \
+                            #        if there are no port-forwarding", 903)
+
+    logging.debug(f"{HEADER} - check_ip_pub_if_not_port_fowrading] Return value is {return_value} !")
+    return return_value
+
+
 def check_project_path_not_start_or_end_with_slash(yaml_content:dict()) -> bool:
 
     if str(yaml_content[YAML_PROJECT_KEY][PROJECT_PATH_KEY]).startswith('/') or \
