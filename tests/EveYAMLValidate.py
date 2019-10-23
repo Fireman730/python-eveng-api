@@ -89,12 +89,13 @@ except ImportError as importError:
 
 try:
     import logging
-    logging.getLogger(__name__)
-    logging.basicConfig(
-    level=logging.DEBUG,
-    filename="./../logs/yaml_validation.log",
-    format='[%(asctime)s] - %(levelname)s - %(message)s',
-    datefmt="%Y-%m-%d %H:%M:%S"
+    val_log = logging
+    val_log.getLogger(__name__)
+    val_log.basicConfig(
+        level=logging.DEBUG,
+        filename="./logs/EveYAMLValidate.log",
+        format='[%(asctime)s] - %(levelname)s - %(message)s',
+        datefmt="%Y-%m-%d %H:%M:%S"
     )
 except ImportError as importError:
     print(f"{HEADER_ERR} logging")
@@ -164,7 +165,9 @@ def pprintline(data: str()) -> None:
     print("==================================================================")
 
 
-def validateYamlFileForPyEVENG(api: PyEVENG.PyEVENG, yaml_content: dict(), vm_info, * , pipeline=False):
+def validateYamlFileForPyEVENG(api: PyEVENG.PyEVENG, yaml_content: dict(), vm_info, *, pipeline=False, file_path=""):
+
+    val_log.debug(f"{HEADER} - validateYamlFileForPyEVENG] Start function with {file_path}!")
 
     return_value = True
 
@@ -177,14 +180,34 @@ def validateYamlFileForPyEVENG(api: PyEVENG.PyEVENG, yaml_content: dict(), vm_in
     # Check that YAML file keys are corrects
     assert checkIfYamlFileKeysAreCorrect(yaml_content)
     # Check that each links have an different ID
-    assert checkIfDuplicateParam(yaml_content, "links", "id")
+    assert checkIfDuplicateParam(yaml_content, YAML_LINKS_KEY, LINKS_ID_KEY)
     # Check that each devices have an different name
-    assert checkIfDuplicateParam(yaml_content, "devices", "name")
+    assert checkIfDuplicateParam(yaml_content, YAML_DEVICES_KEY, DEVICES_NAME_KEY)
     # Check that each devices have a different UUID
-    if "uuid" in yaml_content['devices']:
-        assert checkIfDuplicateParam(yaml_content, "devices", "uuid")
-    # Check that RAM allowd to each device is allowd
-    assert checkIfRamIsAllowed(yaml_content)
+    if DEVICES_UUID_KEY in yaml_content[YAML_DEVICES_KEY]:
+        assert checkIfDuplicateParam(yaml_content, YAML_DEVICES_KEY, DEVICES_UUID_KEY)
+    
+    
+    # Check that RAM allowd to each device is allowed
+    val_log.debug("================================================================================================")
+    val_log.debug(f"{HEADER} - validateYamlFileForPyEVENG]({file_path}) check_if_ram_is_allowed - start check!")
+    if check_if_ram_is_allowed(yaml_content) is False:
+        val_log.debug(
+            f"{HEADER} - validateYamlFileForPyEVENG]({file_path}) check_if_ram_is_allowed is FAILED !!!!")
+        return_value = False
+    else:
+        val_log.debug(f"{HEADER} - validateYamlFileForPyEVENG]({file_path}) check_if_ram_is_allowed is SUCCESS !!!!")
+    
+
+    # Check that Ansible:groups: <hostname> are defined in devices:
+    if YAML_ANSIBLE_KEY in yaml_content.keys():
+        if check_ansible_groups_devices(yaml_content) is False:
+            val_log.debug(f"{HEADER} - validateYamlFileForPyEVENG]({file_path}) check_ansible_groups_devices is FAILED !!!!")
+            return_value = False
+        else:
+            val_log.debug(f"{HEADER} - validateYamlFileForPyEVENG]({file_path}) check_ansible_groups_devices is SUCCESS !!!!")
+
+    
     # Check that ansible: keys are allowed
     assert checkAnsibleKeys(yaml_content)
     assert checkAnsibleKeysGroupsExistIfPlaybooksExist(yaml_content)
@@ -194,38 +217,81 @@ def validateYamlFileForPyEVENG(api: PyEVENG.PyEVENG, yaml_content: dict(), vm_in
     assert checkIfPortUseManyTime(yaml_content)
     # Check that each EVENG port used to NAT is unique
     assert checkNatPort(yaml_content)
+    
     # Check port-forwarding is between 10000 et 30000
+    val_log.debug("================================================================================================")
+    val_log.debug(f"{HEADER} - validateYamlFileForPyEVENG]({file_path}) check_port_value - start check!")
     if check_port_value(yaml_content) is False:
+        val_log.debug(f"{HEADER} - validateYamlFileForPyEVENG]({file_path}) check_port_value is FAILED !!!!")
         return_value = False
+    else:
+        val_log.debug(f"{HEADER} - validateYamlFileForPyEVENG]({file_path}) check_port_value is SUCCESS !!!!")
+    
     # Check that each device has a unique IP address in OOB NETWORK
     assert checkDeviceIPAddressInOOB(yaml_content)
+    
     # Check that links:node is in devices:name
+    val_log.debug("================================================================================================")
+    val_log.debug(f"{HEADER} - validateYamlFileForPyEVENG]({file_path}) check_if_links_host_exists - start check!")
     if check_if_links_host_exists(yaml_content) is False:
+        val_log.debug(f"{HEADER} - validateYamlFileForPyEVENG]({file_path}) check_if_links_host_exists is FAILED !!!!")
         return_value = False
+    else:
+        val_log.debug(f"{HEADER} - validateYamlFileForPyEVENG]({file_path}) check_if_links_host_exists is SUCCESS !!!!")
 
     # Check that devices type is in IMAGE_TYPES
-    assert checkDeviceElement(IMAGE_TYPES, yaml_content)
+    val_log.debug("================================================================================================")
+    val_log.debug(f"{HEADER} - validateYamlFileForPyEVENG]({file_path}) check_if_links_host_exists - start check!")
+    if check_device_element(IMAGE_TYPES, yaml_content) is False:
+        val_log.debug(f"{HEADER} - validateYamlFileForPyEVENG]({file_path}) check_device_element(IMAGE_TYPES) is FAILED !!!!")
+        return_value = False
+    else:
+        val_log.debug(f"{HEADER} - validateYamlFileForPyEVENG]({file_path}) check_device_element(IMAGE_TYPES) is SUCCESS !!!!")
+
     # Check that devices console is in CONSOLE_TYPES
-    assert checkDeviceElement(
-        CONSOLE_TYPES, yaml_content, param_to_verify="console")
+    val_log.debug("================================================================================================")
+    val_log.debug(f"{HEADER} - validateYamlFileForPyEVENG]({file_path}) check_device_element - start check!")
+    if check_device_element(CONSOLE_TYPES, yaml_content, param_to_verify=DEVICES_CONSOLE_KEY) is False:
+        val_log.debug(f"{HEADER} - validateYamlFileForPyEVENG]({file_path}) check_device_element(CONSOLE_TYPES) is FAILED !!!!")
+        return_value = False
+    else:
+        val_log.debug(f"{HEADER} - validateYamlFileForPyEVENG]({file_path}) check_device_element(CONSOLE_TYPES) is SUCCESS !!!!")
+
     # Check that configs type is in CONFIG_TYPES
-    if "configs" in yaml_content.keys():
-        assert checkDeviceElement(
-            CONFIG_TYPES, yaml_content, dict_to_verify="configs", param_to_verify="type")
+    val_log.debug("================================================================================================")
+    val_log.debug(f"{HEADER} - validateYamlFileForPyEVENG]({file_path}) check_device_element(CONFIG_TYPES) - start check!")
+    if YAML_CONFIGS_KEY in yaml_content.keys():
+        if check_device_element(CONFIG_TYPES, yaml_content, dict_to_verify=YAML_CONFIGS_KEY, param_to_verify=CONFIG_TYPE_KEY) is False:
+            val_log.debug(f"{HEADER} - validateYamlFileForPyEVENG]({file_path}) check_device_element(CONFIG_TYPES) is FAILED !!!!")
+            return_value = False
+        else:
+            val_log.debug(f"{HEADER} - validateYamlFileForPyEVENG]({file_path}) check_device_element(CONFIG_TYPES) is SUCCESS !!!!")
+
     # Check that device image is available in the EVE-NG
     if pipeline is False:
         assert checkIfImageIsAvaiable(api, yaml_content)
     # Check memory available vs memery asked by devices
     if pipeline is False:
         assert checkVMMemoryFreeVSDevicesMemoryAsked(api, yaml_content)
+    
     # Check that nodes in configs: node is in devices added
+    val_log.debug("================================================================================================")
+    val_log.debug(f"{HEADER} - validateYamlFileForPyEVENG]({file_path}) check_if_configs_nodes_exists - start check!")
     if YAML_CONFIGS_KEY in yaml_content.keys():
         if check_if_configs_nodes_exists(yaml_content) is False:
+            val_log.debug(f"{HEADER} - validateYamlFileForPyEVENG]({file_path}) check_if_configs_nodes_exists is FAILED !!!!")
             return_value = False
+        else:
+            val_log.debug(f"{HEADER} - validateYamlFileForPyEVENG]({file_path}) check_if_configs_nodes_exists is SUCCESS !!!!")
 
     # Check that ip_eve or ip_pub doesn't exist if there is not port-forwarding
+    val_log.debug("================================================================================================")
+    val_log.debug(f"{HEADER} - validateYamlFileForPyEVENG]({file_path}) check_ip_pub_if_not_port_fowrading - start check!")
     if check_ip_pub_if_not_port_fowrading(yaml_content) is False:
+        val_log.debug(f"{HEADER} - validateYamlFileForPyEVENG]({file_path}) check_ip_pub_if_not_port_fowrading is FAILED !!!!")
         return_value = False
+    else:
+            val_log.debug(f"{HEADER} - validateYamlFileForPyEVENG]({file_path}) check_ip_pub_if_not_port_fowrading is SUCCESS !!!!")
 
     return return_value
 ######################################################
@@ -234,11 +300,69 @@ def validateYamlFileForPyEVENG(api: PyEVENG.PyEVENG, yaml_content: dict(), vm_in
 #
 # Create test functions below ...
 #
+def get_devices_name(yaml_content: dict()) -> list:
 
+    device_name_lst = list()
+
+    if YAML_DEVICES_KEY in yaml_content.keys():
+        for device in yaml_content[YAML_DEVICES_KEY]:
+            if DEVICES_CONFIG_KEY in device.keys():
+                device_name_lst.append(device[DEVICES_NAME_KEY])
+    
+    return device_name_lst
+
+# =========================================================================================================================================================
+#
+# Check that ram of each node is correct
+#
+def check_ansible_groups_devices(yaml_content: dict()) -> bool:
+
+    return_value = True
+    error_device_name_lst = list()
+
+    val_log.debug(f"{HEADER} check_ansible_groups_devices] Start function !")
+
+    if YAML_ANSIBLE_KEY in yaml_content.keys():
+        if ANSIBLE_GROUPS_KEY in yaml_content[YAML_ANSIBLE_KEY].keys():
+
+            # Retrieve all devices names
+            device_name_lst = get_devices_name(yaml_content)
+            val_log.debug(f"{HEADER} check_ansible_groups_devices] All devices name ({YAML_DEVICES_KEY}:{DEVICES_NAME_KEY}) :")
+            val_log.debug(f"==>> {device_name_lst}")
+
+            for group in yaml_content[YAML_ANSIBLE_KEY][ANSIBLE_GROUPS_KEY]:
+                for device_name_in_group in yaml_content[YAML_ANSIBLE_KEY][ANSIBLE_GROUPS_KEY][group]:
+                    val_log.debug(f"{HEADER} check_ansible_groups_devices] {device_name_in_group} is in the list above ??")
+                    val_log.debug(f"==>> {device_name_in_group in device_name_lst} // if confition is device_name_in_group not in device_name_lst = {device_name_in_group not in device_name_lst}")
+                    if device_name_in_group not in device_name_lst:
+                        error_device_name_lst.append(device_name_in_group)
+                        return_value = False
+        else:
+            val_log.debug(f"{HEADER} check_ansible_groups_devices] {ANSIBLE_GROUPS_KEY} key is not in the yaml file {YAML_ANSIBLE_KEY}:!")
+            print(f"{HEADER} check_ansible_groups_devices] Please set the groups key ({YAML_ANSIBLE_KEY}:{ANSIBLE_GROUPS_KEY}:)")
+            return_value = False
+
+    else:
+        val_log.debug(f"{HEADER} check_ansible_groups_devices] {YAML_ANSIBLE_KEY} key is not in the yaml file!")
+
+    val_log.debug(
+        f"{HEADER} check_ansible_groups_devices] return_value={return_value} ??")
+    if return_value is False:
+        val_log.debug(f"{HEADER} check_ansible_groups_devices] The following device(s) is/are not in ({YAML_DEVICES_KEY}:{DEVICES_NAME_KEY})")
+        print(f"{HEADER} check_ansible_groups_devices] The following device(s) is/are not in ({YAML_DEVICES_KEY}:{DEVICES_NAME_KEY})")
+        print(f"\t\t ==> {error_device_name_lst}")
+
+    return return_value
+
+
+
+# =========================================================================================================================================================
+#
 # Check that ip_eve is not present if there are no port-forwarding
+#
 def check_ip_pub_if_not_port_fowrading(yaml_content:dict()) -> bool:
 
-    logging.debug(f"{HEADER} - check_ip_pub_if_not_port_fowrading] Start function !")
+    val_log.debug(f"{HEADER} check_ip_pub_if_not_port_fowrading] Start function !")
 
     port_forwarding = False
     return_value = True
@@ -247,30 +371,30 @@ def check_ip_pub_if_not_port_fowrading(yaml_content:dict()) -> bool:
         for link in yaml_content[YAML_LINKS_KEY]:
             if LINKS_DST_KEY in link.keys():
                 if link[LINKS_DST_KEY] == KEYWORD_TO_TELL_THAT_A_LINK_IS_OOB:
-                    logging.debug(
-                        f"{HEADER} - check_ip_pub_if_not_port_fowrading] link_id {link[LINKS_ID_KEY]} is OOB !")
+                    val_log.debug(
+                        f"{HEADER} check_ip_pub_if_not_port_fowrading] link_id {link[LINKS_ID_KEY]} is OOB !")
                     if LINKS_SRC_KEY in link.keys():
                         for oob_interface in link[LINKS_SRC_KEY]:
                             if OOB_IP_MGMT_KEY in oob_interface.keys() and OOB_SSH_KEY in oob_interface.keys() and OOB_NAT_KEY in oob_interface.keys():
-                                logging.debug(
-                                    f"{HEADER} - check_ip_pub_if_not_port_fowrading] There are port-forwarding !")
+                                val_log.debug(
+                                    f"{HEADER} check_ip_pub_if_not_port_fowrading] There are port-forwarding !")
                                 port_forwarding = True
                             else:
-                                logging.debug(
-                                    f"{HEADER} - check_ip_pub_if_not_port_fowrading] There are NOT port-forwarding !")
+                                val_log.debug(
+                                    f"{HEADER} check_ip_pub_if_not_port_fowrading] There are NOT port-forwarding !")
 
                     if port_forwarding is False:
                         if LINKS_IP_EVE_KEY in  link.keys() or LINKS_IP_PUB_KEY in link.keys():
-                            logging.debug(
-                                f"{HEADER} - check_ip_pub_if_not_port_fowrading] ip_pub: or ip_eve are present...")
+                            val_log.debug(
+                                f"{HEADER} check_ip_pub_if_not_port_fowrading] ip_pub: or ip_eve are present...")
                             return_value = False
                             print(
-                                f"{HEADER} - check_ip_pub_if_not_port_fowrading] Error ip_eve or ip_pub can not exist if there are no port-forwarding")
+                                f"{HEADER} check_ip_pub_if_not_port_fowrading] Error ip_eve or ip_pub can not exist if there are no port-forwarding")
                             #raise EVENG_Exception(
-                            #    f"{HEADER} - check_ip_pub_if_not_port_fowrading] Error ip_eve or ip_pub can not exist \
+                            #    f"{HEADER} check_ip_pub_if_not_port_fowrading] Error ip_eve or ip_pub can not exist \
                             #        if there are no port-forwarding", 903)
 
-    logging.debug(f"{HEADER} - check_ip_pub_if_not_port_fowrading] Return value is {return_value} !")
+    val_log.debug(f"{HEADER} check_ip_pub_if_not_port_fowrading] Return value is {return_value} !")
     return return_value
 
 
@@ -331,24 +455,44 @@ def checkAnsibleKeys(yaml_content: dict()) -> bool:
 
     return True
 
-## Check that ram of each node is correct
+
+# =========================================================================================================================================================
+#
+# Check that ram of each node is correct
+#
+def check_if_ram_is_allowed_with_path(pat_to_yaml_file: str()) -> bool:
+    return check_if_ram_is_allowed(open_yaml_files(pat_to_yaml_file))
 
 
-def checkIfRamIsAllowedWithPath(pat_to_yaml_file: str()) -> bool:
-    return checkIfRamIsAllowed(open_yaml_files(pat_to_yaml_file))
+def check_if_ram_is_allowed(yaml_content: dict()) -> bool:
 
+    return_value = True
+    error_res_dict = dict()
+    
+    val_log.debug(f"{HEADER} - check_if_ram_is_allowed] Start function !")
 
-def checkIfRamIsAllowed(yaml_content: dict()) -> bool:
-    if "devices" in yaml_content.keys():
-        for device in yaml_content['devices']:
-            if str(device['ram']) not in RAM_ALLOWED:
-                return False
-        return True
-    return False
+    if YAML_DEVICES_KEY in yaml_content.keys():
+        val_log.debug(f"{HEADER} - check_if_ram_is_allowed] RAM memories allowed are : RAM_ALLOWED{RAM_ALLOWED} !")
+        for device in yaml_content[YAML_DEVICES_KEY]:
+            val_log.debug(f"{HEADER} - check_if_ram_is_allowed] {device[DEVICES_NAME_KEY]} has {device[DEVICES_RAM_KEY]} RAM!")
+            val_log.debug(f"{HEADER} - check_if_ram_is_allowed] This value is allowed ??")
+            val_log.debug(f"==>> {str(device[DEVICES_RAM_KEY]) in RAM_ALLOWED}")
+            if str(device[DEVICES_RAM_KEY]) not in RAM_ALLOWED:
+                logging.debug(f"{HEADER} - check_if_ram_is_allowed] DEVICE ERROR ^^^^^^")
+                error_res_dict[device[DEVICES_NAME_KEY]] = device[DEVICES_RAM_KEY]
+                return_value = False
 
-## Check that nodes in configs: node is in devices added
+    logging.debug(f"{HEADER} - check_if_ram_is_allowed] return_value={return_value}")
+    if return_value is False:
+        print(f"{HEADER} - check_if_ram_is_allowed] Error with the following device(s):")
+        PP.pprint(error_res_dict)
 
+    return return_value
 
+# =========================================================================================================================================================
+#
+# Check that nodes in configs: node is in devices added
+#
 def check_if_configs_nodes_exists_with_path(pat_to_yaml_file: str()) -> bool:
     return check_if_configs_nodes_exists(open_yaml_files(pat_to_yaml_file))
 
@@ -358,26 +502,26 @@ def check_if_configs_nodes_exists(yaml_content: dict()) -> bool:
     all_devices_lst = list()
     return_value = True
 
-    logging.debug(f"{HEADER} - check_if_configs_nodes_exists] Start function !")
+    val_log.debug(f"{HEADER} - check_if_configs_nodes_exists] Start function !")
 
     if YAML_DEVICES_KEY in yaml_content.keys():
         for device in yaml_content[YAML_DEVICES_KEY]:
             all_devices_lst.append(device['name'])
 
-        logging.debug(f"{HEADER} - check_if_configs_nodes_exists] All nodes in YAML file !")
-        logging.debug(f"{all_devices_lst}")
+        val_log.debug(f"{HEADER} - check_if_configs_nodes_exists] All nodes in YAML file !")
+        val_log.debug(f"{all_devices_lst}")
 
     if YAML_CONFIGS_KEY in yaml_content.keys():
         for node in yaml_content[YAML_CONFIGS_KEY]:
-            logging.debug(f"{HEADER} - check_if_configs_nodes_exists] Is {node[CONFIG_NODE_KEY]} in the list ? ")
-            logging.debug(f"{all_devices_lst}")
+            val_log.debug(f"{HEADER} - check_if_configs_nodes_exists] Is {node[CONFIG_NODE_KEY]} in the list ? ")
+            val_log.debug(f"{all_devices_lst}")
 
             if node[CONFIG_NODE_KEY] not in all_devices_lst:
-                logging.debug(f"{HEADER} - check_if_configs_nodes_exists] NOPE {node[CONFIG_NODE_KEY]} is NOT in the list !")
+                val_log.debug(f"{HEADER} - check_if_configs_nodes_exists] NOPE {node[CONFIG_NODE_KEY]} is NOT in the list !")
                 print(f"{HEADER} check_if_configs_nodes_exists] Node {node[CONFIG_NODE_KEY]} is not in the 'devices:' list ...")
                 return_value = False
             else:
-                logging.debug(f"{HEADER} - check_if_configs_nodes_exists] Yes {node[CONFIG_NODE_KEY]} is in the list !")
+                val_log.debug(f"{HEADER} - check_if_configs_nodes_exists] Yes {node[CONFIG_NODE_KEY]} is in the list !")
     return return_value
 
 ## Check if path_to_vm info value is a yaml file ###
@@ -428,23 +572,55 @@ def checkIfYamlFileKeysAreCorrect(yaml_content: dict()) -> bool:
 #
 
 
-def checkDeviceElementWithPath(element_lst: list(), pat_to_yaml_file: str(), dict_to_verify: str() = "devices", param_to_verify: str() = "type") -> bool:
-    return checkDeviceElement(element_lst, open_yaml_files(pat_to_yaml_file), dict_to_verify, param_to_verify)
+def check_device_element_with_path(element_lst: list(), pat_to_yaml_file: str(), dict_to_verify: str() = "devices", param_to_verify: str() = "type") -> bool:
+    return check_device_element(element_lst, open_yaml_files(pat_to_yaml_file), dict_to_verify, param_to_verify)
 
 
-def checkDeviceElement(element_lst: list(), yaml_content: dict(), dict_to_verify: str() = "devices", param_to_verify: str() = "type") -> bool:
+def check_device_element(element_lst: list(), yaml_content: dict(), dict_to_verify: str() = "devices", param_to_verify: str() = "type") -> bool:
 
-    for device in yaml_content[dict_to_verify]:
+    return_value = True
+    error_missing = False
+    error_not_list = False
 
-        if param_to_verify not in device.keys():
-            pprintline(device)
-            raise EVENG_Exception(
-                f"[EveYAMLValidate.py - checkDeviceElement] Error ! Key {param_to_verify} is missing in {dict_to_verify}: !", 931)
-        else:
-            if device[param_to_verify] not in element_lst:
-                raise EVENG_Exception(str("[EveYAMLValidate.py - checkDeviceElement] - Type "+str(dict_to_verify)+":"+str(param_to_verify)+": \""+str(
-                    device[param_to_verify])+"\" is not available on this EVE-NG."), 932)
-    return True
+
+    val_log.debug(f"{HEADER} check_device_element] Start function !")
+    val_log.debug(f"{HEADER} check_device_element] element_lst={element_lst}")
+    val_log.debug(f"{HEADER} check_device_element] dict_to_verify={dict_to_verify}")
+    val_log.debug(f"{HEADER} check_device_element] param_to_verify={param_to_verify}")
+
+    if dict_to_verify in yaml_content.keys():
+        for device in yaml_content[dict_to_verify]:
+            val_log.debug(
+                f"{HEADER} check_device_element] param_to_verify={param_to_verify} is present in device.keys={device.keys()} ???")
+            val_log.debug(f"==>> {param_to_verify in device.keys()} // if condition is param_to_verify not in device.keys() = {param_to_verify not in device.keys()}")
+            if param_to_verify not in device.keys():
+                val_log.debug(
+                    f"{HEADER} check_device_element](1) param_to_verify={param_to_verify} is present NOT in device.keys={device.keys()}")
+                print(f"{HEADER} check_device_element](1) Error ! Key {param_to_verify} is missing in {dict_to_verify}: !")
+                error_missing = True
+                return_value = False
+            else:
+                val_log.debug(f"{HEADER} check_device_element](2) param_to_verify={param_to_verify} is present in device.keys={device.keys()}")
+                val_log.debug(f"{HEADER} check_device_element](2) device[param_to_verify]={device[param_to_verify]} is present in element_lst={element_lst} ??? ")
+                val_log.debug(f"==>> {device[param_to_verify] in element_lst} // if device[param_to_verify] not in element_lst = {device[param_to_verify] not in element_lst}")
+                if device[param_to_verify] not in element_lst:
+                    val_log.debug(f"{HEADER} check_device_element](3) device[param_to_verify]={device[param_to_verify]} is NOT present in element_lst={element_lst}")
+                    val_log.debug(f"{HEADER} check_device_element](3) ({dict_to_verify}:{param_to_verify}:{device[param_to_verify]}) is not available on this EVE-NG.")
+                    error_not_list = True
+                    return_value = False
+
+    val_log.debug(f"{HEADER} check_device_element] error_missing={error_missing}")
+    if error_missing:
+        print(f"{HEADER} check_device_element] Please check that ({dict_to_verify}:{param_to_verify}) exists.")
+        print(f"\t\t Please use one of the following possibilities : {element_lst}")
+
+    val_log.debug(f"{HEADER} check_device_element] error_not_list={error_not_list}")
+    if error_not_list:
+        print(f"{HEADER} check_device_element] Please check your ({dict_to_verify}:{param_to_verify}) values.")
+        print(f"\t\t Please use one of the following possibilities : {element_lst}")
+
+    val_log.debug(f"{HEADER} check_device_element] return_value={return_value}")
+    return return_value
 #
 #### Check Image (Cumulus, Extreme, Cisco, Arista, ...) ####
 #
@@ -500,29 +676,29 @@ def check_if_links_host_exists(yaml_content: dict(), dict_to_verify: str() = "li
     all_values = set()
     return_value = True
 
-    logging.debug(f"{HEADER} check_if_links_host_exists] Start function !")
-    logging.debug(f"{HEADER} check_if_links_host_exists] dict_to_verify={dict_to_verify} !")
-    logging.debug(f"{HEADER} check_if_links_host_exists] param_to_verify={param_to_verify} !")
-    logging.debug(f"{HEADER} check_if_links_host_exists] param_to_verify={param_to_verify} !")
+    val_log.debug(f"{HEADER} check_if_links_host_exists] Start function !")
+    val_log.debug(f"{HEADER} check_if_links_host_exists] dict_to_verify={dict_to_verify} !")
+    val_log.debug(f"{HEADER} check_if_links_host_exists] param_to_verify={param_to_verify} !")
+    val_log.debug(f"{HEADER} check_if_links_host_exists] param_to_verify={param_to_verify} !")
 
     if dict_to_verify in yaml_content.keys():
         for link in yaml_content[dict_to_verify]:
             if link[param_to_verify[2]] != KEYWORD_TO_TELL_THAT_A_LINK_IS_OOB:
                 if link[param_to_verify[0]] not in all_values:
-                    logging.debug(
+                    val_log.debug(
                         f"{HEADER} check_if_links_host_exists] (1) Add {link[param_to_verify[0]]} in all_values !")
                     all_values.add([link[param_to_verify[0]]][0])
 
                 if link[param_to_verify[2]] not in all_values:
-                    logging.debug(
+                    val_log.debug(
                         f"{HEADER} check_if_links_host_exists] (2) Add {link[param_to_verify[0]]} in all_values !")
                     all_values.add([link[param_to_verify[2]]][0])
 
             else:
-                logging.debug(f"{HEADER} check_if_links_host_exists] OOB Connexion !")
+                val_log.debug(f"{HEADER} check_if_links_host_exists] OOB Connexion !")
                 for oobConnection in link[param_to_verify[0]]:
                     if oobConnection[OOB_HOST_KEY] not in all_values:
-                        logging.debug(
+                        val_log.debug(
                             f"{HEADER} check_if_links_host_exists] (3) Add {link[param_to_verify[0]]} in all_values !")
                         all_values.add([oobConnection[OOB_HOST_KEY]][0])
 
@@ -534,7 +710,7 @@ def check_if_links_host_exists(yaml_content: dict(), dict_to_verify: str() = "li
 
     for value in all_values:
         if value not in all_devices:
-            logging.debug(f"{HEADER} check_if_links_host_exists] Link {value} is not in 'devices:'")
+            val_log.debug(f"{HEADER} check_if_links_host_exists] Link {value} is not in 'devices:'")
             print(f"{HEADER} check_if_links_host_exists] Link {value} is not in 'devices:'")
             return_value = False
             #raise EVENG_Exception(f"{HEADER} check_if_links_host_exists] - There is a link on "+str(
@@ -602,26 +778,26 @@ def check_port_value(yaml_content: dict()):
     return_value = True
     list_error = list()
 
-    logging.debug(f"{HEADER} check_port_value] Start function !")
+    val_log.debug(f"{HEADER} check_port_value] Start function !")
 
     for link in yaml_content[YAML_LINKS_KEY]:
         if KEYWORD_TO_TELL_THAT_A_LINK_IS_OOB in link[LINKS_DST_KEY]:
-            logging.debug(f"{HEADER} check_port_value] link_id {link[LINKS_ID_KEY]} is OOB !")
+            val_log.debug(f"{HEADER} check_port_value] link_id {link[LINKS_ID_KEY]} is OOB !")
             for oob_link in link[LINKS_SRC_KEY]:
                 if OOB_NAT_KEY in oob_link.keys():
-                    logging.debug(f"{HEADER} check_port_value] Link :")
-                    logging.debug(f"{oob_link}")
+                    val_log.debug(f"{HEADER} check_port_value] Link :")
+                    val_log.debug(f"{oob_link}")
                     if oob_link[OOB_NAT_KEY] > MAX_NAT_PORT or oob_link[OOB_NAT_KEY] < MIN_NAT_PORT:
-                        logging.debug(f"{HEADER} check_port_value] ERROR with this LINK !")
+                        val_log.debug(f"{HEADER} check_port_value] ERROR with this LINK !")
                         list_error.append(
                             f"{oob_link[OOB_HOST_KEY]} - {oob_link[OOB_NAT_KEY]}")
                         return_value = False
                     else:
-                        logging.debug(f"{HEADER} check_port_value] This link is OK !")
+                        val_log.debug(f"{HEADER} check_port_value] This link is OK !")
 
     if return_value is False:
-        logging.debug(f"{HEADER} check_port_value] Error with the following link(s) :")
-        logging.debug(f"{list_error}")
+        val_log.debug(f"{HEADER} check_port_value] Error with the following link(s) :")
+        val_log.debug(f"{list_error}")
         print(f"{HEADER} check_port_value] Error with the following link(s) :")
         print(f"{list_error}")
         #raise EVENG_Exception(

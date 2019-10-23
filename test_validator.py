@@ -21,7 +21,7 @@ __license__ = "MIT"
 #
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
-
+HEADER_ERR = "Error import [test_validator]"
 ######################################################
 #
 # Import Library
@@ -30,28 +30,28 @@ EXIT_FAILURE = 1
 try:
     import api.PyEVENG
 except ImportError as importError:
-    print("Error import [test_validator] api.PyEVENG")
+    print(f"{HEADER_ERR} api.PyEVENG")
     print(importError)
     exit(EXIT_FAILURE)
 
 try:
     from tests.EveYAMLValidate import validateYamlFileForPyEVENG
 except ImportError as importError:
-    print("Error import [test_validator] tests.EveYAMLValidate")
+    print(f"{HEADER_ERR} tests.EveYAMLValidate")
     print(importError)
     exit(EXIT_FAILURE)
 
 try:
     import os
 except ImportError as importError:
-    print("Error import [test_validator] os")
+    print(f"{HEADER_ERR} os")
     print(importError)
     exit(EXIT_FAILURE)
 
 try:
     import yaml
 except ImportError as importError:
-    print("Error import [test_validator] yaml")
+    print(f"{HEADER_ERR} yaml")
     print(importError)
     exit(EXIT_FAILURE)
 
@@ -97,37 +97,50 @@ def main():
     ghost_api = api.PyEVENG.PyEVENG
     return_value = True
     file_nok_lst = list()
+    is_first = True
 
     print("########################################")
     print("### Following files should work")
     print("########################################")
     for r, d, f in os.walk(FILES_TO_TEST_PATH_SUCCESS):
         for file in f:
+            if is_first:
+                is_first = False
+            else:
+                print("--------")
             if FILE_EXTENSION_YML in file or FILE_EXTENSION_YAML in file: 
                 print(f"[test_validator.py - main] {FILES_TO_TEST_PATH_SUCCESS}/{file} will be tested")
                 file_ok = validateYamlFileForPyEVENG(
                     ghost_api, 
                     open_file(os.path.join(r, file)),
                     vm_info=VM_INFO_PATH_GHOST,
-                    pipeline=True
+                    pipeline=True,
+                    file_path=f"{FILES_TO_TEST_PATH_SUCCESS}/{file}"
                 )
                 print(f"[test_validator.py - main] {FILES_TO_TEST_PATH_SUCCESS}/{file} is {file_ok}")
                 if file_ok is False:
                     file_nok_lst.append(file)
                     return_value = False
 
+    is_first = True
+
     print("########################################")
     print("### Following files should not work")
     print("########################################")
     for r, d, f in os.walk(FILES_TO_TEST_PATH_FAILED):
         for file in f:
+            if is_first:
+                is_first = False
+            else:
+                print("--------")
             if FILE_EXTENSION_YML in file or FILE_EXTENSION_YAML in file:
                 print(f"[test_validator.py - main] {FILES_TO_TEST_PATH_FAILED}/{file} will be tested")
                 file_ok = validateYamlFileForPyEVENG(
                     ghost_api,
                     open_file(os.path.join(r, file)),
                     vm_info=VM_INFO_PATH_GHOST,
-                    pipeline=True
+                    pipeline=True,
+                    file_path=f"{FILES_TO_TEST_PATH_SUCCESS}/{file}"
                 )
                 print(f"[test_validator.py - main] {FILES_TO_TEST_PATH_FAILED}/{file} is {file_ok}")
                 if file_ok is True:

@@ -1,0 +1,426 @@
+---
+project:
+  path: /Users/
+  name: data-center-cumulus
+  version: 1
+  author: DylanHamel
+  description: Data Center Network with Cumulus Network devices
+  body: HEIG-VD - TB
+
+devices:
+  - type: qemu
+    template: cumulus
+    config: Unconfigured
+    delay: 0
+    icon: router.png
+    image: cumulus-vx-3.7.5
+    name: spine01
+    left: 45%
+    top: 20%
+    ram: 512
+    console: telnet
+    cpu: 1
+    ethernet: 8
+    uuid: 641a4800-1b19-427c-ae87-5555590b7790
+  - type: qemu
+    template: cumulus
+    config: Unconfigured
+    delay: 0
+    icon: router.png
+    image: cumulus-vx-3.7.5
+    name: spine02
+    left: 55%
+    top: 20%
+    ram: 1024
+    console: telnet
+    cpu: 1
+    ethernet: 8
+    uuid: 641a4800-1b19-427c-ae87-6666690b7790
+  - type: qemu
+    template: cumulus
+    config: Unconfigured
+    delay: 0
+    icon: router.png
+    image: cumulus-vx-3.7.5
+    name: leaf01
+    left: 35%
+    top: 35%
+    ram: 512
+    console: telnet
+    cpu: 1
+    ethernet: 8
+    uuid: 641a4800-1b19-427c-ae87-1111190b7790
+  - type: qemu
+    template: cumulus
+    config: Unconfigured
+    delay: 0
+    icon: router.png
+    image: cumulus-vx-3.7.5
+    name: leaf02
+    left: 45%
+    top: 35%
+    ram: 512
+    console: telnet
+    cpu: 1
+    ethernet: 8
+    uuid: 641a4800-1b19-427c-ae87-2222290b7790
+  - type: qemu
+    template: cumulus
+    config: Unconfigured
+    delay: 0
+    icon: router.png
+    image: cumulus-vx-3.7.5
+    name: leaf03
+    left: 55%
+    top: 35%
+    ram: 512
+    console: telnet
+    cpu: 1
+    ethernet: 8
+    uuid: 641a4800-1b19-427c-ae87-3333390b7790
+  - type: qemu
+    template: cumulus
+    config: Unconfigured
+    delay: 0
+    icon: router.png
+    image: cumulus-vx-3.7.5
+    name: leaf04
+    left: 65%
+    top: 35%
+    ram: 512
+    console: telnet
+    cpu: 1
+    ethernet: 8
+    uuid: 641a4800-1b19-427c-ae87-4444490b7790
+  - type: qemu
+    template: cumulus
+    config: Unconfigured
+    delay: 0
+    icon: router.png
+    image: cumulus-vx-3.7.5
+    name: exit01
+    left: 65%
+    top: 35%
+    ram: 512
+    console: telnet
+    cpu: 1
+    ethernet: 11
+    uuid: 641a4800-1b19-427c-ae87-4444490b7791
+  - type: qemu
+    template: cumulus
+    config: Unconfigured
+    delay: 0
+    icon: router.png
+    image: cumulus-vx-3.7.5
+    name: exit02
+    left: 65%
+    top: 35%
+    ram: 512
+    console: telnet
+    cpu: 1
+    ethernet: 11
+    uuid: 641a4800-1b19-427c-ae87-4444490b7792
+  - type: qemu
+    template: extremexos
+    config: Unconfigured
+    delay: 0
+    icon: "Switch L3.png"
+    image: extremexos-voss-7.1
+    name: core01
+    left: 45%
+    top: 20%
+    ram: 2048
+    console: telnet
+    cpu: 1
+    ethernet: 8
+    uuid: 641a4800-1b19-427c-ae87-5555590b77963
+  - type: qemu
+    template: extremexos
+    config: Unconfigured
+    delay: 0
+    icon: "Switch L3.png"
+    image: extremexos-voss-7.1
+    name: core02
+    left: 45%
+    top: 20%
+    ram: 2048
+    console: telnet
+    cpu: 1
+    ethernet: 8
+    uuid: 641a4800-1b19-427c-ae87-5555590b77964
+
+links:
+  - id: 1
+    type: ethernet
+    network: bridge
+    src: spine01
+    sport: swp1
+    dst: leaf01
+    dport: swp1
+  - id: 2
+    type: ethernet
+    network: bridge
+    src: spine01
+    sport: swp2
+    dst: leaf02
+    dport: swp1
+  - id: 3
+    type: ethernet
+    network: bridge
+    src: spine01
+    sport: swp3
+    dst: leaf03
+    dport: swp1
+  - id: 4
+    type: ethernet
+    network: bridge
+    src: spine01
+    sport: swp4
+    dst: leaf04
+    dport: swp1
+  - id: 5
+    type: ethernet
+    network: bridge
+    src: spine01
+    sport: swp5
+    dst: exit01
+    dport: swp1
+  - id: 6
+    type: ethernet
+    network: bridge
+    src: spine01
+    sport: swp6
+    dst: exit02
+    dport: swp1
+  - id: 7
+    type: ethernet
+    network: bridge
+    src: spine02
+    sport: swp4
+    dst: leaf04
+    dport: swp2
+  - id: 8
+    type: ethernet
+    network: bridge
+    src: spine02
+    sport: swp3
+    dst: leaf03
+    dport: swp2
+  - id: 9
+    type: ethernet
+    network: bridge
+    src: spine02
+    sport: swp2
+    dst: leaf02
+    dport: swp2
+  - id: 10
+    type: ethernet
+    network: bridge
+    src: spine02
+    sport: swp1
+    dst: leaf01
+    dport: swp2
+  - id: 11
+    type: ethernet
+    network: bridge
+    src: spine02
+    sport: swp5
+    dst: exit01
+    dport: swp2
+  - id: 12
+    type: ethernet
+    network: bridge
+    src: spine02
+    sport: swp6
+    dst: exit02
+    dport: swp2
+  - id: 13
+    type: ethernet
+    network: bridge
+    src: leaf01
+    sport: swp6
+    dst: leaf02
+    dport: swp6
+  - id: 14
+    type: ethernet
+    network: bridge
+    src: leaf01
+    sport: swp7
+    dst: leaf02
+    dport: swp7
+  - id: 15
+    type: ethernet
+    network: bridge
+    src: leaf03
+    sport: swp6
+    dst: leaf04
+    dport: swp6
+  - id: 16
+    type: ethernet
+    network: bridge
+    src: leaf03
+    sport: swp7
+    dst: leaf04
+    dport: swp7
+  - id: 17
+    type: ethernet
+    network: bridge
+    src: exit01
+    sport: swp6
+    dst: exit02
+    dport: swp6
+  - id: 18
+    type: ethernet
+    network: bridge
+    src: exit01
+    sport: swp7
+    dst: exit02
+    dport: swp7
+  - id: 19
+    type: ethernet
+    network: bridge
+    src: exit01
+    sport: swp8
+    dst: core01
+    dport: port1
+  - id: 20
+    type: ethernet
+    network: bridge
+    src: exit01
+    sport: swp9
+    dst: core02
+    dport: port1
+  - id: 21
+    type: ethernet
+    network: bridge
+    src: exit02
+    sport: swp9
+    dst: core02
+    dport: port2
+  - id: 22
+    type: ethernet
+    network: bridge
+    src: exit02
+    sport: swp8
+    dst: core01
+    dport: port2
+  - id: 23
+    type: ethernet
+    network: bridge
+    src: core01
+    sport: port3
+    dst: core02
+    dport: port3
+  - id: 24
+    type: ethernet
+    network: bridge
+    src: core01
+    sport: port4
+    dst: core02
+    dport: port4
+  - id: 25
+    network: pnet5
+    src:
+      - host: spine01
+        port: eth0
+        ip_mgmt: 10.0.4.101
+        ssh: 22
+        nat: 22101
+      - host: spine02
+        port: eth0
+        ip_mgmt: 10.0.4.102
+        ssh: 22
+        nat: 22102
+      - host: leaf01
+        port: eth0
+        ip_mgmt: 10.0.4.201
+        ssh: 22
+        nat: 22201
+      - host: leaf02
+        port: eth0
+        ip_mgmt: 10.0.4.202
+        ssh: 22
+        nat: 22202
+      - host: leaf03
+        port: eth0
+        ip_mgmt: 10.0.4.203
+        ssh: 22
+        nat: 22203
+      - host: leaf04
+        port: eth0
+        ip_mgmt: 10.0.4.204
+        ssh: 22
+        nat: 22204
+      - host: exit01
+        port: eth0
+        ip_mgmt: 10.0.4.151
+        ssh: 22
+        nat: 22151
+      - host: exit02
+        port: eth0
+        ip_mgmt: 10.0.4.152
+        ssh: 22
+        nat: 22152
+      - host: core01
+        port: Mgmt
+        ip_mgmt: 10.0.4.51
+        ssh: 22
+        nat: 22051
+      - host: core02
+        port: Mgmt
+        ip_mgmt: 10.0.4.52
+        ssh: 22
+        nat: 22052
+    dst: OOB-NETWORK
+    # Enter a free address in the range
+    # This ip addr will be assigned to EVE-NG VM
+    # Set your OOB network default gateway
+    ip_eve: 10.0.4.1/24
+    ip_pub: 172.16.194.239
+
+configs:
+  - node: spine01
+    config: ./../topology/configs/spine01
+  - node: spine02
+    type: full
+    config: ./../topology/configs/spine02
+  - node: leaf01
+    config: ./../topology/configs/leaf01
+  - node: leaf02
+    type: full
+    config: ./../topology/configs/leaf02
+  - node: leaf03
+    type: full
+    config: ./../topology/configs/leaf03
+  - node: leaf04
+    type: full
+    config: ./../topology/configs/leaf04
+  - node: exit01
+    type: full
+    config: ./../topology/configs/exit01
+  - node: exit02
+    type: full
+    config: ./../topology/configs/exit02
+  - node: core01
+    type: full
+    config: ./../topology/configs/core01
+  - node: core02
+    type: full
+    config: ./../topology/configs/core02
+
+ansible:
+  groups:
+    leaf:
+      - leaf01
+      - leaf02
+      - leaf03
+      - leaf04
+    spine:
+      - spine01
+      - spine02
+    exit:
+      - exit01
+      - exit02
+    core:
+      - core01
+      - core02
