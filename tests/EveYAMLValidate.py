@@ -216,7 +216,13 @@ def validateYamlFileForPyEVENG(api: PyEVENG.PyEVENG, yaml_content: dict(), vm_in
     # Check that each device ports are used only one time - not connected to many devices
     assert checkIfPortUseManyTime(yaml_content)
     # Check that each EVENG port used to NAT is unique
-    assert checkNatPort(yaml_content)
+    val_log.debug("================================================================================================")
+    val_log.debug(f"{HEADER} - validateYamlFileForPyEVENG]({file_path}) check_nat_port - start check!")
+    if check_nat_port(yaml_content) is False:
+        val_log.debug(f"{HEADER} - validateYamlFileForPyEVENG]({file_path}) check_nat_port is FAILED !!!!")
+        return_value = False
+    else:
+        val_log.debug(f"{HEADER} - validateYamlFileForPyEVENG]({file_path}) check_nat_port is SUCCESS !!!!")
     
     # Check port-forwarding is between 10000 et 30000
     val_log.debug("================================================================================================")
@@ -805,24 +811,44 @@ def check_port_value(yaml_content: dict()):
 
     return return_value
 
+
+# =========================================================================================================================================================
 #
-#### Check that each EVENG port used to NAT is unique ####
+# Check that each EVENG port used to NAT is unique
 #
+def check_nat_port(yaml_content: dict()):
 
-def checkNatPort(yaml_content: dict()):
+    nat_port_lst = list()
+    error_port_lst = list()
+    return_value = True
 
-    list_nat_port = list()
+    val_log.debug(f"{HEADER} check_nat_port] Start function !")
 
-    for link in yaml_content[YAML_LINKS_KEY]:
-        if KEYWORD_TO_TELL_THAT_A_LINK_IS_OOB in link[LINKS_DST_KEY]:
-            for oob_link in link[LINKS_SRC_KEY]:
-                if OOB_NAT_KEY in oob_link.keys():
-                    if oob_link[OOB_NAT_KEY] in list_nat_port:
-                        raise EVENG_Exception(
-                            str(f"{HEADER} checkNatPort] - Two devices have the same external NAT port : {str(oob_link['nat'])}"), 900)
-                    else:
-                        list_nat_port.append(oob_link[OOB_NAT_KEY])
-    return True
+    if YAML_LINKS_KEY in yaml_content.keys():
+        for link in yaml_content[YAML_LINKS_KEY]:
+            if KEYWORD_TO_TELL_THAT_A_LINK_IS_OOB in link[LINKS_DST_KEY]:
+                for oob_link in link[LINKS_SRC_KEY]:
+                    if OOB_NAT_KEY in oob_link.keys():
+                        logging.debug(
+                            f"{HEADER} check_nat_port] Link with port {oob_link[OOB_NAT_KEY]} already in list ??? ")
+                        logging.debug(
+                            f"==>> {oob_link[OOB_NAT_KEY] in nat_port_lst} ")
+                        if oob_link[OOB_NAT_KEY] in nat_port_lst:
+                            logging.debug(f"{HEADER} check_nat_port] ERROR with port {oob_link[OOB_NAT_KEY]}.")
+                            error_port_lst.append(oob_link[OOB_NAT_KEY])
+                            return_value = False
+                        else:
+                            logging.debug(f"{HEADER} check_nat_port] port {oob_link[OOB_NAT_KEY]} added in list.")
+                            nat_port_lst.append(oob_link[OOB_NAT_KEY])
+
+    logging.debug(f"{HEADER} check_nat_port] return_value={return_value}")
+    if return_value is False:
+        logging.debug(f"{HEADER} check_nat_port] ERROR the following port are present twice !!")
+        logging.debug(f"\t\t==>> {error_port_lst}")
+        print(f"{HEADER} check_nat_port] ERROR the following port are present twice !!")
+        print(f"\t\t==>> {error_port_lst}")
+
+    return return_value
 
 #
 #### Check that each device has a unique IP address in OOB NETWORK ####
