@@ -1,0 +1,8 @@
+---
+project:
+  path: /Users/
+  name: spine-leaf
+  version: 1
+  author: DylanHamel
+  description: Spine and Leaf architecture for test befor prod
+  body: Actual label

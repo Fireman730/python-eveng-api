@@ -176,7 +176,17 @@ def validateYamlFileForPyEVENG(api: PyEVENG.PyEVENG, yaml_content: dict(), vm_in
     # Check that path_to_vm info value is a yaml file
     # assert CheckIfPathToVMKeyGoToYAMLfile(yaml_content)
     # Check that YAML file contains project:, devices: and links: keys
-    assert checkifKeysAreInYamlFile(yaml_content)
+
+    # Check that YAML file contains project:, devices: and links: keys
+    val_log.debug("================================================================================================")
+    val_log.debug(f"{HEADER} - validateYamlFileForPyEVENG]({file_path}) check_if_ram_is_allowed - start check!")
+    if check_if_keys_are_in_yaml_file(yaml_content) is False:
+        val_log.debug(
+            f"{HEADER} - validateYamlFileForPyEVENG]({file_path}) check_if_keys_are_in_yaml_file is FAILED !!!!")
+        return_value = False
+    else:
+        val_log.debug(f"{HEADER} - validateYamlFileForPyEVENG]({file_path}) check_if_keys_are_in_yaml_file is SUCCESS !!!!")
+
     # Check that YAML file keys are corrects
     assert checkIfYamlFileKeysAreCorrect(yaml_content)
     # Check that each links have an different ID
@@ -184,8 +194,9 @@ def validateYamlFileForPyEVENG(api: PyEVENG.PyEVENG, yaml_content: dict(), vm_in
     # Check that each devices have an different name
     assert checkIfDuplicateParam(yaml_content, YAML_DEVICES_KEY, DEVICES_NAME_KEY)
     # Check that each devices have a different UUID
-    if DEVICES_UUID_KEY in yaml_content[YAML_DEVICES_KEY]:
-        assert checkIfDuplicateParam(yaml_content, YAML_DEVICES_KEY, DEVICES_UUID_KEY)
+    if YAML_DEVICES_KEY in yaml_content.keys():
+        if DEVICES_UUID_KEY in yaml_content[YAML_DEVICES_KEY]:
+            assert checkIfDuplicateParam(yaml_content, YAML_DEVICES_KEY, DEVICES_UUID_KEY)
     
     
     # Check that RAM allowd to each device is allowed
@@ -545,23 +556,47 @@ def CheckIfPathToVMKeyGoToYAMLfile(yaml_content: dict()) -> bool:
             str(yaml_content['path_vm_info']))+"."), 900)
 
 
-### Check that keys devices:, project: and links: are in your YAML file. Configs: is not mandatory ###
-def checkifKeysAreInYamlFileWithPath(pat_to_yaml_file: str()) -> bool:
-    return checkifKeysAreInYamlFile(open_yaml_files(pat_to_yaml_file))
-
-
-def checkifKeysAreInYamlFile(yaml_content: dict()) -> bool:
-    allKeys = yaml_content.keys()
-    for mandatoryKey in MANDATORY_YAML_KEYS:
-        if mandatoryKey not in allKeys:
-            raise EVENG_Exception(str("[EveYAMLValidate.py - checkifKeysAreInYamlFile] - Key ("+str(
-                mandatoryKey)+") is missing please add all mandatory keys (path_vm_info, project, devices, links."), 900)
-    return True
+# =========================================================================================================================================================
 #
-### Check that keys is corrects ###
+# Check that keys devices:, project: and links: are in your YAML file.
+#   Configs: is not mandatory
 #
+def check_if_keys_are_in_yaml_file_with_path(pat_to_yaml_file: str()) -> bool:
+    return check_if_keys_are_in_yaml_file(open_yaml_files(pat_to_yaml_file))
 
+def check_if_keys_are_in_yaml_file(yaml_content: dict()) -> bool:
 
+    all_keys = yaml_content.keys()
+    return_value = True
+    error_key_missing_lst = list()
+
+    val_log.debug(f"{HEADER} - check_if_keys_are_in_yaml_file] Start function !")
+    val_log.debug(f"{HEADER} - check_if_keys_are_in_yaml_file] All keys in YAML file = all_keys{all_keys} !")
+
+    for mandatory_key in MANDATORY_YAML_KEYS:
+        if mandatory_key not in all_keys:
+            val_log.debug(f"{HEADER} - check_if_keys_are_in_yaml_file] {mandatory_key} is NOT in the YAML file !")
+            val_log.debug(f"{HEADER} - check_if_keys_are_in_yaml_file] return_value pass to FALSE !")
+            error_key_missing_lst.append(mandatory_key)
+            return_value = False
+            #raise EVENG_Exception(str("[EveYAMLValidate.py - check_if_keys_are_in_yaml_file] - Key ("+str(
+            #    mandatory_key)+") is missing please add all mandatory keys (path_vm_info, project, devices, links."), 900)
+        else:
+            val_log.debug(f"{HEADER} - check_if_keys_are_in_yaml_file] {mandatory_key} is in the YAML file !")
+
+    val_log.debug(f"{HEADER} - check_if_keys_are_in_yaml_file] return_value={return_value} !")
+    if return_value is False:
+        val_log.debug(f"{HEADER} - check_if_keys_are_in_yaml_file] - Error with the following key(s) :")
+        val_log.debug(f"\t\t==>> {error_key_missing_lst}")
+        print(f"{HEADER} - check_if_keys_are_in_yaml_file] - Error with the following key(s) :")
+        print(f"\t\t==>> {error_key_missing_lst}")
+
+    return return_value
+
+# =========================================================================================================================================================
+#
+# Check that keys is corrects
+#
 def checkIfYamlFileKeysAreCorrectWithPath(pat_to_yaml_file: str()) -> bool:
     return checkIfYamlFileKeysAreCorrect(open_yaml_files(pat_to_yaml_file))
 
@@ -711,8 +746,9 @@ def check_if_links_host_exists(yaml_content: dict(), dict_to_verify: str() = "li
     # Retrieve all devices: hostname
     all_devices = list()
 
-    for device in yaml_content[YAML_DEVICES_KEY]:
-        all_devices.append(device[DEVICES_NAME_KEY])
+    if YAML_DEVICES_KEY in yaml_content.keys():
+        for device in yaml_content[YAML_DEVICES_KEY]:
+            all_devices.append(device[DEVICES_NAME_KEY])
 
     for value in all_values:
         if value not in all_devices:
@@ -734,45 +770,47 @@ def checkIfPortUseManyTimeWithPath(pat_to_yaml_file: str(), dict_to_verify: str(
 
 
 def checkIfPortUseManyTime(yaml_content: dict(), dict_to_verify: str() = "links", param_to_verify: list() = ['src', 'sport', 'dst', 'dport']) -> bool:
+
     allHostInLinks = dict()
 
-    for link in yaml_content[dict_to_verify]:
-        if link[param_to_verify[2]] != "OOB-NETWORK":
-            if link[param_to_verify[0]] not in allHostInLinks.keys():
-                allHostInLinks[link[param_to_verify[0]]] = list()
-            if link[param_to_verify[2]] not in allHostInLinks.keys():
-                allHostInLinks[link[param_to_verify[2]]] = list()
+    if dict_to_verify in yaml_content.keys():
+        for link in yaml_content[dict_to_verify]:
+            if link[param_to_verify[2]] != "OOB-NETWORK":
+                if link[param_to_verify[0]] not in allHostInLinks.keys():
+                    allHostInLinks[link[param_to_verify[0]]] = list()
+                if link[param_to_verify[2]] not in allHostInLinks.keys():
+                    allHostInLinks[link[param_to_verify[2]]] = list()
 
-        else:
-            for oobConnection in link[param_to_verify[0]]:
-                if oobConnection['host'] not in allHostInLinks.keys():
-                    allHostInLinks[oobConnection['host']] = list()
-
-    for link in yaml_content[dict_to_verify]:
-        if link['dst'] != "OOB-NETWORK":
-            if link[param_to_verify[1]] in allHostInLinks[link[param_to_verify[0]]]:
-                raise EVENG_Exception(
-                    str("[EveYAMLValidate.py - checkIfPortUseManyTime] - Port "+str(link[param_to_verify[1]])+" on "+str(link['src'])+" is use several times"), 900)
             else:
-                allHostInLinks[link[param_to_verify[0]]].append(
-                    link[param_to_verify[1]])
+                for oobConnection in link[param_to_verify[0]]:
+                    if oobConnection['host'] not in allHostInLinks.keys():
+                        allHostInLinks[oobConnection['host']] = list()
 
-            if link[param_to_verify[3]] in allHostInLinks[link[param_to_verify[2]]]:
-                raise EVENG_Exception(
-                    str("[EveYAMLValidate.py - checkIfPortUseManyTime] - Port "+str(link[param_to_verify[3]])+" on "+str(link['dst'])+" is use several times"), 900)
-            else:
-                allHostInLinks[link[param_to_verify[2]]].append(
-                    link[param_to_verify[3]])
-
-        else:
-            for oobConnection in link['src']:
-                if oobConnection['port'] in allHostInLinks[oobConnection['host']]:
+        for link in yaml_content[dict_to_verify]:
+            if link['dst'] != "OOB-NETWORK":
+                if link[param_to_verify[1]] in allHostInLinks[link[param_to_verify[0]]]:
                     raise EVENG_Exception(
-                        str("[EveYAMLValidate.py - checkIfPortUseManyTime] - Port "+str(
-                            oobConnection['port'])+" on "+str(oobConnection['host'])+" is use several times"), 900)
+                        str("[EveYAMLValidate.py - checkIfPortUseManyTime] - Port "+str(link[param_to_verify[1]])+" on "+str(link['src'])+" is use several times"), 900)
                 else:
-                    allHostInLinks[oobConnection['host']].append(
-                        oobConnection['port'])
+                    allHostInLinks[link[param_to_verify[0]]].append(
+                        link[param_to_verify[1]])
+
+                if link[param_to_verify[3]] in allHostInLinks[link[param_to_verify[2]]]:
+                    raise EVENG_Exception(
+                        str("[EveYAMLValidate.py - checkIfPortUseManyTime] - Port "+str(link[param_to_verify[3]])+" on "+str(link['dst'])+" is use several times"), 900)
+                else:
+                    allHostInLinks[link[param_to_verify[2]]].append(
+                        link[param_to_verify[3]])
+
+            else:
+                for oobConnection in link['src']:
+                    if oobConnection['port'] in allHostInLinks[oobConnection['host']]:
+                        raise EVENG_Exception(
+                            str("[EveYAMLValidate.py - checkIfPortUseManyTime] - Port "+str(
+                                oobConnection['port'])+" on "+str(oobConnection['host'])+" is use several times"), 900)
+                    else:
+                        allHostInLinks[oobConnection['host']].append(
+                            oobConnection['port'])
 
     return True
 
@@ -786,20 +824,21 @@ def check_port_value(yaml_content: dict()):
 
     val_log.debug(f"{HEADER} check_port_value] Start function !")
 
-    for link in yaml_content[YAML_LINKS_KEY]:
-        if KEYWORD_TO_TELL_THAT_A_LINK_IS_OOB in link[LINKS_DST_KEY]:
-            val_log.debug(f"{HEADER} check_port_value] link_id {link[LINKS_ID_KEY]} is OOB !")
-            for oob_link in link[LINKS_SRC_KEY]:
-                if OOB_NAT_KEY in oob_link.keys():
-                    val_log.debug(f"{HEADER} check_port_value] Link :")
-                    val_log.debug(f"{oob_link}")
-                    if oob_link[OOB_NAT_KEY] > MAX_NAT_PORT or oob_link[OOB_NAT_KEY] < MIN_NAT_PORT:
-                        val_log.debug(f"{HEADER} check_port_value] ERROR with this LINK !")
-                        list_error.append(
-                            f"{oob_link[OOB_HOST_KEY]} - {oob_link[OOB_NAT_KEY]}")
-                        return_value = False
-                    else:
-                        val_log.debug(f"{HEADER} check_port_value] This link is OK !")
+    if YAML_LINKS_KEY in yaml_content.keys():
+        for link in yaml_content[YAML_LINKS_KEY]:
+            if KEYWORD_TO_TELL_THAT_A_LINK_IS_OOB in link[LINKS_DST_KEY]:
+                val_log.debug(f"{HEADER} check_port_value] link_id {link[LINKS_ID_KEY]} is OOB !")
+                for oob_link in link[LINKS_SRC_KEY]:
+                    if OOB_NAT_KEY in oob_link.keys():
+                        val_log.debug(f"{HEADER} check_port_value] Link :")
+                        val_log.debug(f"{oob_link}")
+                        if oob_link[OOB_NAT_KEY] > MAX_NAT_PORT or oob_link[OOB_NAT_KEY] < MIN_NAT_PORT:
+                            val_log.debug(f"{HEADER} check_port_value] ERROR with this LINK !")
+                            list_error.append(
+                                f"{oob_link[OOB_HOST_KEY]} - {oob_link[OOB_NAT_KEY]}")
+                            return_value = False
+                        else:
+                            val_log.debug(f"{HEADER} check_port_value] This link is OK !")
 
     if return_value is False:
         val_log.debug(f"{HEADER} check_port_value] Error with the following link(s) :")
@@ -858,15 +897,16 @@ def checkDeviceIPAddressInOOB(yaml_content: dict()):
 
     list_nat_port = list()
 
-    for link in yaml_content['links']:
-        if KEYWORD_TO_TELL_THAT_A_LINK_IS_OOB in link[LINKS_DST_KEY]:
-            for oob_link in link[LINKS_SRC_KEY]:
-                if OOB_NAT_KEY in oob_link.keys():
-                    if oob_link[OOB_IP_MGMT_KEY] in list_nat_port:
-                        raise EVENG_Exception(
-                            str(f"{HEADER} - checkDeviceIPAddressInOOB] - Two devices have the same OOB IP address : {str(oob_link['ip_mgmt'])}"), 900)
-                    else:
-                        list_nat_port.append(oob_link[OOB_IP_MGMT_KEY])
+    if YAML_LINKS_KEY in yaml_content.keys():
+        for link in yaml_content[YAML_LINKS_KEY]:
+            if KEYWORD_TO_TELL_THAT_A_LINK_IS_OOB in link[LINKS_DST_KEY]:
+                for oob_link in link[LINKS_SRC_KEY]:
+                    if OOB_NAT_KEY in oob_link.keys():
+                        if oob_link[OOB_IP_MGMT_KEY] in list_nat_port:
+                            raise EVENG_Exception(
+                                str(f"{HEADER} - checkDeviceIPAddressInOOB] - Two devices have the same OOB IP address : {str(oob_link['ip_mgmt'])}"), 900)
+                        else:
+                            list_nat_port.append(oob_link[OOB_IP_MGMT_KEY])
     return True
 
 #
@@ -880,11 +920,13 @@ def checkIfDuplicateParamWithPath(pat_to_yaml_file: str(), dict_to_verify: str()
 
 def checkIfDuplicateParam(yaml_content: dict(), dict_to_verify: str() = "devices", param_to_verify: str() = "name") -> bool:
     listParam = list()
-    for node in yaml_content[dict_to_verify]:
-        if node[param_to_verify] in listParam:
-            raise EVENG_Exception(
-                str("[EveYAMLValidate.py - checkIfDuplicateParam] - Two devices have the name : "+str(node[param_to_verify])), 900)
-        listParam.append(node[param_to_verify])
+
+    if dict_to_verify in yaml_content.keys():
+        for node in yaml_content[dict_to_verify]:
+            if node[param_to_verify] in listParam:
+                raise EVENG_Exception(
+                    str("[EveYAMLValidate.py - checkIfDuplicateParam] - Two devices have the name : "+str(node[param_to_verify])), 900)
+            listParam.append(node[param_to_verify])
     return True
 #
 #### Open a YAML file and return the content in a dict ####
