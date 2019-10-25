@@ -626,7 +626,7 @@ def check_if_yaml_keys_are_correct(yaml_content: dict()) -> bool:
 
     for key in yaml_content.keys():
         val_log.debug(f"{HEADER} check_if_yaml_keys_are_correct] Key=({key}) is in YAML_KEYS ???")
-        val_log.debug(f"\t\t==>> {key not in YAML_KEYS} // if confition is if key not in YAML_KEYS = {key not in YAML_KEYS}
+        val_log.debug(f"\t\t==>> {key not in YAML_KEYS} // if confition is if key not in YAML_KEYS = {key not in YAML_KEYS}")
         if key not in YAML_KEYS:
             val_log.debug(f"{HEADER} check_if_yaml_keys_are_correct] return_value set to FALSE")
             error_key_missing_lst.append(key)
