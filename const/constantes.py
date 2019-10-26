@@ -78,6 +78,7 @@ LINKS_TYPE_KEY = 'type'
 LINKS_ID_KEY = 'id'
 LINKS_DEST_PORT_KEY = 'dport'
 LINKS_SRC_PORT_KEY = 'sport'
+LINKS_SRC_HOST_KEY = 'host'
 LINKS_IP_EVE_KEY = 'ip_eve'
 LINKS_IP_PUB_KEY = 'ip_pub'
 

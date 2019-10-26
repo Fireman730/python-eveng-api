@@ -232,7 +232,15 @@ def validateYamlFileForPyEVENG(api: PyEVENG.PyEVENG, yaml_content: dict(), vm_in
     # Check that links is connected to existing devices
     # assert checkIfLinkConnectedToExistingDevice(yaml_content)
     # Check that each device ports are used only one time - not connected to many devices
-    assert checkIfPortUseManyTime(yaml_content)
+    val_log.debug("================================================================================================")
+    val_log.debug(f"{HEADER} - validateYamlFileForPyEVENG]({file_path}) check_nat_port - start check!")
+    if check_if_port_use_many_time(yaml_content) is False:
+        val_log.debug(f"{HEADER} - validateYamlFileForPyEVENG]({file_path}) check_if_port_use_many_time is FAILED !!!!")
+        return_value = False
+    else:
+        val_log.debug(f"{HEADER} - validateYamlFileForPyEVENG]({file_path}) check_if_port_use_many_time is SUCCESS !!!!")
+
+
     # Check that each EVENG port used to NAT is unique
     val_log.debug("================================================================================================")
     val_log.debug(f"{HEADER} - validateYamlFileForPyEVENG]({file_path}) check_nat_port - start check!")
@@ -797,54 +805,72 @@ def check_if_links_host_exists(yaml_content: dict(), dict_to_verify: str() = "li
 #
 # Check if port is use many time #### 
 #
-def checkIfPortUseManyTimeWithPath(pat_to_yaml_file: str(), dict_to_verify: str() = "links", param_to_verify: list() = ['src', 'sport', 'dst', 'dport']) -> bool:
-    return checkIfPortUseManyTime(open_yaml_files(pat_to_yaml_file), dict_to_verify, param_to_verify)
 
 
-def checkIfPortUseManyTime(yaml_content: dict(), dict_to_verify: str() = "links", param_to_verify: list() = ['src', 'sport', 'dst', 'dport']) -> bool:
+def check_if_port_use_many_time_with_path(pat_to_yaml_file: str(), dict_to_verify: str() = "links", param_to_verify: list() = ['src', 'sport', 'dst', 'dport']) -> bool:
+    return check_if_port_use_many_time(open_yaml_files(pat_to_yaml_file), dict_to_verify, param_to_verify)
 
-    allHostInLinks = dict()
+
+def check_if_port_use_many_time(yaml_content: dict(), dict_to_verify: str() = "links", param_to_verify: list() = ['src', 'sport', 'dst', 'dport']) -> bool:
+
+    all_hosts_in_links = dict()
+    error_port_dict = dict()
+    return_value = True
+
+    val_log.debug(f"{HEADER} check_if_port_use_many_time] Start function !")
 
     if dict_to_verify in yaml_content.keys():
         for link in yaml_content[dict_to_verify]:
-            if link[param_to_verify[2]] != "OOB-NETWORK":
-                if link[param_to_verify[0]] not in allHostInLinks.keys():
-                    allHostInLinks[link[param_to_verify[0]]] = list()
-                if link[param_to_verify[2]] not in allHostInLinks.keys():
-                    allHostInLinks[link[param_to_verify[2]]] = list()
+            if link[param_to_verify[2]] != KEYWORD_TO_TELL_THAT_A_LINK_IS_OOB:
+                if link[param_to_verify[0]] not in all_hosts_in_links.keys():
+                    all_hosts_in_links[link[param_to_verify[0]]] = list()
+                if link[param_to_verify[2]] not in all_hosts_in_links.keys():
+                    all_hosts_in_links[link[param_to_verify[2]]] = list()
 
             else:
                 for oobConnection in link[param_to_verify[0]]:
-                    if oobConnection['host'] not in allHostInLinks.keys():
-                        allHostInLinks[oobConnection['host']] = list()
+                    if oobConnection[LINKS_SRC_HOST_KEY] not in all_hosts_in_links.keys():
+                        all_hosts_in_links[oobConnection[LINKS_SRC_HOST_KEY]] = list()
 
         for link in yaml_content[dict_to_verify]:
-            if link['dst'] != "OOB-NETWORK":
-                if link[param_to_verify[1]] in allHostInLinks[link[param_to_verify[0]]]:
-                    raise EVENG_Exception(
-                        str("[EveYAMLValidate.py - checkIfPortUseManyTime] - Port "+str(link[param_to_verify[1]])+" on "+str(link['src'])+" is use several times"), 900)
+            if link[LINKS_DST_KEY] != KEYWORD_TO_TELL_THAT_A_LINK_IS_OOB:
+                if link[param_to_verify[1]] in all_hosts_in_links[link[param_to_verify[0]]]:
+                    val_log.debug(
+                        f"{HEADER} check_if_port_use_many_time] Port {link[param_to_verify[1]]} on {link[LINKS_SRC_KEY]} is use several times")
+                    error_port_dict[link[param_to_verify[1]]] = link[LINKS_SRC_KEY]
+                    return_value = False
                 else:
-                    allHostInLinks[link[param_to_verify[0]]].append(
+                    all_hosts_in_links[link[param_to_verify[0]]].append(
                         link[param_to_verify[1]])
 
-                if link[param_to_verify[3]] in allHostInLinks[link[param_to_verify[2]]]:
-                    raise EVENG_Exception(
-                        str("[EveYAMLValidate.py - checkIfPortUseManyTime] - Port "+str(link[param_to_verify[3]])+" on "+str(link['dst'])+" is use several times"), 900)
+                if link[param_to_verify[3]] in all_hosts_in_links[link[param_to_verify[2]]]:
+                    val_log.debug(
+                        f"{HEADER} check_if_port_use_many_time] Port {link[param_to_verify[1]]} on {link[LINKS_SRC_KEY]} is use several times")
+                    error_port_dict[link[param_to_verify[1]]] = link[LINKS_SRC_KEY]
+                    return_value = False
                 else:
-                    allHostInLinks[link[param_to_verify[2]]].append(
+                    all_hosts_in_links[link[param_to_verify[2]]].append(
                         link[param_to_verify[3]])
 
             else:
-                for oobConnection in link['src']:
-                    if oobConnection['port'] in allHostInLinks[oobConnection['host']]:
-                        raise EVENG_Exception(
-                            str("[EveYAMLValidate.py - checkIfPortUseManyTime] - Port "+str(
-                                oobConnection['port'])+" on "+str(oobConnection['host'])+" is use several times"), 900)
-                    else:
-                        allHostInLinks[oobConnection['host']].append(
-                            oobConnection['port'])
+                for oobConnection in link[LINKS_SRC_KEY]:
+                    if LINKS_SRC_PORT_KEY in oobConnection.keys():
+                        if oobConnection[LINKS_SRC_PORT_KEY] in all_hosts_in_links[oobConnection[LINKS_SRC_HOST_KEY]]:
+                            val_log.debug(
+                                f"{HEADER} check_if_port_use_many_time] Port {link[param_to_verify[1]]} on {link[LINKS_SRC_KEY]} is use several times")
+                            error_port_dict[link[paracheck_if_port_use_many_timem_to_verify[1]]] = link[LINKS_SRC_KEY]
+                            return_value = False
+                        else:
+                            all_hosts_in_links[oobConnection[LINKS_SRC_HOST_KEY]].append(oobConnection[LINKS_SRC_PORT_KEY])
 
-    return True
+    val_log.debug(f"{HEADER} check_if_port_use_many_time] return_value={return_value}")
+    if return_value is False:
+        val_log.debug(f"{HEADER} check_if_port_use_many_time] Error with the following port :")
+        val_log.debug(f"\t\t==>> {error_port_dict}")
+        print(f"{HEADER} check_if_port_use_many_time] Error with the following port :")
+        PP.pprint(error_port_dict)
+
+    return return_value
 
 # =========================================================================================================================================================
 #
