@@ -846,7 +846,10 @@ class PyEVENG:
         self.requestsError(response.status_code)
         return json.loads(response.content)["data"]["image"]
 
-    def getNodeInterfaceID(self, labName:str(), nodeID:str(), interfaceName:str()) -> str():
+    # =========================================================================================================================================================
+    #
+    #
+    def get_node_interface_id(self, lab_name:str(), node_id:str(), interface_name:str()) -> str():
         """
         This function will return a str that contains node interface ID
 
@@ -858,11 +861,44 @@ class PyEVENG:
         Returns:
             string: Node Interface ID
         """
-        data = self.getLabNodeInterfaces(labName, nodeID)
-        for index, value in enumerate(data['data']['ethernet']):
-            if value['name'] == interfaceName:
-                return index
 
+        logging.debug(f"{HEADER} get_node_interface_id] Enter in function.")
+        logging.debug(f"{HEADER} get_node_interface_id] lab_name={lab_name}.")
+        logging.debug(f"{HEADER} get_node_interface_id] node_id={node_id}.")
+        logging.debug(f"{HEADER} get_node_interface_id] interface_name={interface_name}.")
+
+        data = self.getLabNodeInterfaces(lab_name, node_id)
+        device_type = data.get('data').get('sort', "unknow_type")
+
+        logging.debug(f"{HEADER} get_node_interface_id] data={data}.")
+        print(f"{HEADER} get_node_interface_id] data['data']['ethernet']={data['data']['ethernet']}.")
+        logging.debug(f"{HEADER} get_node_interface_id] device_type={device_type}.")
+
+        logging.debug(f"{HEADER} get_node_interface_id] (device_type == 'iol')={device_type == 'iol'}.")
+
+        if device_type == 'iol':
+            for index, value in data['data']['ethernet'].items():
+                logging.debug(f"{HEADER} get_node_interface_id][iol] value={value} type={type(value)}.")
+                logging.debug(f"{HEADER} get_node_interface_id][iol] index={index} type={type(index)}.")
+                logging.debug(f"{HEADER} get_node_interface_id][iol] value['name'] == interface_name={value['name'] == interface_name}.")
+
+                if value['name'] == interface_name:
+                    return index
+
+        else:
+            for index, value in enumerate(data['data']['ethernet']):
+                logging.debug(f"{HEADER} get_node_interface_id][qemu] value={value} type={type(value)}.")
+                logging.debug(f"{HEADER} get_node_interface_id][qemu] index={index} type={type(index)}.")
+                logging.debug(f"{HEADER} get_node_interface_id][qemu] value['name'] == interface_name={value['name'] == interface_name}.")
+            
+                if value['name'] == interface_name:
+                    return index
+
+        logging.debug(f"{HEADER} get_node_interface_id] End function.")
+
+    # =========================================================================================================================================================
+    #
+    #
     def get_node_interfaces(self, labName: str(), nodeID: str()) -> list():
         """
         This function will return a list that contains all ethernet interface names
@@ -1908,7 +1944,7 @@ class PyEVENG:
     # =========================================================================================================================================================
     #
     #
-    def addNetworksToLab(self, networksToAdd: dict(), labName:str()):
+    def add_networks_to_lab(self, network_to_add: dict(), lab_name:str()):
         """
         This function add some network to a Lab
 
@@ -1919,27 +1955,41 @@ class PyEVENG:
             param1 (dict): Nodes Informamations
             param2 (str): Labname
         """
-        data = dict()
-        networkName = self.getLabNetworksName(labName)
 
-        for link in networksToAdd:
+        logging.debug(f"{HEADER} add_networks_to_lab] Enter in function.")
+        logging.debug(f"{HEADER} add_networks_to_lab] Add {network_to_add}.")
+        logging.debug(f"{HEADER} add_networks_to_lab] In {lab_name}.")
+
+        data = dict()
+        network_name = self.getLabNetworksName(lab_name)
+
+        for link in network_to_add:
+
+            logging.debug(f"{HEADER} add_networks_to_lab] Link to add {link}")
+            logging.debug(f"{HEADER} add_networks_to_lab] Link is OOB-NETWORK is {link['dst'] == 'OOB-NETWORK'}")
+            
             if link['dst'] == "OOB-NETWORK":
                 data['name'] = str("OOB-NETWORK")
             else:
                 data['name'] = str(link['src']+"("+link['sport']+")--"+link['dst']+"("+link['dport'] + ")")
 
-            if data['name'] not in networkName:
+            logging.debug(f"{HEADER} add_networks_to_lab] data['name']={data['name']}")
+            logging.debug(f"{HEADER} add_networks_to_lab] network_name={network_name}")
+            logging.debug(f"{HEADER} add_networks_to_lab] data['name'] not in network_name={data['name'] not in network_name}")
+
+            if data['name'] not in network_name:
                 data['type'] = str(link['network'])
                 data['visibility'] = 1
-                self.addNetworkToLab(data, labName)
+                self.add_network_to_lab(data, lab_name)
             else:
-                print("[PyEVENG addNetworkToLab] -",
+                print("[PyEVENG add_networks_to_lab] -",
                       data['name'], " is already deployed!")
 
+        logging.debug(f"{HEADER} - add_networks_to_lab] End function.")
     # =========================================================================================================================================================
     #
     #
-    def addNetworkToLab(self, networkToAdd: dict(), labName: str()) -> str():
+    def add_network_to_lab(self, network_to_add: dict(), lab_name: str()) -> str():
         """
         This function add some links to a Lab
 
@@ -1947,18 +1997,34 @@ class PyEVENG:
             param1 (dict): Nodes Informamations
             param2 (str): Labname
         """
-        print("[PyEVENG addNetworkToLab] -",
-              networkToAdd['name'], "is deploying...")
+
+        logging.debug(f"{HEADER} add_network_to_lab] Enter in function.")
+        logging.debug(f"{HEADER} add_network_to_lab] {network_to_add['name']} is deploying...")
+
+        print(f"{HEADER} add_network_to_lab] {network_to_add['name']} is deploying...")
 
         self.lock_lab()
-        response = requests.post(
-            self._url+"/api/labs/"+self._userFolder+"/"+labName+"/networks", data=json.dumps(networkToAdd), cookies=self._cookies, verify=False)
-        self.requestsError(response.status_code)
 
-        print("[PyEVENG addNetworkToLab] -",
-              networkToAdd['name'], "(",str(response.status_code),") has been deployed!")
-        
-        return (json.loads(response.content)['data']['id'])
+        data =self._execute_api_call(
+            url=f"/api/labs/{self._userFolder}/{lab_name}/networks",
+            call_type=API_CALL_POST,
+            data_call=json.dumps(network_to_add),
+            return_data=True,
+            verify=False,
+            cookie=self._cookies,
+            login=False
+        )
+
+        #response = requests.post(
+        #    self._url+"/api/labs/"+self._userFolder+"/"+labName+"/networks", data=json.dumps(networkToAdd), cookies=self._cookies, verify=False)
+        #self.requestsError(response.status_code)
+        logging.debug(f"{HEADER} - add_network_to_lab] Response = !")
+        logging.debug(f"{data}")
+        logging.debug(f"{HEADER} - add_network_to_lab] {network_to_add['name']} has been deployed!")
+        print(f"{HEADER} - add_network_to_lab] {network_to_add['name']} has been deployed!")
+
+        logging.debug(f"{HEADER} - add_network_to_lab] End function.")
+        print(f"{HEADER} - add_network_to_lab] End function.")
 
     # =========================================================================================================================================================
     #
@@ -1977,7 +2043,7 @@ class PyEVENG:
             param2 (str): Node interface ID
             param3 (str): Network ID
         """
-        self.addNetworksToLab(interfacesToAdd, labName)
+        self.add_networks_to_lab(interfacesToAdd, labName)
         self.addLinksToLab(interfacesToAdd, labName)
         self.setNetworkVisibilityTo0(interfacesToAdd, labName)
 
@@ -2045,14 +2111,14 @@ class PyEVENG:
                             ssh, link['ip_pub'], link['network'], oobInterface['ip_mgmt'], oobInterface['ssh'], ipMgmtEve, oobInterface['nat'])
                     #
 
-                    self.addLinkToLab(link['id'], self.getNodeIDbyNodeName(labName, oobInterface['host']), self.getNodeInterfaceID(
+                    self.addLinkToLab(link['id'], self.getNodeIDbyNodeName(labName, oobInterface['host']), self.get_node_interface_id(
                         labName, self.getNodeIDbyNodeName(labName, oobInterface['host']), oobInterface['port']), labName)
 
             else:
                 self.addLinkToLab(link['id'], self.getNodeIDbyNodeName(labName, link['src']),
-                                  self.getNodeInterfaceID(labName, self.getNodeIDbyNodeName(labName, link['src']), link['sport']), labName)
+                                  self.get_node_interface_id(labName, self.getNodeIDbyNodeName(labName, link['src']), link['sport']), labName)
                 self.addLinkToLab(link['id'], self.getNodeIDbyNodeName(labName, link['dst']),
-                                  self.getNodeInterfaceID(labName, self.getNodeIDbyNodeName(labName, link['dst']), link['dport']), labName)
+                                  self.get_node_interface_id(labName, self.getNodeIDbyNodeName(labName, link['dst']), link['dport']), labName)
 
         if create_connexion_file:
             self.write_in_remote_file(ssh, connexion_informations, "/root/.eveng/connexion_{}".format(labName), mode='w')

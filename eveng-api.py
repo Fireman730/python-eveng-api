@@ -26,6 +26,13 @@ EXIT_FAILURE = 1
 # Import Library
 #
 try:
+    import traceback
+except ImportError as importError:
+    print("Error import [eveng-api] traceback")
+    print(importError)
+    exit(EXIT_FAILURE)
+
+try:
     import time
 except ImportError as importError:
     print("Error import [eveng-api] time")
@@ -170,7 +177,8 @@ def exit_success():
 @click.option('--telnet', default="null", help='This argument will return a dict with telnet informations connexions lab need LAB HAS TO BE STARTED.')
 @click.option('--pod', default="0", help='This argument defines a on which POD the is stored.')
 @click.option('--folder', default="Users", help='This argument defines a on which FOLDER lab is stored.')
-def main(deploy, inventory, vm, force, start, backup, stop, remove, test, images, ports, connexion, telnet, pod, folder):
+@click.option('--debug', default=False, help='Enter in debug mode.')
+def main(deploy, inventory, vm, force, start, backup, stop, remove, test, images, ports, connexion, telnet, pod, folder, debug):
     """
     This function is the main function of this project.
     It will retrieve arguments and run Functions
@@ -276,7 +284,7 @@ def main(deploy, inventory, vm, force, start, backup, stop, remove, test, images
             #
             # Call function that will create Lab, deploy devices, deploy links and push config
             #
-            deploy_all(api, ymlF, vmInfo, force)
+            deploy_all(api, ymlF, vmInfo, force, debug)
             api.logout()
 
             if "ansible" in ymlF.keys():
@@ -327,7 +335,7 @@ def main(deploy, inventory, vm, force, start, backup, stop, remove, test, images
 #
 #
 #### Create a Topology (devices, links) based on a YAML File ####
-def deploy_all (api: PyEVENG.PyEVENG, ymlF: dict(), vmInfo: dict(), force: str()):
+def deploy_all (api: PyEVENG.PyEVENG, ymlF: dict(), vmInfo: dict(), force: str(), debug=False):
     """
     This function will create your network step by step.
 
@@ -403,6 +411,8 @@ def deploy_all (api: PyEVENG.PyEVENG, ymlF: dict(), vmInfo: dict(), force: str()
 
     except Exception as e:
         print(e)
+        if debug:
+            traceback.print_exc()
         print("[eveng-api - deploy_all] - error during la creation !")
         api.delete_lab(ymlF[YAML_PROJECT_KEY][PROJECT_NAME_KEY]+".unl")
 
