@@ -107,7 +107,7 @@ def main():
             if is_first:
                 is_first = False
             else:
-                print("--------")
+                print("-------------------------------------------------------------------------------------")
             if FILE_EXTENSION_YML in file or FILE_EXTENSION_YAML in file: 
                 print(f"[test_validator.py - main] {FILES_TO_TEST_PATH_SUCCESS}/{file} will be tested")
                 file_ok = validateYamlFileForPyEVENG(
@@ -132,7 +132,7 @@ def main():
             if is_first:
                 is_first = False
             else:
-                print("--------")
+                print("-------------------------------------------------------------------------------------")
             if FILE_EXTENSION_YML in file or FILE_EXTENSION_YAML in file:
                 print(f"[test_validator.py - main] {FILES_TO_TEST_PATH_FAILED}/{file} will be tested")
                 file_ok = validateYamlFileForPyEVENG(

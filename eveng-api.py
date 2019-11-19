@@ -279,8 +279,12 @@ def main(deploy, inventory, vm, force, start, backup, stop, remove, test, images
             #
             # Validate your yaml file
             #
-            validateYamlFileForPyEVENG(api, ymlF, vmInfo)
-            print(f"Your YAML file is OK :) !")
+            valide = validateYamlFileForPyEVENG(api, ymlF, vmInfo)
+            if valide:
+                print(f"Your YAML file is OK :) !")
+            else:
+                print(f"Your YAML file is NOK :) !")
+                exit(EXIT_FAILURE)
             #
             # Call function that will create Lab, deploy devices, deploy links and push config
             #

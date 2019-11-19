@@ -871,7 +871,7 @@ class PyEVENG:
         device_type = data.get('data').get('sort', "unknow_type")
 
         logging.debug(f"{HEADER} get_node_interface_id] data={data}.")
-        print(f"{HEADER} get_node_interface_id] data['data']['ethernet']={data['data']['ethernet']}.")
+        logging.debug(f"{HEADER} get_node_interface_id] data['data']['ethernet']={data['data']['ethernet']}.")
         logging.debug(f"{HEADER} get_node_interface_id] device_type={device_type}.")
 
         logging.debug(f"{HEADER} get_node_interface_id] (device_type == 'iol')={device_type == 'iol'}.")
