@@ -1,0 +1,60 @@
+---
+project:
+  path: /Users/
+  name: spine-leaf-oob
+  version: 1
+  author: DylanHamel
+  description: Spine and Leaf architecture for test befor prod
+  body: Actual label
+
+devices:
+  - type: qemu
+    template: cumulus
+    config: Unconfigured
+    delay: 0
+    icon: router.png
+    image: cumulus-vx-3.7.3
+    name: Spine01
+    left: 45%
+    top: 20%
+    ram: 1024
+    console: telnet
+    cpu: 1
+    ethernet: 8
+    uuid: 641a4800-1b19-427c-ae87-5555590b7790
+  - type: qemu
+    template: cumulus
+    config: Unconfigured
+    delay: 0
+    icon: router.png
+    image: cumulus-vx-3.7.3
+    name: Leaf01
+    left: 35%
+    top: 35%
+    ram: 1024
+    console: telnet
+    cpu: 1
+    ethernet: 8
+    uuid: 641a4800-1b19-427c-ae87-1111190b7790
+
+links:
+  - id: 1
+    type: ethernet
+    # if it's a connexion between 2 devices, use bridge
+    network: bridge
+    src: Spine01
+    sport: swp1
+    dst: Leaf01
+    dport: swp1
+  - id: 2
+    network: pnet4
+    src:
+      - host: Spine01
+        port: eth0
+      - host: Leaf01
+        port: eth0
+    dst: OOB-NETWORK
+    dport: oob
+    left: 350
+    top: 200
+   

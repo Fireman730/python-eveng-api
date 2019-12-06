@@ -1976,9 +1976,12 @@ class PyEVENG:
             logging.debug(f"{HEADER} add_networks_to_lab] network_name={network_name}")
             logging.debug(f"{HEADER} add_networks_to_lab] data['name'] not in network_name={data['name'] not in network_name}")
 
-            if data['name'] not in network_name:
-                data['type'] = str(link['network'])
-                data['visibility'] = 1
+            if data[LINKS_NAME_KEY] not in network_name:
+                data[LINKS_TYPE_KEY] = str(link[LINKS_NETWORK_KEY])
+                data[LINKS_VISIBILITY_KEY] = 1
+                data[LINKS_LEFT_POSIT_KEY] = str(link.get(LINKS_LEFT_POSIT_KEY, "0"))
+                data[LINKS_TOP_POSIT_KEY] = str(link.get(LINKS_TOP_POSIT_KEY, "0"))
+
                 self.add_network_to_lab(data, lab_name)
             else:
                 print("[PyEVENG add_networks_to_lab] -",

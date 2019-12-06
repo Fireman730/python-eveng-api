@@ -84,6 +84,10 @@ LINKS_SRC_PORT_KEY = 'sport'
 LINKS_SRC_HOST_KEY = 'host'
 LINKS_IP_EVE_KEY = 'ip_eve'
 LINKS_IP_PUB_KEY = 'ip_pub'
+LINKS_LEFT_POSIT_KEY = 'left'
+LINKS_TOP_POSIT_KEY = 'top'
+LINKS_VISIBILITY_KEY = 'visibility'
+LINKS_NAME_KEY = 'name'
 
 #### OOB keys ####
 OOB_NAT_KEY = 'nat'
