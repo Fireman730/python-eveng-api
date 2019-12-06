@@ -1668,9 +1668,8 @@ class PyEVENG:
         logging.debug(f"{HEADER} login] Start login() function")
 
         if self._verbose:
-            print("[PyEVENG - login] ...") 
-        
-        print(self._url, self._username, self._password)
+            print(f"[PyEVENG - login] ...") 
+            print(f"[PyEVENG - login] connection on {self._url}")
         
         self._execute_api_call(
             url=f"/api/auth/login",

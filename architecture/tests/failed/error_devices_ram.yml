@@ -45,7 +45,7 @@ devices:
     name: leaf01
     left: 35%
     top: 35%
-    ram: 512
+    ram: 768
     console: telnet
     cpu: 1
     ethernet: 8

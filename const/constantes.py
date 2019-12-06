@@ -18,6 +18,8 @@ __license__ = "MIT"
 # ###########################################################################
 
 EVENG_LAB_EXTENSION = '.unl'
+EXIT_SUCCESS = 0
+EXIT_FAILURE = 1
 
 # ###########################################################################
 #
@@ -45,6 +47,7 @@ YAML_DEVICES_KEY = 'devices'
 YAML_LINKS_KEY = 'links'
 YAML_CONFIGS_KEY = 'configs'
 YAML_ANSIBLE_KEY = 'ansible'
+YAML_PATH_TO_VM_INFO = 'path_vm_info'
 
 #### Project keys ####
 PROJECT_NAME_KEY = 'name'
@@ -56,7 +59,7 @@ PROJECT_BODY_KEY = 'body'
 
 #### Devices keys ####
 DEVICES_TYPE_VIRT_KEY = 'type'
-DEVICES_TEMPLATE_KEY = 'tempalte'
+DEVICES_TEMPLATE_KEY = 'template'
 DEVICES_CONFIG_KEY = 'config'
 DEVICES_DELAY_KEY = 'delay'
 DEVICES_ICON_KEY = 'icon'

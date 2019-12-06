@@ -14,28 +14,10 @@
  Please, check documentation about VM setup for use this script
  If doesn't work feel free to open an issue
 
- Tests done by this script
- 00. Check if YAML file contains path_vm_info:, project:, devices: and links: keys
- 01. Check if YAML file keys are corrects
- 02. Check if a port is connected to two network
- 03. Check if each devices have a different name
- 04. Check if each devices have a different UUID
- 05. Check if image type is qemu, iol or dynamips (devices: - type: qemu)
- 06. Check if console: is telnet or vnc
- 07. Check if each links have a different ID
- 08. Check if each links are connected to a existing device
- 09. Check if device image is available in the EVE-NG
- 10. Check if configs: type is in
- 11. Check if path_to_vm value is a yaml file
- 12. Check if ethernet: number is higher that port connection number
- 13. Check if links:node is in devices:name
- 14: Check if Memory on EVE-NG VM is suffisant
- 15: Check if NAT port are correct and are between MAX_NAT_PORT & MIN_NAT_PORT
- 16: Check if project:path exist
 """
 
 __author__ = "Dylan Hamel"
-__version__ = "0.1"
+__version__ = "1.0"
 __email__ = "dylan.hamel@protonmail.com"
 __status__ = "Prototype"
 
@@ -51,6 +33,7 @@ HEADER = "[EveYamlValidate.py -"
 #
 # Import Library
 #
+
 try:
     from exceptions.EveExceptions import EVENG_Exception
 except ImportError as importError:
@@ -73,17 +56,17 @@ except ImportError as importError:
     exit(EXIT_FAILURE)
 
 try:
-    import pprint
-    PP = pprint.PrettyPrinter(indent=4)
+    from const.constantes import  *
 except ImportError as importError:
-    print(f"{HEADER_ERR}  pprint")
+    print(f"{HEADER_ERR} const.constantes")
     print(importError)
     exit(EXIT_FAILURE)
 
 try:
-    from const.constantes import  *
+    import pprint
+    PP = pprint.PrettyPrinter(indent=4)
 except ImportError as importError:
-    print(f"{HEADER_ERR} const.constantes")
+    print(f"{HEADER_ERR}  pprint")
     print(importError)
     exit(EXIT_FAILURE)
 
@@ -114,7 +97,7 @@ CONSOLE_TYPES = ["telnet", "vnc"]
 CONFIG_TYPES = ["full", "oob"]
 YAML_KEYS = ["project", "devices", "links", "configs", "ansible"]
 MANDATORY_YAML_KEYS = ["project", "devices", "links"]
-RAM_ALLOWED = ["64", "128", "256", "512", "1024", "2048",
+RAM_ALLOWED = ["64", "128", "256", "512", "768", "1024", "2048", "2560",
                "3072", "4096", "5120", "6144", "8192", "16384"]
 KEYS_IN_ANSIBLE = ["playbooks", "groups"]
 
@@ -165,7 +148,7 @@ def pprintline(data: str()) -> None:
     print("==================================================================")
 
 
-def validateYamlFileForPyEVENG(api: PyEVENG.PyEVENG, yaml_content: dict(), vm_info, *, pipeline=False, file_path=""):
+def validateYamlFileForPyEVENG(api: PyEVENG.PyEVENG, yaml_content: dict(), vm_info, *, pipeline=False, file_path="") -> None:
 
     val_log.debug(f"{HEADER} - validateYamlFileForPyEVENG] Start function with {file_path}!")
 
@@ -174,7 +157,16 @@ def validateYamlFileForPyEVENG(api: PyEVENG.PyEVENG, yaml_content: dict(), vm_in
     # Check that project:path doesn't start or end with "/"
     # assert check_project_path_not_start_or_end_with_slash(yaml_content)
     # Check that path_to_vm info value is a yaml file
-    # assert CheckIfPathToVMKeyGoToYAMLfile(yaml_content)
+
+    val_log.debug("================================================================================================")
+    val_log.debug(f"{HEADER} - validateYamlFileForPyEVENG]({file_path}) check_if_ram_is_allowed - start check!")
+    if check_if_path_to_vm_key_go_to_yaml_file(yaml_content) is False:
+        val_log.debug(
+            f"{HEADER} - validateYamlFileForPyEVENG]({file_path}) check_if_path_to_vm_key_go_to_yaml_file is FAILED !!!!")
+        return_value = False
+    else:
+        val_log.debug(
+            f"{HEADER} - validateYamlFileForPyEVENG]({file_path}) check_if_path_to_vm_key_go_to_yaml_file is SUCCESS !!!!")
     # Check that YAML file contains project:, devices: and links: keys
 
     # Check that YAML file contains project:, devices: and links: keys
@@ -351,10 +343,25 @@ def validateYamlFileForPyEVENG(api: PyEVENG.PyEVENG, yaml_content: dict(), vm_in
 
     # Check that device image is available in the EVE-NG
     if pipeline is False:
-        assert checkIfImageIsAvaiable(api, yaml_content)
+        val_log.debug("================================================================================================")
+        val_log.debug(
+            f"{HEADER} - validateYamlFileForPyEVENG]({file_path}) check_if_image_is_available - start check!")
+        if check_if_image_is_available(api, yaml_content) is False:
+                val_log.debug(f"{HEADER} - validateYamlFileForPyEVENG]({file_path}) check_if_image_is_available is FAILED !!!!")
+                return_value = False
+        else:
+            val_log.debug(
+                f"{HEADER} - validateYamlFileForPyEVENG]({file_path}) check_if_image_is_available is SUCCESS !!!!")
+
     # Check memory available vs memery asked by devices
     if pipeline is False:
-        assert checkVMMemoryFreeVSDevicesMemoryAsked(api, yaml_content)
+        val_log.debug("================================================================================================")
+        val_log.debug(f"{HEADER} - validateYamlFileForPyEVENG]({file_path}) check_vm_memory_free_vs_devices_memory_asked - start check!")
+        if check_vm_memory_free_vs_devices_memory_asked(api, yaml_content) is False:
+            val_log.debug(f"{HEADER} - validateYamlFileForPyEVENG]({file_path}) check_vm_memory_free_vs_devices_memory_asked is FAILED !!!!")
+            return_value = False
+        else:
+          val_log.debug(f"{HEADER} - validateYamlFileForPyEVENG]({file_path}) check_vm_memory_free_vs_devices_memory_asked is SUCCESS !!!!")  
     
     # Check that nodes in configs: node is in devices added
     val_log.debug("================================================================================================")
@@ -446,8 +453,7 @@ def check_ip_pub_if_not_port_fowrading(yaml_content:dict()) -> bool:
     val_log.debug(f"{HEADER} check_ip_pub_if_not_port_fowrading] Start function !")
 
     if yaml_content is None:
-        val_log.debug(
-            f"{HEADER} - check_ip_pub_if_not_port_fowrading] yaml_content is EMPTY (NoneType)!")
+        val_log.debug(f"{HEADER} - check_ip_pub_if_not_port_fowrading] yaml_content is EMPTY (NoneType)!")
         return False
 
     port_forwarding = False
@@ -457,28 +463,20 @@ def check_ip_pub_if_not_port_fowrading(yaml_content:dict()) -> bool:
         for link in yaml_content[YAML_LINKS_KEY]:
             if LINKS_DST_KEY in link.keys():
                 if link[LINKS_DST_KEY] == KEYWORD_TO_TELL_THAT_A_LINK_IS_OOB:
-                    val_log.debug(
-                        f"{HEADER} check_ip_pub_if_not_port_fowrading] link_id {link[LINKS_ID_KEY]} is OOB !")
+                    val_log.debug(f"{HEADER} check_ip_pub_if_not_port_fowrading] link_id {link[LINKS_ID_KEY]} is OOB !")
                     if LINKS_SRC_KEY in link.keys():
                         for oob_interface in link[LINKS_SRC_KEY]:
                             if OOB_IP_MGMT_KEY in oob_interface.keys() and OOB_SSH_KEY in oob_interface.keys() and OOB_NAT_KEY in oob_interface.keys():
-                                val_log.debug(
-                                    f"{HEADER} check_ip_pub_if_not_port_fowrading] There are port-forwarding !")
+                                val_log.debug(f"{HEADER} check_ip_pub_if_not_port_fowrading] There are port-forwarding !")
                                 port_forwarding = True
                             else:
-                                val_log.debug(
-                                    f"{HEADER} check_ip_pub_if_not_port_fowrading] There are NOT port-forwarding !")
+                                val_log.debug(f"{HEADER} check_ip_pub_if_not_port_fowrading] There are NOT port-forwarding !")
 
                     if port_forwarding is False:
                         if LINKS_IP_EVE_KEY in  link.keys() or LINKS_IP_PUB_KEY in link.keys():
-                            val_log.debug(
-                                f"{HEADER} check_ip_pub_if_not_port_fowrading] ip_pub: or ip_eve are present...")
+                            val_log.debug(f"{HEADER} check_ip_pub_if_not_port_fowrading] ip_pub: or ip_eve are present...")
+                            print(f"{HEADER} check_ip_pub_if_not_port_fowrading] Error ip_eve or ip_pub can not exist if there are no port-forwarding")
                             return_value = False
-                            print(
-                                f"{HEADER} check_ip_pub_if_not_port_fowrading] Error ip_eve or ip_pub can not exist if there are no port-forwarding")
-                            #raise EVENG_Exception(
-                            #    f"{HEADER} check_ip_pub_if_not_port_fowrading] Error ip_eve or ip_pub can not exist \
-                            #        if there are no port-forwarding", 903)
 
     val_log.debug(f"{HEADER} check_ip_pub_if_not_port_fowrading] Return value is {return_value} !")
     return return_value
@@ -489,37 +487,80 @@ def check_ip_pub_if_not_port_fowrading(yaml_content:dict()) -> bool:
 #
 def check_project_path_not_start_or_end_with_slash(yaml_content:dict()) -> bool:
 
-    if str(yaml_content[YAML_PROJECT_KEY][PROJECT_PATH_KEY]).startswith('/') or \
-        str(yaml_content[YAML_PROJECT_KEY][PROJECT_PATH_KEY]).endswith('/'): 
-        pprintline(f"{yaml_content[YAML_PROJECT_KEY][PROJECT_PATH_KEY]}")
-        raise EVENG_Exception(
-            f"[EveYAMLValidate.py - check_project_path_not_start_or_end_with_slash] Error ! 'project:path' starts or ends with a / (slash).", 903)
+    val_log.debug(f"{HEADER} check_project_path_not_start_or_end_with_slash] Start function !")
 
+    if yaml_content is None:
+        val_log.debug(f"{HEADER} - check_project_path_not_start_or_end_with_slash] yaml_content is EMPTY (NoneType)!")
+        return False
+
+    return_value = True
+
+    if YAML_PROJECT_KEY in yaml.keys():
+        if PROJECT_PATH_KEY in yaml_content[YAML_PROJECT_KEY].keys():
+            val_log.debug(
+                f"{HEADER} - check_project_path_not_start_or_end_with_slash] Project path in EVE-NG = {yaml_content[YAML_PROJECT_KEY][PROJECT_PATH_KEY]}!")
+            if str(yaml_content[YAML_PROJECT_KEY][PROJECT_PATH_KEY]).startswith('/') or \
+                    str(yaml_content[YAML_PROJECT_KEY][PROJECT_PATH_KEY]).endswith('/'): 
+                pprintline(f"{yaml_content[YAML_PROJECT_KEY][PROJECT_PATH_KEY]}")
+                val_log.debug(
+                    f"[EveYAMLValidate.py - check_project_path_not_start_or_end_with_slash] Error ! 'project:path' starts or ends with a / (slash).")
+                return_value = False
     else:
-        return True
+        val_log.debug(f"{HEADER} - check_project_path_not_start_or_end_with_slash] keys '{YAML_PROJECT_KEY}' is not in the YAML file!")
+
+    val_log.debug(f"{HEADER} - check_project_path_not_start_or_end_with_slash] return_value={return_value}!")
+    if return_value is False:
+        val_log.debug(f"{HEADER} - check_project_path_not_start_or_end_with_slash] Error with the EVE-NG path!")
+        val_log.debug(f"\t\t==>> {yaml_content[YAML_PROJECT_KEY][PROJECT_PATH_KEY]}")
+        print(f"{HEADER} - check_project_path_not_start_or_end_with_slash] Error with the EVE-NG path!")
+        print(f"\t\t==>> {yaml_content[YAML_PROJECT_KEY][PROJECT_PATH_KEY]}")
+
+    return return_value
 
 
-def checkVMMemoryFreeVSDevicesMemoryAskedWithPath(api: PyEVENG.PyEVENG, pat_to_yaml_file: str()) -> bool:
-    return checkVMMemoryFreeVSDevicesMemoryAsked(api, open_yaml_files(pat_to_yaml_file))
+def check_vm_memory_free_vs_devices_memory_asked_with_path(api: PyEVENG.PyEVENG, path_to_yaml_file: str()) -> bool:
+    return check_vm_memory_free_vs_devices_memory_asked(
+        api,
+        open_yaml_files(
+            path_to_yaml_file
+        )
+    )
 
 # =========================================================================================================================================================
 #
 # Check memory available vs memery asked by devices
 #
-def checkVMMemoryFreeVSDevicesMemoryAsked(api: PyEVENG.PyEVENG, yaml_content: dict()) -> bool:
+def check_vm_memory_free_vs_devices_memory_asked(api: PyEVENG.PyEVENG, yaml_content: dict()) -> bool:
+
+    val_log.debug(f"{HEADER} - check_vm_memory_free_vs_devices_memory_asked] Start function !")
+
     total_memory = 0
     coefficient = 1.2
+    return_value = True
 
-    if "devices" in yaml_content.keys():
-        for device in yaml_content['devices']:
-            total_memory = total_memory + device['ram']
+    val_log.debug(f"{HEADER} - check_vm_memory_free_vs_devices_memory_asked](1) total_memory={total_memory}!")
+    val_log.debug(f"{HEADER} - check_vm_memory_free_vs_devices_memory_asked](1) coefficient={coefficient}!")
+
+    if YAML_DEVICES_KEY in yaml_content.keys():
+        for device in yaml_content[YAML_DEVICES_KEY]:
+            
+            val_log.debug(f"{HEADER} - check_vm_memory_free_vs_devices_memory_asked] device[DEVICES_RAM_KEY]={device[DEVICES_NAME_KEY]}!")
+            val_log.debug(f"{HEADER} - check_vm_memory_free_vs_devices_memory_asked] RAM used={device[DEVICES_RAM_KEY]}!")
+            total_memory = total_memory + device[DEVICES_RAM_KEY]
 
         vm_memory = api.get_vm_memory()
 
+        val_log.debug(f"{HEADER} - check_vm_memory_free_vs_devices_memory_asked](1) total_memory={total_memory}!")
+        val_log.debug(f"{HEADER} - check_vm_memory_free_vs_devices_memory_asked](1) vm_memory={vm_memory}!")
+        val_log.debug(f"{HEADER} - check_vm_memory_free_vs_devices_memory_asked](1) total_memory / coefficient={int(total_memory / coefficient)}!")
+        val_log.debug(f"{HEADER} - check_vm_memory_free_vs_devices_memory_asked](1) int(vm_memory) < int(total_memory / coefficient)={int(vm_memory) < int(total_memory / coefficient)}!")
+        
         if int(vm_memory) < int(total_memory / coefficient):
-            return False
+            return_value = False
 
-    return True
+    val_log.debug(f"{HEADER} - check_vm_memory_free_vs_devices_memory_asked] return_value={return_value} !")
+
+    return return_value
 
 # =========================================================================================================================================================
 #
@@ -527,11 +568,11 @@ def checkVMMemoryFreeVSDevicesMemoryAsked(api: PyEVENG.PyEVENG, yaml_content: di
 #
 def check_ansible_keys_groups_exist_if_playbooks_exist(yaml_content: dict()) -> bool:
     
-    val_log.debug(f"{HEADER} - check_ansible_keys] check_ansible_keys_groups_exist_if_playbooks_exist function !")
+    val_log.debug(f"{HEADER} - check_ansible_keys_groups_exist_if_playbooks_exist] Start function !")
 
     if yaml_content is None:
         val_log.debug(
-            f"{HEADER} - check_ansible_keys] yaml_content is EMPTY (NoneType)!")
+            f"{HEADER} - check_ansible_keys_groups_exist_if_playbooks_exist] yaml_content is EMPTY (NoneType)!")
         return False
 
     return_value = True
@@ -553,12 +594,13 @@ def check_ansible_keys_groups_exist_if_playbooks_exist(yaml_content: dict()) -> 
 #
 # Check that Ansible keys are allowd
 #
-
-
-def check_ansible_keys_with_path(pat_to_yaml_file: str()) -> bool:
+def check_ansible_keys_with_path(path_to_yaml_file: str()) -> bool:
     val_log.debug(f"{HEADER} - check_ansible_keys] check_ansible_keys_with_path function !")
-    return check_ansible_keys(open_yaml_files(pat_to_yaml_file))
-
+    return check_ansible_keys(
+        open_yaml_files(
+            path_to_yaml_file
+        )
+    )
 
 def check_ansible_keys(yaml_content: dict()) -> bool:
     
@@ -593,9 +635,12 @@ def check_ansible_keys(yaml_content: dict()) -> bool:
 #
 # Check that ram of each node is correct
 #
-def check_if_ram_is_allowed_with_path(pat_to_yaml_file: str()) -> bool:
-    return check_if_ram_is_allowed(open_yaml_files(pat_to_yaml_file))
-
+def check_if_ram_is_allowed_with_path(path_to_yaml_file: str()) -> bool:
+    return check_if_ram_is_allowed(
+        open_yaml_files(
+            path_to_yaml_file
+        )
+    )
 
 def check_if_ram_is_allowed(yaml_content: dict()) -> bool:
     
@@ -631,9 +676,12 @@ def check_if_ram_is_allowed(yaml_content: dict()) -> bool:
 #
 # Check that nodes in configs: node is in devices added
 #
-def check_if_configs_nodes_exists_with_path(pat_to_yaml_file: str()) -> bool:
-    return check_if_configs_nodes_exists(open_yaml_files(pat_to_yaml_file))
-
+def check_if_configs_nodes_exists_with_path(path_to_yaml_file: str()) -> bool:
+    return check_if_configs_nodes_exists(
+        open_yaml_files(
+            path_to_yaml_file
+        )
+    )
 
 def check_if_configs_nodes_exists(yaml_content: dict()) -> bool:
 
@@ -670,28 +718,56 @@ def check_if_configs_nodes_exists(yaml_content: dict()) -> bool:
                 val_log.debug(f"{HEADER} - check_if_configs_nodes_exists] Yes {node[CONFIG_NODE_KEY]} is in the list !")
     return return_value
 
-## Check if path_to_vm info value is a yaml file ###
+# =========================================================================================================================================================
+#
+# Check if path_to_vm info value is a yaml file
+#
+def Ccheck_if_path_to_vm_key_go_to_yaml_file_with_path(path_to_yaml_file: str()) -> bool:
+    return check_if_path_to_vm_key_go_to_yaml_file(
+        open_yaml_files(
+            path_to_yaml_file
+        )
+    )
 
+def check_if_path_to_vm_key_go_to_yaml_file(yaml_content: dict()) -> bool:
+    
+    val_log.debug(f"{HEADER} - check_if_path_to_vm_key_go_to_yaml_file] Start function !")
+    
+    if yaml_content is None:
+        val_log.debug(f"{HEADER} - check_if_keys_are_in_yaml_file] yaml_content is EMPTY (NoneType)!")
+        return False
+    
+    return_value = True
 
-def CheckIfPathToVMKeyGoToYAMLfileWithPath(pat_to_yaml_file: str()) -> bool:
-    return CheckIfPathToVMKeyGoToYAMLfile(open_yaml_files(pat_to_yaml_file))
+    if YAML_PATH_TO_VM_INFO in yaml_content.keys():
+        if not ("yml" == str(yaml_content[YAML_PATH_TO_VM_INFO])[-3:] or "yaml" == str(yaml_content[YAML_PATH_TO_VM_INFO])[-4:]):
+            val_log.debug(f"{HEADER} - check_if_path_to_vm_key_go_to_yaml_file] {yaml_content[YAML_PATH_TO_VM_INFO]} is NOT a YAML file !")
+            val_log.debug(f"{HEADER} - check_if_path_to_vm_key_go_to_yaml_file] return_value pass to FALSE !")
+            return_value = False
 
+        else:
+            val_log.debug(f"{HEADER} - check_if_path_to_vm_key_go_to_yaml_file] {yaml_content[YAML_PATH_TO_VM_INFO]} is a YAML file !")
 
-def CheckIfPathToVMKeyGoToYAMLfile(yaml_content: dict()) -> bool:
-    if ("yml" == str(yaml_content['path_vm_info'])[-3:]):
-        return True
-    else:
-        raise EVENG_Exception(str("[EveYAMLValidate.py - CheckIfPathToVMKeyGoToYAMLfile] - path_to_vm need to be a yaml file. Change your value ("+str(
-            str(yaml_content['path_vm_info']))+"."), 900)
+    val_log.debug(f"{HEADER} - check_if_path_to_vm_key_go_to_yaml_file] return_value={return_value} !")
+    if return_value is False:
+        val_log.debug(f"{HEADER} - check_if_path_to_vm_key_go_to_yaml_file] The path doesn't point on a YAML file.")
+        val_log.debug(f"\t\t==>> {yaml_content[YAML_PATH_TO_VM_INFO]}")
+        print(f"{HEADER} - check_if_path_to_vm_key_go_to_yaml_file] The path doesn't point on a YAML file.")
+        print(f"\t\t==>> {yaml_content[YAML_PATH_TO_VM_INFO]}")
 
+    return return_value
 
 # =========================================================================================================================================================
 #
 # Check that keys devices:, project: and links: are in your YAML file.
 #   Configs: is not mandatory
 #
-def check_if_keys_are_in_yaml_file_with_path(pat_to_yaml_file: str()) -> bool:
-    return check_if_keys_are_in_yaml_file(open_yaml_files(pat_to_yaml_file))
+def check_if_keys_are_in_yaml_file_with_path(path_to_yaml_file: str()) -> bool:
+    return check_if_keys_are_in_yaml_file(
+        open_yaml_files(
+            path_to_yaml_file
+        )
+    )
 
 def check_if_keys_are_in_yaml_file(yaml_content: dict()) -> bool:
 
@@ -713,8 +789,7 @@ def check_if_keys_are_in_yaml_file(yaml_content: dict()) -> bool:
             val_log.debug(f"{HEADER} - check_if_keys_are_in_yaml_file] return_value pass to FALSE !")
             error_key_missing_lst.append(mandatory_key)
             return_value = False
-            #raise EVENG_Exception(str("[EveYAMLValidate.py - check_if_keys_are_in_yaml_file] - Key ("+str(
-            #    mandatory_key)+") is missing please add all mandatory keys (path_vm_info, project, devices, links."), 900)
+
         else:
             val_log.debug(f"{HEADER} - check_if_keys_are_in_yaml_file] {mandatory_key} is in the YAML file !")
 
@@ -731,9 +806,12 @@ def check_if_keys_are_in_yaml_file(yaml_content: dict()) -> bool:
 #
 # Check that keys is corrects
 #
-def check_if_yaml_keys_are_correct_with_path(pat_to_yaml_file: str()) -> bool:
-    return check_if_yaml_keys_are_correct(open_yaml_files(pat_to_yaml_file))
-
+def check_if_yaml_keys_are_correct_with_path(path_to_yaml_file: str()) -> bool:
+    return check_if_yaml_keys_are_correct(
+        open_yaml_files(
+            path_to_yaml_file
+        )
+    )
 
 def check_if_yaml_keys_are_correct(yaml_content: dict()) -> bool:
 
@@ -769,9 +847,14 @@ def check_if_yaml_keys_are_correct(yaml_content: dict()) -> bool:
 #
 # Check Type (QEMU, IOL, DYNAMIPS)
 #
-def check_device_element_with_path(element_lst: list(), pat_to_yaml_file: str(), dict_to_verify: str() = "devices", param_to_verify: str() = "type") -> bool:
-    return check_device_element(element_lst, open_yaml_files(pat_to_yaml_file), dict_to_verify, param_to_verify)
-
+def check_device_element_with_path(element_lst: list(), path_to_yaml_file: str(), dict_to_verify: str() = "devices", param_to_verify: str() = "type") -> bool:
+    return check_device_element(
+        element_lst,
+        open_yaml_files(
+            path_to_yaml_file
+        ), 
+        dict_to_verify,
+        param_to_verify)
 
 def check_device_element(element_lst: list(), yaml_content: dict(), dict_to_verify: str() = "devices", param_to_verify: str() = "type") -> bool:
 
@@ -827,28 +910,70 @@ def check_device_element(element_lst: list(), yaml_content: dict(), dict_to_veri
 #
 # Check Image (Cumulus, Extreme, Cisco, Arista, ...)
 #
-def checkIfImageIsAvaiableWithPath(availableImages: dict(), pat_to_yaml_file: str(), dict_to_verify: str() = "devices", param_to_verify: str() = "image") -> bool:
-    return checkIfImageIsAvaiable(availableImages, open_yaml_files(pat_to_yaml_file), dict_to_verify, param_to_verify)
+def check_if_image_is_available_with_path(availableImages: dict(), path_to_yaml_file: str(), dict_to_verify: str() = "devices", param_to_verify: str() = "image") -> bool:
+    return check_if_image_is_available(
+            availableImages, 
+            open_yaml_files(
+                path_to_yaml_file
+            ), 
+            dict_to_verify,
+            param_to_verify
+    )
 
+def check_if_image_is_available(pyeveng, yaml_content: dict(), 
+    dict_to_verify: str() = "devices", 
+    param_to_verify: str() = "image"
+    ) -> bool:
 
-def checkIfImageIsAvaiable(pyeveng, yaml_content: dict(), dict_to_verify: str() = "devices", param_to_verify: str() = "image") -> bool:
+    val_log.debug(f"{HEADER} check_if_image_is_available] Start function !")
 
-    for device in yaml_content['devices']:
-        images = pyeveng.get_image_version_by_model(device['template'])
+    if yaml_content is None:
+        val_log.debug(f"{HEADER} - check_if_image_is_available] yaml_content is EMPTY (NoneType)!")
+        return False
 
-        if device[param_to_verify] not in images:
-            raise EVENG_Exception(str("[EveYAMLValidate.py - checkIfImageIsAvaiable] - Image "+str(
-                device[param_to_verify])+" is not available on this EVE-NG \n\t\t=> Error can be in your YAML file [template: or image:]."), 900)
-    return True
+    return_value = True
+    error_dict = dict()
 
+    if YAML_DEVICES_KEY in yaml_content.keys():
+        for device in yaml_content[YAML_DEVICES_KEY]:
+            images = pyeveng.get_image_version_by_model(device[DEVICES_TEMPLATE_KEY])    
+
+            val_log.debug(f"{HEADER} - check_if_image_is_available] device={device}!")
+            val_log.debug(f"{HEADER} - check_if_image_is_available] images={images}!")
+            val_log.debug(f"{HEADER} - check_if_image_is_available] device[param_to_verify] not in images={device[param_to_verify] not in images}!")
+
+            if device[param_to_verify] not in images:
+                val_log.debug(f"{HEADER} - check_if_image_is_available] - Image {str(device[param_to_verify])} is NOT available on this EVE-NG")
+                val_log.debug(f"\t\t => Error can be in your YAML file [template: or image:]")
+                error_dict[device] = images
+                return_value = False
+            else:
+                val_log.debug(f"{HEADER} - check_if_image_is_available] - Image {str(device[param_to_verify])} is available on this EVE-NG")
+
+    val_log.debug(f"{HEADER} check_if_image_is_available] return_value={return_value}")
+    if return_value is False:
+        val_log.debug(f"{HEADER} check_if_yaml_keys_are_correct] Error with the following images(s) :")
+        val_log.debug(f"\t\t==> {error_dict}")
+        print(f"{HEADER} check_if_yaml_keys_are_correct] Error with the following images(s) :")
+        PP.pprint(error_dict)
+
+    return return_value
 
 # =========================================================================================================================================================
 #
 # Check if a link is connected to a existing device
 #
 """
-def checkIfLinkConnectedToExistingDeviceWithPath(pat_to_yaml_file: str(), devicesToVerify: str() = "devices", linksToVerify: str() = "links", deviceParamToVerify: str() = "name", linksDeviceToVerify: list = ['src', 'dst']):
-    return checkIfLinkConnectedToExistingDevice(open_yaml_files(pat_to_yaml_file), devicesToVerify, linksToVerify, deviceParamToVerify, linksDeviceToVerify)
+def checkIfLinkConnectedToExistingDeviceWithPath(path_to_yaml_file: str(), devicesToVerify: str() = "devices", linksToVerify: str() = "links", deviceParamToVerify: str() = "name", linksDeviceToVerify: list = ['src', 'dst']):
+    return checkIfLinkConnectedToExistingDevice(
+        open_yaml_files(
+            path_to_yaml_file
+        ),
+        devicesToVerify,
+        linksToVerify,
+        deviceParamToVerify,
+        linksDeviceToVerify
+    )
 
 
 def checkIfLinkConnectedToExistingDevice(yaml_content: dict(), devicesToVerify: str() = "devices", linksToVerify: str() = "links", deviceParamToVerify: str() = "name", linksDeviceToVerify: list = ['src', 'dst']):
@@ -869,9 +994,14 @@ def checkIfLinkConnectedToExistingDevice(yaml_content: dict(), devicesToVerify: 
 #
 # Check if links: node is in devices:name 
 #
-def check_if_links_host_exists_with_path(pat_to_yaml_file: str(), dict_to_verify: str() = "links", param_to_verify: list() = ['src', 'sport', 'dst', 'dport']) -> bool:
-    return check_if_links_host_exists(open_yaml_files(pat_to_yaml_file), dict_to_verify, param_to_verify)
-
+def check_if_links_host_exists_with_path(path_to_yaml_file: str(), dict_to_verify: str() = "links", param_to_verify: list() = ['src', 'sport', 'dst', 'dport']) -> bool:
+    return check_if_links_host_exists(
+        open_yaml_files(
+            path_to_yaml_file
+        ),
+        dict_to_verify,
+        param_to_verify
+    )
 
 def check_if_links_host_exists(yaml_content: dict(), dict_to_verify: str() = "links", param_to_verify: list() = ['src', 'sport', 'dst', 'dport']) -> bool:
 
@@ -921,8 +1051,6 @@ def check_if_links_host_exists(yaml_content: dict(), dict_to_verify: str() = "li
             val_log.debug(f"{HEADER} check_if_links_host_exists] Link {value} is not in 'devices:'")
             print(f"{HEADER} check_if_links_host_exists] Link {value} is not in 'devices:'")
             return_value = False
-            #raise EVENG_Exception(f"{HEADER} check_if_links_host_exists] - There is a link on "+str(
-            #    linksHost)+" but this node is not create in devices."), 900)
 
     return return_value
 
@@ -932,9 +1060,14 @@ def check_if_links_host_exists(yaml_content: dict(), dict_to_verify: str() = "li
 #
 
 
-def check_if_port_use_many_time_with_path(pat_to_yaml_file: str(), dict_to_verify: str() = "links", param_to_verify: list() = ['src', 'sport', 'dst', 'dport']) -> bool:
-    return check_if_port_use_many_time(open_yaml_files(pat_to_yaml_file), dict_to_verify, param_to_verify)
-
+def check_if_port_use_many_time_with_path(path_to_yaml_file: str(), dict_to_verify: str() = "links", param_to_verify: list() = ['src', 'sport', 'dst', 'dport']) -> bool:
+    return check_if_port_use_many_time(
+        open_yaml_files(
+            path_to_yaml_file
+        ), 
+        dict_to_verify, 
+        param_to_verify
+    )
 
 def check_if_port_use_many_time(yaml_content: dict(), dict_to_verify: str() = "links", param_to_verify: list() = ['src', 'sport', 'dst', 'dport']) -> bool:
 
@@ -1037,8 +1170,6 @@ def check_port_value(yaml_content: dict()):
         val_log.debug(f"{list_error}")
         print(f"{HEADER} check_port_value] Error with the following link(s) :")
         print(f"{list_error}")
-        #raise EVENG_Exception(
-        #    str(f"{HEADER} check_port_value] - Port is > thant {MAX_NAT_PORT} or < {MIN_NAT_PORT} for : {list_error}"), 900)
 
     return return_value
 
@@ -1126,8 +1257,14 @@ def check_device_ip_address_in_oob(yaml_content: dict()):
 #
 # Check If Hostname are duplicate (Spine01, Core01, Leaf01, ...) 
 #
-def check_if_duplicate_param_with_path(pat_to_yaml_file: str(), dict_to_verify: str() = "devices", param_to_verify: str() = "name") -> bool:
-    return check_if_duplicate_param(open_yaml_files(pat_to_yaml_file), dict_to_verify, param_to_verify)
+def check_if_duplicate_param_with_path(path_to_yaml_file: str(), dict_to_verify: str() = "devices", param_to_verify: str() = "name") -> bool:
+    return check_if_duplicate_param(
+        open_yaml_files(
+            path_to_yaml_file
+        ), 
+        dict_to_verify, 
+        param_to_verify
+    )
 
 
 def check_if_duplicate_param(yaml_content: dict(), dict_to_verify: str() = "devices", param_to_verify: str() = "name") -> bool:
@@ -1171,15 +1308,11 @@ def check_if_duplicate_param(yaml_content: dict(), dict_to_verify: str() = "devi
 #
 def open_yaml_files(path: str()) -> dict():
     with open(path, "r") as f:
-        return yaml.load(f.read())
+        return yaml.load(
+            f.read()
+        )
 
 
 ######################################################
 if __name__ == "__main__":
-    #image = dict({'docker': 'Docker.io', 'csr1000v': 'Cisco CSR 1000V', 'vios': 'Cisco vIOS', 'viosl2': 'Cisco vIOS L2', 'cumulus': 'Cumulus VX',
-    #              'extremexos': 'ExtremeXOS', 'linux': 'Linux', 'ostinato': 'Ostinato', 'esxi': 'VMWare ESXi', 'vpcs': 'Virtual PC (VPCS)'})
-    print(checkIfDuplicateParamWithPath(
-        "/Volumes/Data/gitlab/python-eveng-api/architecture/all.yml", "links", "id"))
-    #print(checkIfImageIsAvaiableWithPath(image, "/Volumes/Data/gitlab/python-eveng-api/architecture/all.yml"))
-    #print(checkIfPortUseManyTimeWithPath("/Volumes/Data/gitlab/python-eveng-api/architecture/all.yml"))
-    #print(checkIfLinkConnectedToExistingDeviceWithPath("/Volumes/Data/gitlab/python-eveng-api/architecture/all.yml"))
+    exit(EXIT_FAILURE)
