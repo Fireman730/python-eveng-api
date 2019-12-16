@@ -2257,16 +2257,23 @@ class PyEVENG:
 
         logging.debug(f"{HEADER} _active_forwarding_on_an_inteface] Execute command :")
         logging.debug(f"\t\t => echo '1' | sudo tee /proc/sys/net/ipv4/conf/{inteface_name}/forwarding")
+        logging.debug(f"\t\t => echo '1' | sudo tee /proc/sys/net/ipv4/conf/pnet0/forwarding")
 
         stdin, stdout, stderr = ssh_connexion.exec_command(
-            f"sudo tee /proc/sys/net/ipv4/conf/{inteface_name}/forwarding"
+            f"echo '1' | sudo tee /proc/sys/net/ipv4/conf/{inteface_name}/forwarding"
         )
         o = "".join(stdout.readlines())
 
-        logging.debug(f"{HEADER} _active_forwarding_on_an_inteface] Command result {o} :")
+        stdin2, stdout2, stderr2 = ssh_connexion.exec_command(
+            f"echo '1' | sudo tee /proc/sys/net/ipv4/conf/pnet0/forwarding"
+        )
+        o2 = "".join(stdout2.readlines())
+
+        logging.debug(f"{HEADER} _active_forwarding_on_an_inteface] Command result o={o} :")
+        logging.debug(f"{HEADER} _active_forwarding_on_an_inteface] Command result o2={o2} :")
 
         logging.debug(f"{HEADER} _active_forwarding_on_an_inteface] End function.")
-        if ERROR_MESSAGE_ACTIVE_FORWARDING in o:
+        if ERROR_MESSAGE_ACTIVE_FORWARDING in o and ERROR_MESSAGE_ACTIVE_FORWARDING in o2:
             logging.debug(f"{HEADER} _active_forwarding_on_an_inteface] Return False.")
             return False
         else:

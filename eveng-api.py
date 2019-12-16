@@ -434,7 +434,7 @@ def open_file(path: str()) -> dict():
     Returns:
         str: Node name
     """
-
+    
     with open(path, 'r') as yamlFile:
         try:
             data = yaml.load(yamlFile)
