@@ -2258,6 +2258,7 @@ class PyEVENG:
         logging.debug(f"{HEADER} _active_forwarding_on_an_inteface] Execute command :")
         logging.debug(f"\t\t => echo '1' | sudo tee /proc/sys/net/ipv4/conf/{inteface_name}/forwarding")
         logging.debug(f"\t\t => echo '1' | sudo tee /proc/sys/net/ipv4/conf/pnet0/forwarding")
+        logging.debug(f"\t\t => echo '1' | sudo tee /proc/sys/net/ipv4/conf/eth0/forwarding")
 
         stdin, stdout, stderr = ssh_connexion.exec_command(
             f"echo '1' | sudo tee /proc/sys/net/ipv4/conf/{inteface_name}/forwarding"
@@ -2265,7 +2266,8 @@ class PyEVENG:
         o = "".join(stdout.readlines())
 
         stdin2, stdout2, stderr2 = ssh_connexion.exec_command(
-            f"echo '1' | sudo tee /proc/sys/net/ipv4/conf/pnet0/forwarding"
+            f"echo '1' | sudo tee /proc/sys/net/ipv4/conf/pnet0/forwarding && \
+            echo '1' | sudo tee /proc/sys/net/ipv4/conf/eth0/forwarding"
         )
         o2 = "".join(stdout2.readlines())
 
