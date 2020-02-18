@@ -1380,7 +1380,7 @@ class PyEVENG:
             if self.getNodeStatus(labName, nodeID) == "2":
                 print("[PyEVENG startLabNode] -", labName, self.getNodeNameByID(labName, nodeID), "is started !")
 
-    def startLabAllNodes(self, labName: str(), *, enable=False):
+    def startLabAllNodes(self, labName: str(), nodes_id, *, enable=False):
         """
         This function will start all node of a lab
 
@@ -1393,23 +1393,41 @@ class PyEVENG:
         nodesID = self.getLabNodesID(labName)
 
         # First Start Device
-        for nodeID in nodesID:
-          self.startLabNode(labName, nodeID)
-
-        if enable:
-            first = True
-            print("[PyEVENG startLabAllNodes] - no shutdown interfaces ...")
+        if nodes_id != "#":
+            if "," in nodes_id:
+                # --start=data-center-cumulus.unl --nodes_id=1,2,3
+                nodes_id = nodes_id.split(",")
+                for node in nodes_id:
+                    if node in nodesID:
+                        self.startLabNode(labName, node)
+                    else:
+                        print(f"{HEADER} - startLabAllNodes] Device with id {node} doesn't exist in lab {labName}")
+            else:
+                # --start=data-center-cumulus.unl --nodes_id=1
+                if nodes_id in nodesID:
+                    self.startLabNode(labName, nodes_id)
+                else:
+                    print(f"{HEADER} - startLabAllNodes] Device with id {nodes_id} doesn't exist in lab {labName}")
+        else:
+            # ./eveng-api.py --start=data-center-cumulus.unl
             for nodeID in nodesID:
-                nodeName = self.getNodeNameByID(labName, nodeID)
-                nodeImage = self.getNodeImageAndNodeID(labName, nodeName)
-                if "VIOS" in nodeImage[0]:
-                    telnetPort = self.get_node_telnet_port(labName, nodeID)
-                    telnetIP = self.get_node_telnet_ip(labName, nodeID)
-                    if first:
-                        time.sleep(60)
-                        first = False
-                    self.enable_port(labName, telnetIP, telnetPort, nodeID, nodeName)
-            print("[PyEVENG startLabAllNodes] - no shutdown interfaces done !")
+                self.startLabNode(labName, nodeID)
+
+            if enable:
+                first = True
+                print("[PyEVENG startLabAllNodes] - no shutdown interfaces ...")
+                for nodeID in nodesID:
+                    nodeName = self.getNodeNameByID(labName, nodeID)
+                    nodeImage = self.getNodeImageAndNodeID(labName, nodeName)
+                    if "VIOS" in nodeImage[0]:
+                        telnetPort = self.get_node_telnet_port(labName, nodeID)
+                        telnetIP = self.get_node_telnet_ip(labName, nodeID)
+                        if first:
+                            time.sleep(60)
+                            first = False
+                        self.enable_port(labName, telnetIP, telnetPort, nodeID, nodeName)
+                print("[PyEVENG startLabAllNodes] - no shutdown interfaces done !")
+
 
     def enable_port(self, labName:str(), ipAddress:str(), telnetPort:str(), nodeID:str(), nodeName:str()):
         """
@@ -1510,8 +1528,7 @@ class PyEVENG:
         response = requests.get(
             self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes/stop/stopmode=3", cookies=self._cookies, verify=False)
 
-
-    def stopLabAllNodes(self, labName):
+    def stopLabAllNodes(self, labName, nodes_id):
         """
         This function will stop all node of a lab
 
@@ -1521,12 +1538,30 @@ class PyEVENG:
         """
 
         #self.check_param_type_str(labName)
-
+        
         nodesID = self.getLabNodesID(labName)
-
-        if len(nodesID) is not 0:
-            for nodeID in nodesID:
-                self.stopLabNode(labName, nodeID)
+        
+        if nodes_id != "#":
+            if "," in nodes_id:
+                # --stop=data-center-cumulus.unl --nodes_id=1,2,3
+                nodes_id = nodes_id.split(",")
+                for node in nodes_id:
+                    if node in nodesID:
+                        self.stopLabNode(labName, node)
+                    else:
+                        print(
+                            f"{HEADER} - stopLabAllNodes] Device with id {node} doesn't exist in lab {labName}")
+            else:
+                # --stop=data-center-cumulus.unl --nodes_id=1
+                if nodes_id in nodesID:
+                    self.stopLabNode(labName, nodes_id)
+                else:
+                    print(f"{HEADER} - stopLabAllNodes] Device with id {nodes_id} doesn't exist in lab {labName}")
+        else:
+            # ./eveng-api.py --stop=data-center-cumulus.unl
+            if len(nodesID) is not 0:
+                for nodeID in nodesID:
+                    self.stopLabNode(labName, nodeID)
 
     
     # ------------------------------------------------------------------------------------------

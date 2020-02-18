@@ -166,9 +166,10 @@ def exit_success():
 @click.option('--inventory', default="#", help='Generate Ansible virtual inventory hosts file.')
 @click.option('--vm', default="./vm/vm_info.yml", help='Path to yaml file that contains EVE-NG VM informations.')
 @click.option('--force', default="False", help='If --force=True, if a lab exists on the EVE-NG VM it will be remove.')
-@click.option('--start', default="#", help='Labname you want to start')
 @click.option('--backup', default="#", help='Path to yaml file that contains informations about backups.')
+@click.option('--start', default="#", help='Labname you want to start')
 @click.option('--stop', default="#", help='Labname you want to stop')
+@click.option('--nodes_id', default="#", help='Node that you want start/stop (1) or (1,3,4,5)')
 @click.option('--remove', default="#", help='Labname you want to remove')
 @click.option('--test', default=False, help='This argument will test your VM parameter in --vm.')
 @click.option('--images', default=False, help='This argument will list images available on EVE-NG VM.')
@@ -178,7 +179,7 @@ def exit_success():
 @click.option('--pod', default="0", help='This argument defines a on which POD the is stored.')
 @click.option('--folder', default="Users", help='This argument defines a on which FOLDER lab is stored.')
 @click.option('--debug', default=False, help='Enter in debug mode.')
-def main(deploy, inventory, vm, force, start, backup, stop, remove, test, images, ports, connexion, telnet, pod, folder, debug):
+def main(deploy, inventory, vm, force, backup, start, stop, nodes_id,remove, test, images, ports, connexion, telnet, pod, folder, debug):
     """
     This function is the main function of this project.
     It will retrieve arguments and run Functions
@@ -319,12 +320,12 @@ def main(deploy, inventory, vm, force, start, backup, stop, remove, test, images
 
     # ======================================================================================================
     if start != "#":
-        api.startLabAllNodes(start)
+        api.startLabAllNodes(start, nodes_id)
         api.logout()
         exit_success()
 
     if stop != "#":
-        api.stopLabAllNodes(stop)
+        api.stopLabAllNodes(stop, nodes_id)
         api.logout()
         exit_success()
 
