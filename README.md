@@ -8,12 +8,14 @@ This script has been tested with *EVE-NG - 2.0.5-12-PRO* ```19.04.2019``` and *C
 # --vm=./vm/vm_info.yml is useless if your VM informations are at this path
 
 ./eveng-api.py --vm=./vm/vm_info.yml --deploy=./architecture/2spines_4leafs.yml
-./eveng-api.py --vm=./vm/vm_info.yml --deploy=./architecture/2access_2distrib.yml 
+./eveng-api.py --vm=./vm/vm_info.yml --deploy=./architecture/2access_2distrib.yml
 #
 # Execution some tasks
 #
 ./eveng-api.py --vm=./vm/vm_info.yml --stop=spine-leaf.unl
+./eveng-api.py --vm=./vm/vm_info.yml --stop=lab.unl --folder=DH --pod=0 --nodes_id=1,9
 ./eveng-api.py --vm=./vm/vm_info.yml --start=spine-leaf.unl
+./eveng-api.py --vm=./vm/vm_info.yml --start=lab.unl --folder=DH --pod=0 --nodes_id=1,9
 ./eveng-api.py --vm=./vm/vm_info.yml --backup=./backup/lab_to_backup.yml
 ./eveng-api.py --vm=./vm/vm_info.yml --remove=spine-leaf.unl
 ./eveng-api.py --vm=./vm/vm_info.yml --test=True
@@ -445,10 +447,10 @@ You can find all informations on EVE-NG website
 #### Need to be fixed
 
 1) Push Config to VYOS - Need to be tested
-   
+
 2) Push Config to Nexus - Lab can be deploy but config can't be push
-   
+
 3) Cisco ports are administravely down by default
    1) Find if it's possible to modify qcow2 on backup machine
-   
+
    
