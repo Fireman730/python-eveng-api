@@ -2237,7 +2237,7 @@ class PyEVENG:
             return True
         else:
             logging.debug(f"{HEADER} _check_if_forwarding_is_activate_by_interface] Return False.")
-            return True
+            return False
 
     # =========================================================================================================================================================
     #
