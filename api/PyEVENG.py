@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.7
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """
@@ -293,13 +293,13 @@ class PyEVENG:
         This function will recover all devices that need to be backed up.
         
         ```
-          - labname: dmvpn-ospf-qos.unl
+        - labname: dmvpn-ospf-qos.unl
             pod: 0
             folder: Network
             bck_path: /Volumes/Data/gitlab/python-eveng-api/backup
             bck_type: verbose
             hostname:               # <<== This list
-              - all
+            - all
         ```
 
         This function will not execute the backup !
@@ -338,7 +338,7 @@ class PyEVENG:
         When device are implemented you can add a condition.
 
         Example:
-          lif "NEW_DEVICE" in nodeImage:
+        if "NEW_DEVICE" in nodeImage:
             self.get_newDevice_backup(path, project_name, node_name, node_id)
 
         You also need to implement the get_newDevice_backup(...) function for create a object of your new class.
@@ -1149,7 +1149,7 @@ class PyEVENG:
             param1 (str): EVE-NG lab name
             param2 (str): EVE-NG node ID
 
-       §
+        §
 
         """
 
@@ -1371,7 +1371,7 @@ class PyEVENG:
         """
         if self.getNodeStatus(labName, nodeID) != "2":
             print("[PyEVENG startLabNode] -",
-                  labName, self.getNodeNameByID(labName, nodeID), "is starting...")
+                labName, self.getNodeNameByID(labName, nodeID), "is starting...")
 
             response = requests.get(
                 self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes/"+nodeID+"/start", cookies=self._cookies, verify=False)
@@ -1380,7 +1380,7 @@ class PyEVENG:
             if self.getNodeStatus(labName, nodeID) == "2":
                 print("[PyEVENG startLabNode] -", labName, self.getNodeNameByID(labName, nodeID), "is started !")
 
-    def startLabAllNodes(self, labName: str(), nodes_id, *, enable=False):
+    def startLabAllNodes(self, labName: str(), nodes_id="#", *, enable=False):
         """
         This function will start all node of a lab
 
@@ -1389,7 +1389,7 @@ class PyEVENG:
         """
 
         #self.check_param_type_str(labName)
-
+        
         nodesID = self.getLabNodesID(labName)
 
         # First Start Device
@@ -1462,12 +1462,12 @@ class PyEVENG:
             #print("3)", telnet.before)
 
             for interface in self.get_node_interfaces(labName, nodeID):
-                 telnet.sendline("interface {}".format(interface))
-                 telnet.expect("(config)")
-                 #print(telnet.before)
-                 telnet.sendline("no shut")
-                 telnet.expect("(config)")
-                 #print(telnet.before)
+                telnet.sendline("interface {}".format(interface))
+                telnet.expect("(config)")
+                #print(telnet.before)
+                telnet.sendline("no shut")
+                telnet.expect("(config)")
+                #print(telnet.before)
 
             telnet.sendline("end")
             telnet.expect("#")
@@ -1494,20 +1494,20 @@ class PyEVENG:
         """
 
         print("[PyEVENG stopLabNode] -",
-              labName, self.getNodeNameByID(labName, nodeID), "is stopping...")
+            labName, self.getNodeNameByID(labName, nodeID), "is stopping...")
         
         if self.getNodeStatus(labName, nodeID) != "0":
             
             if self._community is False:
                 print(self._url+"/api/labs/"+self._userFolder+"/" +
-                      labName+"/nodes/"+nodeID+"/stop/stopmode=3")
+                    labName+"/nodes/"+nodeID+"/stop/stopmode=3")
 
                 response = requests.get(
                     self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes/"+nodeID+"/stop/stopmode=3", cookies=self._cookies, verify=False)
         
             else:
                 print(self._url+"/api/labs/"+self._userFolder+"/" +
-                      labName+"/nodes/"+nodeID+"/stop")
+                    labName+"/nodes/"+nodeID+"/stop")
                 response = requests.get(
                     self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes/"+nodeID+"/stop", cookies=self._cookies, verify=False)
 
@@ -1515,7 +1515,7 @@ class PyEVENG:
 
             if self.getNodeStatus(labName, nodeID) == "0":
                 print("[PyEVENG stopLabNode] -",
-                      labName, self.getNodeNameByID(labName, nodeID), "is stopped !")
+                    labName, self.getNodeNameByID(labName, nodeID), "is stopped !")
 
     def stopLabAllNodes1(self, labName):
         """
@@ -1584,8 +1584,7 @@ class PyEVENG:
 
     def get_image_version_by_model(self, device_type):
         """
-        This
-         function will return a list that contains all installed nodes
+        This function will return a list that contains all installed nodes
 
         Args:
             param1 (str): Device type - Example "cumulus"
@@ -1801,7 +1800,7 @@ class PyEVENG:
         Args:
             param1 (str): Lab name to delete
         """
-       
+
         ssh = self.sshConnect()
         sftp = ssh.open_sftp()
         try:
@@ -1908,13 +1907,13 @@ class PyEVENG:
             param2 (str): Labname to add nodes
         """
         print("[PyEVENG addNodeToLab] -",
-              nodes_to_add['name'], "is deploying...")
+            nodes_to_add['name'], "is deploying...")
 
         node_name_already_in_lab = self.getLabNodesName(lab_name)
     
         if nodes_to_add['name'] in node_name_already_in_lab:
             print("[PyEVENG addNodeToLab] - a node with the name \"",
-                  nodes_to_add['name'], "\" is already deployed!")
+                nodes_to_add['name'], "\" is already deployed!")
 
         else:
             self.lock_lab()
@@ -1934,7 +1933,7 @@ class PyEVENG:
 
             self.requestsError(response.status_code)
             print("[PyEVENG addNodeToLab] -",
-                  nodes_to_add['name'], "has been deployed!")
+                nodes_to_add['name'], "has been deployed!")
     
     # =========
     #
@@ -2020,7 +2019,7 @@ class PyEVENG:
                 self.add_network_to_lab(data, lab_name)
             else:
                 print("[PyEVENG add_networks_to_lab] -",
-                      data['name'], " is already deployed!")
+                    data['name'], " is already deployed!")
 
         logging.debug(f"{HEADER} - add_networks_to_lab] End function.")
     # =========================================================================================================================================================
@@ -2153,9 +2152,9 @@ class PyEVENG:
 
             else:
                 self.addLinkToLab(link['id'], self.getNodeIDbyNodeName(labName, link['src']),
-                                  self.get_node_interface_id(labName, self.getNodeIDbyNodeName(labName, link['src']), link['sport']), labName)
+                                self.get_node_interface_id(labName, self.getNodeIDbyNodeName(labName, link['src']), link['sport']), labName)
                 self.addLinkToLab(link['id'], self.getNodeIDbyNodeName(labName, link['dst']),
-                                  self.get_node_interface_id(labName, self.getNodeIDbyNodeName(labName, link['dst']), link['dport']), labName)
+                                self.get_node_interface_id(labName, self.getNodeIDbyNodeName(labName, link['dst']), link['dport']), labName)
 
         if create_connexion_file:
             self.write_in_remote_file(ssh, connexion_informations, "/root/.eveng/connexion_{}".format(labName), mode='w')
@@ -2389,18 +2388,18 @@ class PyEVENG:
         # DNAT
         #
         print("[PyEVENG - create_iptables_nat] -",
-              tools.routing.IPTABLES_DNAT.format("A", evengIP, eveSsh, hostsIP, sshMgmt))
+            tools.routing.IPTABLES_DNAT.format("A", evengIP, eveSsh, hostsIP, sshMgmt))
         stdin, stdout, stderr = ssh.exec_command(
             tools.routing.IPTABLES_DNAT.format("A", evengIP, eveSsh, hostsIP, sshMgmt))
         o = "".join(stdout.readlines())
-       
+
         commands.append(tools.routing.IPTABLES_DNAT.format("D", evengIP, eveSsh, hostsIP, sshMgmt))
         
         #
         # FIREWALL
         #
         print("[PyEVENG - create_iptables_nat] -",
-              tools.routing.IPTABLES_ALLOWED.format("A", evengIP, eveSsh))
+            tools.routing.IPTABLES_ALLOWED.format("A", evengIP, eveSsh))
         stdin, stdout, stderr = ssh.exec_command(
             tools.routing.IPTABLES_ALLOWED.format("A", evengIP, eveSsh))
         o = "".join(stdout.readlines())
@@ -2411,7 +2410,7 @@ class PyEVENG:
         # SNAT
         #
         print("[PyEVENG - create_iptables_nat] -",
-              tools.routing.IPTABLES_SNAT.format("A", interface, eveIP))
+            tools.routing.IPTABLES_SNAT.format("A", interface, eveIP))
         stdin, stdout, stderr = ssh.exec_command(
             tools.routing.IPTABLES_SNAT.format("A", interface, eveIP))
         o = "".join(stdout.readlines())
@@ -2443,10 +2442,10 @@ class PyEVENG:
             param4 (str): Network ID
         """
         print("[PyEVENG addLinkToLab] -",
-              nodeID, interfaceID, "is deploying...")
+            nodeID, interfaceID, "is deploying...")
 
         print(self._url+"/api/labs/"+self._userFolder+"/" +
-              str(labName)+"/nodes/"+str(nodeID)+"/interfaces - data={\""+str(interfaceID)+"\":\""+str(networkID)+"\"}")
+            str(labName)+"/nodes/"+str(nodeID)+"/interfaces - data={\""+str(interfaceID)+"\":\""+str(networkID)+"\"}")
         self.lock_lab()
         response = requests.put(
             self._url+"/api/labs/"+self._userFolder+"/"+str(labName)+"/nodes/"+str(nodeID)+"/interfaces", data="{\""+str(interfaceID)+"\":\""+str(networkID)+"\"}", cookies=self._cookies, verify=False)

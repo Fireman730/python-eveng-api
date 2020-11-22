@@ -1,18 +1,18 @@
-#!/usr/bin/env python3.7
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """
- This file is used for validate the yaml architecture syntaxe.
- When you want deploy automaticly a topology in your EVE-NG VM you have to write a YAML file that contains
+This file is used for validate the yaml architecture syntaxe.
+When you want deploy automaticly a topology in your EVE-NG VM you have to write a YAML file that contains
  * Lab to create
  * Devives to create
  * Links to create
  * Config to push in devices
 
- There are some YAML file examples in this repo in ./architecture/...
- These examples have been tested.
- Please, check documentation about VM setup for use this script
- If doesn't work feel free to open an issue
+There are some YAML file examples in this repo in ./architecture/...
+These examples have been tested.
+Please, check documentation about VM setup for use this script
+If doesn't work feel free to open an issue
 
 """
 
@@ -361,7 +361,7 @@ def validateYamlFileForPyEVENG(api: PyEVENG.PyEVENG, yaml_content: dict(), vm_in
             val_log.debug(f"{HEADER} - validateYamlFileForPyEVENG]({file_path}) check_vm_memory_free_vs_devices_memory_asked is FAILED !!!!")
             return_value = False
         else:
-          val_log.debug(f"{HEADER} - validateYamlFileForPyEVENG]({file_path}) check_vm_memory_free_vs_devices_memory_asked is SUCCESS !!!!")  
+            val_log.debug(f"{HEADER} - validateYamlFileForPyEVENG]({file_path}) check_vm_memory_free_vs_devices_memory_asked is SUCCESS !!!!")  
     
     # Check that nodes in configs: node is in devices added
     val_log.debug("================================================================================================")
@@ -874,24 +874,25 @@ def check_device_element(element_lst: list(), yaml_content: dict(), dict_to_veri
 
     if dict_to_verify in yaml_content.keys():
         for device in yaml_content[dict_to_verify]:
-            val_log.debug(
-                f"{HEADER} check_device_element] param_to_verify={param_to_verify} is present in device.keys={device.keys()} ???")
-            val_log.debug(f"==>> {param_to_verify in device.keys()} // if condition is param_to_verify not in device.keys() = {param_to_verify not in device.keys()}")
-            if param_to_verify not in device.keys():
+            if not(device['type']=='iol' and param_to_verify=='console'):
                 val_log.debug(
-                    f"{HEADER} check_device_element](1) param_to_verify={param_to_verify} is present NOT in device.keys={device.keys()}")
-                print(f"{HEADER} check_device_element](1) Error ! Key {param_to_verify} is missing in {dict_to_verify}: !")
-                error_missing = True
-                return_value = False
-            else:
-                val_log.debug(f"{HEADER} check_device_element](2) param_to_verify={param_to_verify} is present in device.keys={device.keys()}")
-                val_log.debug(f"{HEADER} check_device_element](2) device[param_to_verify]={device[param_to_verify]} is present in element_lst={element_lst} ??? ")
-                val_log.debug(f"==>> {device[param_to_verify] in element_lst} // if device[param_to_verify] not in element_lst = {device[param_to_verify] not in element_lst}")
-                if device[param_to_verify] not in element_lst:
-                    val_log.debug(f"{HEADER} check_device_element](3) device[param_to_verify]={device[param_to_verify]} is NOT present in element_lst={element_lst}")
-                    val_log.debug(f"{HEADER} check_device_element](3) ({dict_to_verify}:{param_to_verify}:{device[param_to_verify]}) is not available on this EVE-NG.")
-                    error_not_list = True
+                    f"{HEADER} check_device_element] param_to_verify={param_to_verify} is present in device.keys={device.keys()} ???")
+                val_log.debug(f"==>> {param_to_verify in device.keys()} // if condition is param_to_verify not in device.keys() = {param_to_verify not in device.keys()}")
+                if param_to_verify not in device.keys():
+                    val_log.debug(
+                        f"{HEADER} check_device_element](1) param_to_verify={param_to_verify} is present NOT in device.keys={device.keys()}")
+                    print(f"{HEADER} check_device_element](1) Error ! Key {param_to_verify} is missing in {dict_to_verify}: !")
+                    error_missing = True
                     return_value = False
+                else:
+                    val_log.debug(f"{HEADER} check_device_element](2) param_to_verify={param_to_verify} is present in device.keys={device.keys()}")
+                    val_log.debug(f"{HEADER} check_device_element](2) device[param_to_verify]={device[param_to_verify]} is present in element_lst={element_lst} ??? ")
+                    val_log.debug(f"==>> {device[param_to_verify] in element_lst} // if device[param_to_verify] not in element_lst = {device[param_to_verify] not in element_lst}")
+                    if device[param_to_verify] not in element_lst:
+                        val_log.debug(f"{HEADER} check_device_element](3) device[param_to_verify]={device[param_to_verify]} is NOT present in element_lst={element_lst}")
+                        val_log.debug(f"{HEADER} check_device_element](3) ({dict_to_verify}:{param_to_verify}:{device[param_to_verify]}) is not available on this EVE-NG.")
+                        error_not_list = True
+                        return_value = False
 
     val_log.debug(f"{HEADER} check_device_element] error_missing={error_missing}")
     if error_missing:
@@ -1285,15 +1286,16 @@ def check_if_duplicate_param(yaml_content: dict(), dict_to_verify: str() = "devi
     
     if dict_to_verify in yaml_content.keys():
         for node in yaml_content[dict_to_verify]:
-            val_log.debug(f"{HEADER} - check_if_duplicate_param] node={node} !")
-            val_log.debug(f"{HEADER} - check_if_duplicate_param] node[param_to_verify]={node[param_to_verify]} !")
-            val_log.debug(f"{HEADER} - check_if_duplicate_param] node[param_to_verify] in list_param={node[param_to_verify] in list_param} !")
-            if node[param_to_verify] in list_param:
-                error_dup_lst.append(node[param_to_verify])
-                return_value = False
+            if not(node['type']=='iol' and param_to_verify=='uuid'):
+                val_log.debug(f"{HEADER} - check_if_duplicate_param] node={node} !")
+                val_log.debug(f"{HEADER} - check_if_duplicate_param] node[param_to_verify]={node[param_to_verify]} !")
+                val_log.debug(f"{HEADER} - check_if_duplicate_param] node[param_to_verify] in list_param={node[param_to_verify] in list_param} !")
+                if node[param_to_verify] in list_param:
+                    error_dup_lst.append(node[param_to_verify])
+                    return_value = False
 
-            list_param.append(node[param_to_verify])
-
+                list_param.append(node[param_to_verify])
+            
     if return_value is False:
         logging.debug(f"{HEADER} check_if_duplicate_param] ERROR the following values are duplicate in {dict_to_verify}:{param_to_verify} !!")
         logging.debug(f"\t\t==>> {error_dup_lst}")
