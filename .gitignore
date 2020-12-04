@@ -6,3 +6,4 @@ docker
 inv_ansible.py
 nornir.log
 improvement/
+logs/
