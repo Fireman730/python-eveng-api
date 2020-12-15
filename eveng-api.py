@@ -173,9 +173,9 @@ def exit_success():
 @click.option('--remove', default="#", help='Labname you want to remove')
 @click.option('--test', default=False, help='This argument will test your VM parameter in --vm.')
 @click.option('--images', default=False, help='This argument will list images available on EVE-NG VM.')
-@click.option('--ports', default="null", help='This argument will print port name for you can create your architecture YAML.')
-@click.option('--connexion', default="null", help='This argument will return a dict with devices informations connexions <--connexion=mylab.unl>.')
-@click.option('--telnet', default="null", help='This argument will return a dict with telnet informations connexions lab need LAB HAS TO BE STARTED.')
+@click.option('--ports', default=None, help='This argument will print port name for you can create your architecture YAML.')
+@click.option('--connexion', default=None, help='This argument will return a dict with devices informations connexions <--connexion=mylab.unl>.')
+@click.option('--telnet', default=None, help='This argument will return a dict with telnet informations connexions lab need LAB HAS TO BE STARTED.')
 @click.option('--pod', default="0", help='This argument defines a on which POD the is stored.')
 @click.option('--folder', default="Users", help='This argument defines a on which FOLDER lab is stored.')
 @click.option('--debug', default=False, help='Enter in debug mode.')
@@ -197,7 +197,7 @@ def main(deploy, inventory, vm, force, backup, start, stop, nodes_id,remove, tes
         #
         # Create the object that is connected with EVE-NG API
         #
-        cliVerbose = connexion is "null" and telnet is "null"
+        cliVerbose = connexion is None and telnet is None
 
         api = PyEVENG.PyEVENG(vmInfo['https_username'],
                         vmInfo['https_password'],
@@ -213,7 +213,7 @@ def main(deploy, inventory, vm, force, backup, start, stop, nodes_id,remove, tes
         )
 
     # ======================================================================================================
-    if telnet is not "null":
+    if telnet is not None:
         try:
             PP.pprint(api.get_nodes_url(telnet))
         except EVENG_Exception as e:
@@ -223,7 +223,7 @@ def main(deploy, inventory, vm, force, backup, start, stop, nodes_id,remove, tes
 
         exit(EXIT_SUCCESS)
 
-    if connexion is not "null":
+    if connexion is not None:
         try:
             PP.pprint(api.get_remote_connexion_file(connexion))
             api.logout()
@@ -239,8 +239,7 @@ def main(deploy, inventory, vm, force, backup, start, stop, nodes_id,remove, tes
             PP.pprint(open_file("./tools/oob_iptables_ex.yml"))
             printline()
 
-
-    if ports is not "null":
+    if ports is not None:
         printline()
         PP.pprint(open_file("./devices/_port_device.yml")[ports])
         printline()

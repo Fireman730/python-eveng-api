@@ -1023,7 +1023,7 @@ class PyEVENG:
 
         nodesID = list()
 
-        if len(content) is not 0:
+        if len(content) != 0:
             for key, val in content.items():
                 nodesID.append(key)
 
@@ -1113,7 +1113,7 @@ class PyEVENG:
         nodesID = self.getLabNodesID(labName)
         result = dict()
 
-        if len(nodesID) is not 0:
+        if len(nodesID) != 0:
             for nodeID in nodesID:
                 result[self.getNodeNameByID(labName, nodeID)] = self.get_node_url(labName, nodeID)
 
@@ -1559,7 +1559,7 @@ class PyEVENG:
                     print(f"{HEADER} - stopLabAllNodes] Device with id {nodes_id} doesn't exist in lab {labName}")
         else:
             # ./eveng-api.py --stop=data-center-cumulus.unl
-            if len(nodesID) is not 0:
+            if len(nodesID) != 0:
                 for nodeID in nodesID:
                     self.stopLabNode(labName, nodeID)
 
