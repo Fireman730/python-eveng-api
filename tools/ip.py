@@ -107,7 +107,7 @@ def generateRandomIPAddressInSubnetBothWithAsk (ipAddress, netmask) :
 
     ok = input("[ipAddress] - This IP is Ok for you ? [y=yes/n=NoAndEnterManually]")
 
-    while ok is not "y" or ok is not "n":
+    while ok != "y" or ok != "n":
         ok = input("Please answer by [y/n]")
 
     if ok == "y":

@@ -1,186 +1,31 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-"""
-This file contains a Class (PyEVENG) thah contains REST API Call to EVE-NG VM.
-Some functionalities use a SSH connection.
+import ssl
+import urllib3
+import requests
+from urllib3 import PoolManager
+import time
+import yaml
+import json
+import sphinx
+import pprint
+import pexpect
+import paramiko
+import tools.ip
+import tools.routing
+from os import mkdir
+from os import listdir
+from os.path import isfile, join
+import devices.cumulus_device as cumulus_device
+import devices.extreme_device as extreme_device
+import devices.cisco_device as cisco_device
+import devices.vyos_device as vyos_device
+import devices.nexus_device as nexus_device
+import devices.arista_device as arista_device
+from const.constantes import *
+from exceptions.EveExceptions import EVENG_Exception
 
-You can create a object as with the followind code:
-```
-api = PyEVENG.PyEVENG(username=httpsUsername, password=httpsPassword, ipAddress=ipAddress, port=myPort, useHTTPS=httpsSSL,          
-            userFolder=myFolder, pod=myPod,  root=sshRoot, rmdp=sshPass, community=myCommunity)
-```
-
-With your PyEVENG object you can GET and PUT some informations to/from the EVE-NG devices.
-
-Below any features :
-
-* login()
-* get_backup_nodes_config()
-* get_backup_config()
-* add_config_to_nodes_lab()
-
-Backup are implemented for :
-* Cisco IOS L3/l2
-* Cumulus Linux
-* VyOS
-* Cisco Nexus 9k
-* Extreme Network
-
-Push Config are implemented for:
-* Cisco IOS L3/l2
-* Cumulus Linux
-* Extreme Network
-
-
-
-STANDRD PEP 8
-
-## Function and Variable Names
-Function names should be lowercase, with words separated by underscores as necessary to improve readability.
-Variable names follow the same convention as function names.
-
-
-"""
-
-__author__     = "Dylan Hamel"
-__maintainer__ = "Dylan Hamel"
-__version__    = "1.0"
-__email__      = "dylan.hamel@protonmail.com"
-__status__     = "Production"
-__copyright__  = "Copyright 2019"
-__license__    = "MIT"
-
-
-######################################################
-#
-# Default value used for exit()
-#
-
-EXIT_SUCCESS = 0
-EXIT_FAILURE = 1
-
-HEADER = "[PyEVENG -"
-
-######################################################
-#
-# Import Library
-#
-
-try:
-    from const.constantes import *
-except ImportError as importError:
-    print(f"{HEADER} const.constantes")
-    print(importError)
-    exit(EXIT_FAILURE)
-
-try:
-    import time
-except ImportError as importError:
-    print(f"{HEADER} time")
-    print(importError)
-    exit(EXIT_FAILURE)
-
-try:
-    import yaml
-except ImportError as importError:
-    print(f"{HEADER} yaml")
-    print(importError)
-    exit(EXIT_FAILURE)
-
-try:
-    import pexpect
-except ImportError as importError:
-    print(f"{HEADER} pexpect")
-    print(importError)
-    exit(EXIT_FAILURE)
-
-try:
-    import pprint
-    PP = pprint.PrettyPrinter(indent=4)
-except ImportError as importError:
-    print(f"{HEADER} pprint")
-    print(importError)
-    exit(EXIT_FAILURE)
-
-try:
-    import tools.ip
-except ImportError as importError:
-    print(f"{HEADER} tools.ip")
-    print(importError)
-    exit(EXIT_FAILURE)
-
-try:
-    import tools.routing
-except ImportError as importError:
-    print(f"{HEADER} tools.routing")
-    print(importError)
-    exit(EXIT_FAILURE)
-
-try:
-    from exceptions.EveExceptions import EVENG_Exception
-except ImportError as importError:
-    print(f"{HEADER} listdir")
-    print(importError)
-    exit(EXIT_FAILURE)
-
-try:
-    from os import listdir
-    from os.path import isfile, join
-    from os import mkdir
-except ImportError as importError:
-    print(f"{HEADER} listdir")
-    print(importError)
-    exit(EXIT_FAILURE)
-
-try:
-    import devices.cumulus_device as cumulus_device
-    import devices.extreme_device as extreme_device
-    import devices.cisco_device as cisco_device
-    import devices.vyos_device as vyos_device
-    import devices.nexus_device as nexus_device
-    import devices.arista_device as arista_device
-except ImportError as importError:
-    print(f"{HEADER} xyz_device")
-    print(importError)
-    exit(EXIT_FAILURE)
-
-try:
-    import paramiko
-except ImportError as importError:
-    print(f"{HEADER} paramiko")
-    print(importError)
-    exit(EXIT_FAILURE)
-
-try:
-    import urllib3
-    from urllib3 import PoolManager
-    import ssl
-except ImportError as importError:
-    print(f"{HEADER} urllib3 / ssl")
-    print(importError)
-    exit(EXIT_FAILURE)
-
-try:
-    import requests
-except ImportError as importError:
-    print(f"{HEADER} requests")
-    print(importError)
-    exit(EXIT_FAILURE)
-
-try:
-    import json
-except ImportError as importError:
-    print(f"{HEADER} json")
-    print(importError)
-    exit(EXIT_FAILURE)
-
-try:
-    import sphinx
-except ImportError as importError:
-    print(f"{HEADER} sphinx")
-    print(importError)
-    exit(EXIT_FAILURE)
 
 try:
     import logging
@@ -203,10 +48,11 @@ except ImportError as importError:
     exit(EXIT_FAILURE)
 
 
-######################################################
-#
-# YAML file Keys
-#
+EXIT_SUCCESS = 0
+EXIT_FAILURE = 1
+
+HEADER = "[PyEVENG -"
+
 API_CALL_DELETE = "DELETE"
 API_CALL_POST = "POST"
 API_CALL_GET = "GET"
@@ -248,8 +94,6 @@ NODE_NAME_KEY = 'name'
 NODE_IMAGE_KEY = 'image'
 NODE_ID_KEY = 'id'
 
-
-
 #### Config keys ####
 CONFIG_NODE_KEY = 'node'
 CONFIG_TYPE_KEY = 'type'
@@ -258,10 +102,6 @@ CONFIG_PATH_KEY = 'config'
 CONFIG_TYPE_FULL_KEYWORD = 'full'
 CONFIG_TYPE_OOB_KEYWORD = 'oob'
 
-######################################################
-#
-# Class
-#
 
 class PyEVENG:
     """
@@ -1311,7 +1151,6 @@ class PyEVENG:
         logging.debug(f"{HEADER} - get_labs_in_folder] Call data :")
         logging.debug(f"{HEADER} - get_labs_in_folder] {data['data']['labs']}")
         print(f"{HEADER} get_labs_in_folder] Call data :")
-        PP.pprint(data['data']['labs'])
 
         labs_in_folder_lst = list()
         for lab in data['data']['labs']:
@@ -1528,7 +1367,7 @@ class PyEVENG:
         response = requests.get(
             self._url+"/api/labs/"+self._userFolder+"/"+labName+"/nodes/stop/stopmode=3", cookies=self._cookies, verify=False)
 
-    def stopLabAllNodes(self, labName, nodes_id):
+    def stopLabAllNodes(self, labName, nodes_id='#'):
         """
         This function will stop all node of a lab
 
@@ -1918,9 +1757,7 @@ class PyEVENG:
         else:
             self.lock_lab()
             
-            print(
-                f"{self._url}/api/labs/{str(self._userFolder)}/{str(lab_name)}/nodes")
-            #PP.pprint(json.dumps(nodes_to_add))
+            print(f"{self._url}/api/labs/{str(self._userFolder)}/{str(lab_name)}/nodes")
 
             response = requests.post(
                 f"{self._url}/api/labs/{str(self._userFolder)}/{str(lab_name)}/nodes",
